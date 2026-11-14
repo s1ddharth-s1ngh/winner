@@ -1,0 +1,57 @@
+import type { ISODate } from '../lib/dates'
+import type { ApiToken, DailyStat, Group, Member, Profile, StatsInput, Workout } from '../domain/types'
+import { createLocalRepo } from './localRepo'
+import { createSupabaseRepo } from './supabaseRepo'
+
+export interface AuthUser {
+  id: string
+  email: string
+}
+
+export type ProfileInput = Pick<Profile, 'username' | 'avatar_color' | 'timezone'>
+export type WorkoutInput = Pick<Workout, 'date' | 'type' | 'duration_min' | 'note'>
+
+/** Everything the UI needs from a backend. Screens never talk to a backend directly. */
+export interface Repo {
+  readonly kind: 'local' | 'supabase'
+
+  getUser(): Promise<AuthUser | null>
+  signUp(email: string, password: string): Promise<void>
+  signIn(email: string, password: string): Promise<void>
+  signOut(): Promise<void>
+  onAuthChange(cb: () => void): () => void
+
+  getProfile(userId: string): Promise<Profile | null>
+  saveProfile(input: ProfileInput): Promise<Profile>
+
+  listGroups(): Promise<Group[]>
+  createGroup(name: string): Promise<Group>
+  joinGroup(inviteCode: string): Promise<Group>
+  leaveGroup(groupId: string): Promise<void>
+  listMembers(groupId: string): Promise<Member[]>
+
+  listStats(userIds: string[], from: ISODate, to: ISODate): Promise<DailyStat[]>
+  saveStats(input: StatsInput): Promise<void>
+  listWorkouts(userIds: string[], from: ISODate, to: ISODate): Promise<Workout[]>
+  addWorkout(input: WorkoutInput): Promise<void>
+  deleteWorkout(id: string): Promise<void>
+
+  listTokens(): Promise<ApiToken[]>
+  /** Returns the plain token once; only its hash is stored. */
+  createToken(label: string): Promise<string>
+  revokeToken(id: string): Promise<void>
+
+  /** Fires on any data change (own writes, other tabs, realtime). Returns unsubscribe. */
+  subscribe(cb: () => void): () => void
+
+  /** Demo-only helpers (local backend). */
+  demo?: {
+    fillMyHistory(days: number): Promise<void>
+    reset(): void
+  }
+}
+
+const url = import.meta.env.VITE_SUPABASE_URL as string | undefined
+const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined
+
+export const repo: Repo = url && key ? createSupabaseRepo(url, key) : createLocalRepo()
