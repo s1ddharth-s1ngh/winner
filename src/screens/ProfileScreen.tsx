@@ -35,7 +35,7 @@ export default function ProfileScreen() {
           </Link>
         </div>
       </div>
-      <div className="-mt-12 px-5">
+      <div className="relative z-10 -mt-12 px-5">
         <Avatar name={profile.username} color={profile.avatar_color} size={96} ring />
         <h1 className="mt-3 text-[26px] font-bold tracking-tight">{profile.username}</h1>
         <p className="text-[13px] text-muted">
@@ -73,8 +73,8 @@ export default function ProfileScreen() {
                 >
                   <b.icon className="size-7" strokeWidth={2} />
                   {!b.at && (
-                    <span className="absolute -right-1 -bottom-1 grid size-5 place-items-center rounded-full bg-surface ring-1 ring-line">
-                      <Lock className="size-3" />
+                    <span className="absolute -right-1.5 -bottom-1.5 grid size-6 place-items-center rounded-full bg-ink-2 text-white ring-2 ring-surface">
+                      <Lock className="size-3" strokeWidth={2.5} />
                     </span>
                   )}
                 </span>
@@ -91,7 +91,7 @@ export default function ProfileScreen() {
         )}
 
         <SectionTitle>Groups</SectionTitle>
-        <Card onClick={undefined} className="divide-y divide-line">
+        <Card className="divide-y divide-line">
           <Link to="/groups" className="flex items-center gap-3 p-4">
             <span className="grid size-10 place-items-center rounded-xl bg-brand-soft text-brand">
               <Users className="size-5" />

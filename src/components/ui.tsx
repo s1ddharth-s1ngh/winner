@@ -187,15 +187,17 @@ export function Field({
 }: InputHTMLAttributes<HTMLInputElement> & { label: string; hint?: ReactNode; icon?: LucideIcon; trailing?: ReactNode }) {
   const id = useId()
   return (
-    <label htmlFor={id} className={cx('block', className)}>
-      <span className="mb-1.5 block text-[13px] font-semibold text-ink-2">{label}</span>
+    <div className={cx('block', className)}>
+      <label htmlFor={id} className="mb-1.5 block text-[13px] font-semibold text-ink-2">
+        {label}
+      </label>
       <span className="flex h-12 items-center gap-2.5 rounded-2xl bg-surface-2 px-3.5 ring-1 ring-transparent transition focus-within:bg-surface focus-within:ring-brand">
         {Icon && <Icon className="size-[18px] shrink-0 text-faint" />}
         <input id={id} {...input} className="h-full w-full min-w-0 bg-transparent text-[15px] text-ink outline-none placeholder:text-faint" />
         {trailing}
       </span>
       {hint && <span className="mt-1.5 block text-xs text-muted">{hint}</span>}
-    </label>
+    </div>
   )
 }
 
@@ -255,7 +257,7 @@ export function Sheet({ open, onClose, title, children }: { open: boolean; onClo
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center" role="dialog" aria-modal aria-label={title}>
       <div className="absolute inset-0 animate-fade-in bg-ink/40 backdrop-blur-[2px]" onClick={onClose} />
-      <div className="safe-bottom relative max-h-[92dvh] w-full max-w-md animate-sheet-in overflow-y-auto rounded-t-[28px] bg-bg">
+      <div className="safe-bottom no-scrollbar relative max-h-[92dvh] w-full max-w-md animate-sheet-in overflow-y-auto rounded-t-[28px] bg-bg">
         <div className="sticky top-0 z-10 bg-bg/95 px-5 pt-3 pb-3 backdrop-blur">
           <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-line" />
           <div className="flex items-center justify-between">

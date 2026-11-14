@@ -148,6 +148,11 @@ function Podium({ rows, board, me }: { rows: Row[]; board: Board; me: string }) 
   // Visual order: 2nd, 1st, 3rd.
   const order = [rows[1], rows[0], rows[2]]
   const height = { 1: 'h-28', 2: 'h-20', 3: 'h-16' } as Record<number, string>
+  const block = {
+    1: 'from-brand/25 to-brand/5 text-brand/50',
+    2: 'from-[#cbd5e1]/70 to-[#cbd5e1]/10 text-[#94a3b8]',
+    3: 'from-[#f6c9a0]/70 to-[#f6c9a0]/10 text-[#d9894b]/70',
+  } as Record<number, string>
   const medal = { 1: 'from-[#ffd76a] to-[#f5a524]', 2: 'from-[#e3e8f0] to-[#b6c0cf]', 3: 'from-[#f6c9a0] to-[#d9894b]' } as Record<number, string>
   return (
     <div className="mt-6 grid grid-cols-3 items-end gap-2">
@@ -166,7 +171,7 @@ function Podium({ rows, board, me }: { rows: Row[]; board: Board; me: string }) 
               {r.profile.id === me ? 'You' : r.profile.username}
             </p>
             <p className="text-[15px] font-bold">{board === 'steps' ? <span className="tabular">{compact(r.steps)}</span> : value(r, board)}</p>
-            <div className={cx('mt-2 w-full rounded-t-2xl bg-gradient-to-b', height[rank], rank === 1 ? 'from-brand/20 to-brand/5' : 'from-surface to-surface/40', 'ring-1 ring-line/60')} />
+            <div className={cx('mt-2 grid w-full place-items-start justify-center rounded-t-2xl bg-gradient-to-b pt-2 text-2xl font-extrabold', height[rank], block[rank])}>{rank}</div>
           </div>
         )
       })}

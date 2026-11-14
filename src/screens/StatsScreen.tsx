@@ -16,7 +16,6 @@ import {
   formatDay,
   formatDayShort,
   formatMonth,
-  formatMonthShort,
   formatWeekdayShort,
   startOfMonth,
   startOfWeek,
@@ -211,7 +210,7 @@ function StepsStats({ days, all, span, today }: { days: DayScore[]; all: DayScor
           { label: 'Current streak', value: plural(currentStreak(all, qualifiesSteps), 'day') },
           { label: 'Longest streak', value: plural(longestStreak(all, qualifiesSteps), 'day') },
           { label: 'Best day ever', value: bestEver ? formatNumber(bestEver.steps!) : '—', sub: bestEver && formatDay(bestEver.date) },
-          { label: 'Best month', value: bestMonth && bestMonth[1] ? compact(bestMonth[1]) : '—', sub: bestMonth && bestMonth[1] ? formatMonthShort(`${bestMonth[0]}-01`) : undefined },
+          { label: 'Best month', value: bestMonth && bestMonth[1] ? compact(bestMonth[1]) : '—', sub: bestMonth && bestMonth[1] ? formatMonth(`${bestMonth[0]}-01`) : undefined },
         ]}
       />
     </>
