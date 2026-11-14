@@ -8,4 +8,4 @@
   - sleep schedule chart: bedtime → wake bars per night, target bedtime line
   - averages, best day, best month, longest streaks, total hobby time
 - [x] Polish: empty states, loading skeletons, toasts, transitions, accessible focus states
-- [x] Dark theme + full visual redesign (2026-11-14). Android status bar style not yet checked on a device.
+- [x] Dark theme + full visual redesign (2026-11-14). Checked on the Android 17 emulator: the theme follows the system live and the status bar icons switch (light on dark, dark on light).
