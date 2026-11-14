@@ -199,7 +199,7 @@ export function createLocalRepo(): Repo {
       const demo = PERSONAS.filter((p) => userIds.includes(p.id)).flatMap((p) =>
         eachDay(from, to)
           .map((d) => generateDay(personaOf(p.id), d, now).workout)
-          .filter((w): w is Workout => w != null),
+          .filter((w): w is Workout => w != null && new Date(w.created_at) <= now),
       )
       return [...real, ...demo]
     },

@@ -1,13 +1,13 @@
 # Phase 0 — Setup
 
-- [ ] `git init`, `.gitignore`, `.env.example`
-- [ ] Vite + React + TypeScript, ESLint
-- [ ] Tailwind v4 (`@tailwindcss/vite`), design tokens as CSS variables (light theme)
-- [ ] Inter via `@fontsource-variable/inter` (self-hosted, works offline)
-- [ ] PWA: `vite-plugin-pwa`, manifest, generated icons, auto update
-- [ ] `@supabase/supabase-js` client, created only when env vars exist
-- [ ] Vitest for pure logic
-- [ ] Supabase folder: `supabase/migrations/` with the first migration (validated with PGlite)
+- [x] `git init`, `.gitignore`, `.env.example`
+- [x] Vite + React + TypeScript, ESLint
+- [x] Tailwind v4 (`@tailwindcss/vite`), design tokens as CSS variables (light theme)
+- [x] Inter via `@fontsource-variable/inter` (self-hosted, works offline)
+- [x] PWA: `vite-plugin-pwa`, manifest, generated icons, auto update
+- [x] `@supabase/supabase-js` client, created only when env vars exist
+- [x] Vitest for pure logic
+- [x] Supabase folder: `supabase/migrations/` (validated with PGlite: `npm run test:db`)
 
 ## Supabase project (owner does this later)
 
