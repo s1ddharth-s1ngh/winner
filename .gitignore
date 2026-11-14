@@ -1,0 +1,24 @@
+node_modules
+dist
+dev-dist
+*.local
+.env
+.env.*
+!.env.example
+coverage
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.log
+# Capacitor / Android build outputs
+android/app/build
+android/build
+android/.gradle
+android/local.properties
+android/app/release
+*.apk
+*.keystore
+*.jks
+supabase/.temp
+supabase/.branches
