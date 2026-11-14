@@ -8,7 +8,7 @@ so it can be switched on as soon as the Supabase project exists.
 |---|---|---|
 | [phase-0-setup.md](phase-0-setup.md) | Setup | done |
 | [phase-1-core.md](phase-1-core.md) | Login, profile, groups, manual entry, steps ranking | done (Supabase layer written, not yet run live) |
-| [phase-2-sync.md](phase-2-sync.md) | `ingest-health`, iOS Shortcut, Capacitor + Health Connect | code done; APK build + device test pending |
+| [phase-2-sync.md](phase-2-sync.md) | `ingest-health`, iOS Shortcut, Capacitor + Health Connect | done; APK builds — phone test + live Supabase pending (owner) |
 | [phase-3-game.md](phase-3-game.md) | Stars, rankings, streaks, badges | done |
 | [phase-4-notifications.md](phase-4-notifications.md) | "X passed you" | in-app + phone notifications done; closed-app push needs Supabase |
 | [phase-5-extras.md](phase-5-extras.md) | Workouts, stats and charts, polish | done (dark theme later) |

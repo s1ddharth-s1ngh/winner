@@ -12,7 +12,9 @@
       - sync on app open and on resume
 - [x] Build instructions for the APK: `docs/guides/android-apk.md`
 - [x] Android project (`android/`), minSdk 26, launcher icons + splash, privacy policy page for Health Connect
-- [ ] Verify `./gradlew assembleDebug` and test on a real phone (first build attempt was stopped: PC low on memory)
-- [ ] Deploy + test `ingest-health` against the live Supabase project (needs the project)
+- [x] `./gradlew assembleDebug` builds `app-debug.apk` (7 MB; minSdk 26, target 36; READ_STEPS + READ_SLEEP; web assets + privacy policy bundled).
+      Low-memory build: `./gradlew assembleDebug --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx1g" -Pkotlin.compiler.execution.strategy=in-process`
+- [ ] Install on the owner's phone and connect Health Connect (no device was connected during the build)
+- [ ] Deploy + test `ingest-health` against the live Supabase project (owner creates the project later)
 
 Manual entry stays available for everybody.
