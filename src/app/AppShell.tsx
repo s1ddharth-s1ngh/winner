@@ -31,6 +31,8 @@ export default function AppShell() {
 
   return (
     <Ctx.Provider value={{ openEntry: (date) => setSheet({ kind: 'entry', date }), openWorkout: () => setSheet({ kind: 'workout' }) }}>
+      {/* Scrim behind the status bar on edge-to-edge devices (height is 0 elsewhere). */}
+      <div className="fixed inset-x-0 top-0 z-30 h-[env(safe-area-inset-top)] bg-bg/85 backdrop-blur-md" />
       <div className="mx-auto min-h-dvh max-w-md pb-32">
         <Outlet />
       </div>

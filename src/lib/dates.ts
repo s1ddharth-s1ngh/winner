@@ -120,4 +120,8 @@ export function timeAgo(iso: string, now = new Date()): string {
   return `${Math.floor(s / 86_400)}d ago`
 }
 
-export const browserTimezone = () => Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Rome'
+/** Device IANA timezone. Some Android WebViews report a raw offset like "+00:00": fall back to Europe/Rome then. */
+export function browserTimezone(): string {
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+  return tz && (tz.includes('/') || tz === 'UTC') ? tz : 'Europe/Rome'
+}

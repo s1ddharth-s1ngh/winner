@@ -5,6 +5,7 @@ const config: CapacitorConfig = {
   appName: 'Winner for Life',
   webDir: 'dist',
   android: { backgroundColor: '#f5f6fa' },
+  plugins: { SystemBars: { initialViewportFitValueHint: 'cover' } },
 }
 
 export default config

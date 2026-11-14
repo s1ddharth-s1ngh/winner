@@ -14,7 +14,14 @@
 - [x] Android project (`android/`), minSdk 26, launcher icons + splash, privacy policy page for Health Connect
 - [x] `./gradlew assembleDebug` builds `app-debug.apk` (7 MB; minSdk 26, target 36; READ_STEPS + READ_SLEEP; web assets + privacy policy bundled).
       Low-memory build: `./gradlew assembleDebug --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx1g" -Pkotlin.compiler.execution.strategy=in-process`
-- [ ] Install on the owner's phone and connect Health Connect (no device was connected during the build)
-- [ ] Deploy + test `ingest-health` against the live Supabase project (owner creates the project later)
+- [x] Tested on the Android 17 emulator: install, sign-up, demo group, Health Connect permission sheet
+      (shows app name + privacy policy), "Connected" state, sync runs the aggregate steps + sleep queries without errors.
+      Fixed during the test: `favicon.ico` broke service-worker precache in the app; raw "+00:00" device timezone;
+      content scrolling under the transparent status bar.
+
+## Next — needs the owner
+- Install the APK on the real phone and check that Garmin steps/sleep appear after "Sync now"
+  (the emulator has no health data, so the value mapping was only unit-checked, not seen with real data).
+- Create the Supabase project, then deploy and test `ingest-health` from the iPhone Shortcut.
 
 Manual entry stays available for everybody.
