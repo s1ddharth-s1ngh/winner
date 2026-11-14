@@ -3,7 +3,7 @@ import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router'
 import { useLive } from '../app/hooks'
 import { useSession } from '../app/session'
-import { Avatar, Button, Card, Chip, Field, IconButton, PageHeader, SectionTitle, Sheet, Skeleton, cx } from '../components/ui'
+import { Avatar, Button, Card, Chip, Field, IconButton, PageHeader, SectionTitle, Sheet, Skeleton, cx, rise } from '../components/ui'
 import { useToast } from '../components/toast'
 import { APP } from '../config/app'
 import { repo } from '../data/repo'
@@ -67,12 +67,14 @@ export default function GroupScreen() {
       </div>
       <PageHeader subtitle="Group" title={group.name} />
       <div className="px-4">
-        <Card className="relative overflow-hidden p-5 text-white">
-          <div className="absolute inset-0 bg-[radial-gradient(120%_120%_at_0%_0%,#6d6bff,#4f46e5_50%,#3b1fa8)]" />
-          <div className="absolute -right-10 -bottom-16 size-44 rounded-full border border-white/15" />
+        <Card className="relative animate-rise overflow-hidden p-5 text-white shadow-[var(--shadow-float)]">
+          <div className="absolute inset-0 bg-[image:var(--hero)]" />
+          <div className="absolute -right-12 -bottom-20 size-52 rounded-full border border-white/15" />
+          <div className="absolute -right-2 -bottom-8 size-28 rounded-full border border-white/10" />
+          <div className="absolute -top-10 -left-10 size-40 rounded-full bg-white/10 blur-3xl" />
           <div className="relative">
-            <p className="text-[13px] font-semibold text-white/70">Invite code</p>
-            <p className="mt-1 font-mono text-[34px] font-bold tracking-[0.25em]">{group.invite_code}</p>
+            <p className="text-[11px] font-semibold tracking-[0.14em] text-white/70 uppercase">Invite code</p>
+            <p className="mt-2 font-mono text-[36px] leading-none font-bold tracking-[0.25em] drop-shadow-[0_2px_12px_rgb(0_0_0/0.25)]">{group.invite_code}</p>
             <p className="mt-1 text-[13px] text-white/70">Friends enter this code after signing up.</p>
             <div className="mt-5 flex gap-2">
               <button type="button" onClick={copy} className="inline-flex h-10 items-center gap-2 rounded-full bg-white/15 px-4 text-sm font-semibold ring-1 ring-white/20 backdrop-blur transition active:scale-95">
@@ -86,7 +88,7 @@ export default function GroupScreen() {
         </Card>
 
         <SectionTitle>{members.data ? `${members.data.length} members` : 'Members'}</SectionTitle>
-        <Card className="divide-y divide-line">
+        <Card className="animate-rise divide-y divide-line" style={rise(1)}>
           {!members.data
             ? Array.from({ length: 3 }, (_, i) => <Skeleton key={i} className="m-3 h-10" />)
             : [...members.data]
@@ -113,10 +115,10 @@ export default function GroupScreen() {
         {groups.length > 1 && (
           <>
             <SectionTitle>Switch group</SectionTitle>
-            <Card className="divide-y divide-line">
+            <Card className="animate-rise divide-y divide-line" style={rise(2)}>
               {groups.map((g) => (
                 <button key={g.id} type="button" onClick={() => selectGroup(g.id)} className="flex w-full items-center gap-3 px-4 py-3.5 text-left">
-                  <span className={cx('grid size-6 place-items-center rounded-full ring-2', g.id === group.id ? 'bg-brand ring-brand' : 'ring-line')}>
+                  <span className={cx('grid size-6 place-items-center rounded-full ring-2 transition', g.id === group.id ? 'bg-brand ring-brand' : 'ring-surface-3')}>
                     {g.id === group.id && <Check className="size-3.5 text-white" strokeWidth={3} />}
                   </span>
                   <span className="flex-1 font-semibold">{g.name}</span>

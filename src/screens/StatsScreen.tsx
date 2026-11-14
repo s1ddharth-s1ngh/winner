@@ -1,8 +1,8 @@
-import { BedDouble, ChevronLeft, ChevronRight, Dumbbell, Trash2 } from 'lucide-react'
+import { BedDouble, CalendarCheck, ChevronLeft, ChevronRight, Clock, Dumbbell, Footprints, MoonStar, Target, Timer, Trash2, TrendingUp, type LucideIcon } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { useMyData, useToday } from '../app/hooks'
 import { BarChart, MonthGrid, SleepChart } from '../components/charts'
-import { Card, EmptyState, PageHeader, SectionTitle, Segmented, Skeleton, cx } from '../components/ui'
+import { AnimatedNumber, Card, EmptyState, IconTile, PageHeader, SectionTitle, Segmented, Skeleton, cx, rise, type Tone } from '../components/ui'
 import { workoutIcon } from '../components/workoutIcons'
 import { GOALS } from '../config/scoring'
 import { repo } from '../data/repo'
@@ -97,21 +97,46 @@ export default function StatsScreen() {
 
 function NavButton({ label, disabled, onClick, children }: { label: string; disabled: boolean; onClick: () => void; children: ReactNode }) {
   return (
-    <button type="button" aria-label={label} disabled={disabled} onClick={onClick} className="grid size-8 place-items-center rounded-full bg-surface ring-1 ring-line disabled:opacity-30">
+    <button type="button" aria-label={label} disabled={disabled} onClick={onClick} className="surface-card grid size-8 place-items-center rounded-full text-ink-2 transition active:scale-90 disabled:opacity-30">
       {children}
     </button>
   )
 }
 
-function Kpis({ items }: { items: { label: string; value: ReactNode; tone?: string }[] }) {
+const KPI_TEXT: Record<Tone, string> = {
+  muted: 'text-ink',
+  steps: 'text-steps-strong',
+  sleep: 'text-sleep-strong',
+  star: 'text-star-strong',
+  hobby: 'text-hobby-strong',
+  brand: 'text-brand',
+  danger: 'text-danger',
+}
+const KPI_GLOW: Record<Tone, string> = {
+  muted: 'bg-faint',
+  steps: 'bg-steps',
+  sleep: 'bg-sleep',
+  star: 'bg-star',
+  hobby: 'bg-hobby',
+  brand: 'bg-brand',
+  danger: 'bg-danger',
+}
+
+/** Fitness-style KPI tiles: tinted icon, soft glow, big display number. */
+function Kpis({ items }: { items: { label: string; value: ReactNode; icon: LucideIcon; tone?: Tone }[] }) {
   return (
     <div className="mt-5 grid grid-cols-3 gap-2">
-      {items.map((k) => (
-        <Card key={k.label} className="px-3 py-3.5">
-          <p className={cx('text-[19px] leading-tight font-bold tracking-tight tabular', k.tone)}>{k.value}</p>
-          <p className="mt-1 text-[11px] font-medium text-muted">{k.label}</p>
-        </Card>
-      ))}
+      {items.map((k, i) => {
+        const tone = k.tone ?? 'muted'
+        return (
+          <Card key={k.label} className="relative animate-rise overflow-hidden px-3 pt-3 pb-3.5" style={rise(i)}>
+            <span className={cx('pointer-events-none absolute -top-10 -right-10 size-24 rounded-full opacity-25 blur-2xl', KPI_GLOW[tone])} />
+            <IconTile icon={k.icon} tone={tone} size={30} />
+            <p className={cx('display mt-3 truncate text-[22px]', KPI_TEXT[tone])}>{k.value}</p>
+            <p className="mt-1.5 truncate text-[10.5px] font-semibold tracking-wide text-muted uppercase">{k.label}</p>
+          </Card>
+        )
+      })}
     </div>
   )
 }
@@ -123,13 +148,13 @@ function Records({ items }: { items: { label: string; value: ReactNode; sub?: Re
   return (
     <>
       <SectionTitle>Records</SectionTitle>
-      <Card className="grid grid-cols-2 divide-x divide-line">
+      <Card className="grid animate-rise grid-cols-2 divide-x divide-line" style={rise(2)}>
         {[0, 1].map((col) => (
           <div key={col} className="divide-y divide-line">
             {items.filter((_, i) => i % 2 === col).map((r) => (
               <div key={r.label} className="p-4">
-                <p className="text-xs font-medium text-muted">{r.label}</p>
-                <p className="mt-1 text-lg font-bold tabular">{r.value}</p>
+                <p className="text-[11px] font-semibold tracking-wide text-muted uppercase">{r.label}</p>
+                <p className="display mt-1.5 text-xl">{r.value}</p>
                 {r.sub && <p className="text-xs text-faint">{r.sub}</p>}
               </div>
             ))}
@@ -157,12 +182,12 @@ function StepsStats({ days, all, span, today }: { days: DayScore[]; all: DayScor
     <>
       <Kpis
         items={[
-          { label: 'Total steps', value: compact(total) },
-          { label: 'Daily average', value: withData.length ? compact(total / withData.length) : '—' },
-          { label: `Days at ${compact(GOALS.dailySteps)}+`, value: `${goalDays}/${done.length}`, tone: 'text-steps-strong' },
+          { label: 'Total steps', value: <AnimatedNumber value={total} format={compact} />, icon: Footprints, tone: 'steps' },
+          { label: 'Daily average', value: withData.length ? <AnimatedNumber value={total / withData.length} format={compact} /> : '—', icon: TrendingUp, tone: 'brand' },
+          { label: `Days at ${compact(GOALS.dailySteps)}+`, value: `${goalDays}/${done.length}`, icon: Target, tone: 'star' },
         ]}
       />
-      <Card className="mt-3 p-4 pt-6">
+      <Card className="mt-3 animate-rise p-4 pt-6" style={rise(3)}>
         <BarChart
           bars={days.map((d) => ({
             key: d.date,
@@ -185,20 +210,20 @@ function StepsStats({ days, all, span, today }: { days: DayScore[]; all: DayScor
       {span === 'month' && days[0] && (
         <>
           <SectionTitle>Calendar</SectionTitle>
-          <Card className="p-3">
+          <Card className="animate-rise p-3" style={rise(4)}>
             <MonthGrid
               month={days[0].date}
               today={today}
               render={(d) => {
                 const s = byDate.get(d)
                 if (!s || s.steps == null || d > today) return <span className="text-[13px] font-semibold text-line">·</span>
-                const color = s.stepsStars >= 3 ? 'text-steps-strong' : s.stepsStars >= 1 ? 'text-[#0284c7]' : 'text-faint'
+                const color = s.stepsStars >= 3 ? 'text-steps-strong' : s.stepsStars >= 1 ? 'text-brand' : 'text-faint'
                 return <span className={cx('text-[13px] font-bold tabular', color)}>{compact(s.steps)}</span>
               }}
             />
             <div className="mt-2 flex justify-center gap-4 text-[11px] text-muted">
               <span className="flex items-center gap-1"><i className="size-2 rounded-full bg-steps" /> 3★+</span>
-              <span className="flex items-center gap-1"><i className="size-2 rounded-full bg-[#0284c7]" /> 1–2★</span>
+              <span className="flex items-center gap-1"><i className="size-2 rounded-full bg-brand" /> 1–2★</span>
               <span className="flex items-center gap-1"><i className="size-2 rounded-full bg-faint" /> 0★</span>
             </div>
           </Card>
@@ -231,7 +256,7 @@ function SleepStats({ days, all, span, today }: { days: DayScore[]; all: DayScor
 
   if (allNights.length === 0)
     return (
-      <Card className="mt-5">
+      <Card className="mt-5 animate-rise">
         <EmptyState
           icon={BedDouble}
           title="No sleep data yet"
@@ -244,12 +269,12 @@ function SleepStats({ days, all, span, today }: { days: DayScore[]; all: DayScor
     <>
       <Kpis
         items={[
-          { label: 'Avg bedtime', value: avgRank != null ? clock(fromBedtimeRank(avgRank)) : '—', tone: 'text-sleep-strong' },
-          { label: 'Avg sleep', value: avgMin != null ? duration(avgMin) : '—' },
-          { label: `By ${GOALS.bedtime}`, value: `${early}/${done.length}` },
+          { label: 'Avg bedtime', value: avgRank != null ? clock(fromBedtimeRank(avgRank)) : '—', icon: MoonStar, tone: 'sleep' },
+          { label: 'Avg sleep', value: avgMin != null ? duration(avgMin) : '—', icon: Clock, tone: 'brand' },
+          { label: `By ${GOALS.bedtime}`, value: `${early}/${done.length}`, icon: Target, tone: 'star' },
         ]}
       />
-      <Card className="mt-3 p-4 pt-6">
+      <Card className="mt-3 animate-rise p-4 pt-6" style={rise(3)}>
         <SleepChart
           target={target}
           nights={days.map((d) => ({
@@ -268,7 +293,7 @@ function SleepStats({ days, all, span, today }: { days: DayScore[]; all: DayScor
       {span === 'month' && days[0] && (
         <>
           <SectionTitle>Bedtimes</SectionTitle>
-          <Card className="p-3">
+          <Card className="animate-rise p-3" style={rise(4)}>
             <MonthGrid
               month={days[0].date}
               today={today}
@@ -307,9 +332,9 @@ function HobbyStats({ days, workouts, span, today }: { days: DayScore[]; workout
     <>
       <Kpis
         items={[
-          { label: 'Sessions', value: workouts.length },
-          { label: 'Total time', value: duration(total), tone: 'text-hobby' },
-          { label: 'Active days', value: `${activeDays}/${past(days, today).length}` },
+          { label: 'Sessions', value: <AnimatedNumber value={workouts.length} />, icon: Dumbbell, tone: 'hobby' },
+          { label: 'Total time', value: duration(total), icon: Timer, tone: 'brand' },
+          { label: 'Active days', value: `${activeDays}/${past(days, today).length}`, icon: CalendarCheck, tone: 'steps' },
         ]}
       />
       {workouts.length === 0 ? (
@@ -318,7 +343,7 @@ function HobbyStats({ days, workouts, span, today }: { days: DayScore[]; workout
         </Card>
       ) : (
         <>
-          <Card className="mt-3 p-4 pt-6">
+          <Card className="mt-3 animate-rise p-4 pt-6" style={rise(3)}>
             <BarChart
               color="hobby"
               bars={days.map((d) => ({ key: d.date, label: dayLabel(d.date, span), value: d.date > today ? null : d.workoutMinutes || null }))}
@@ -326,21 +351,19 @@ function HobbyStats({ days, workouts, span, today }: { days: DayScore[]; workout
             />
           </Card>
           <SectionTitle>By activity</SectionTitle>
-          <Card className="space-y-3 p-4">
+          <Card className="animate-rise space-y-3 p-4" style={rise(4)}>
             {types.map(([type, minutes]) => {
               const Icon = workoutIcon(type)
               return (
                 <div key={type} className="flex items-center gap-3">
-                  <span className="grid size-9 place-items-center rounded-xl bg-hobby-soft text-hobby">
-                    <Icon className="size-[18px]" />
-                  </span>
+                  <IconTile icon={Icon} tone="hobby" size={36} />
                   <div className="flex-1">
                     <div className="flex justify-between text-sm">
                       <span className="font-semibold">{type}</span>
                       <span className="font-semibold tabular">{duration(minutes)}</span>
                     </div>
                     <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-surface-2">
-                      <div className="h-full rounded-full bg-hobby" style={{ width: `${(minutes / max) * 100}%` }} />
+                      <div className="h-full rounded-full bg-[linear-gradient(90deg,var(--star),var(--hobby))] transition-[width] duration-700" style={{ width: `${(minutes / max) * 100}%` }} />
                     </div>
                   </div>
                 </div>
@@ -355,7 +378,7 @@ function HobbyStats({ days, workouts, span, today }: { days: DayScore[]; workout
                 const Icon = workoutIcon(w.type)
                 return (
                   <div key={w.id} className="flex items-center gap-3 px-4 py-3">
-                    <Icon className="size-[18px] text-hobby" />
+                    <IconTile icon={Icon} tone="hobby" size={32} />
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold">
                         {w.type} <span className="font-normal text-muted">· {formatDay(w.date)}</span>

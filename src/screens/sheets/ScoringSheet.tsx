@@ -1,7 +1,7 @@
-import { BedDouble, Dumbbell, Flame, Footprints } from 'lucide-react'
+import { BedDouble, Dumbbell, Flame, Footprints, type LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { BEDTIME_TIERS, SLEEP_DURATION_BONUS, STEP_TIERS, STREAKS, WORKOUT_BONUS } from '../../config/scoring'
-import { Sheet, Stars } from '../../components/ui'
+import { IconTile, Sheet, Stars, rise, type Tone } from '../../components/ui'
 import { formatNumber } from '../../lib/format'
 
 const bedtimeRows = [
@@ -14,12 +14,12 @@ export default function ScoringSheet({ open, onClose }: { open: boolean; onClose
 
   return (
     <Sheet open={open} onClose={onClose} title="How scoring works">
-      <Section icon={<Footprints className="size-[18px]" />} tone="bg-steps-soft text-steps-strong" title="Steps per day">
+      <Section i={0} icon={Footprints} tone="steps" title="Steps per day">
         {STEP_TIERS.map((t) => (
           <Line key={t.min} label={`${formatNumber(t.min)}+ steps`} stars={t.stars} max={4} />
         ))}
       </Section>
-      <Section icon={<BedDouble className="size-[18px]" />} tone="bg-sleep-soft text-sleep-strong" title="Sleep: when you fall asleep">
+      <Section i={1} icon={BedDouble} tone="sleep" title="Sleep: when you fall asleep">
         {bedtimeRows.map((r) => (
           <Line key={r.label} label={r.label} stars={r.stars} max={3} />
         ))}
@@ -28,12 +28,12 @@ export default function ScoringSheet({ open, onClose }: { open: boolean; onClose
           {SLEEP_DURATION_BONUS.maxMinutes / 60} hours. The night counts for the day you wake up. No data = 0★, shown as "no data".
         </p>
       </Section>
-      <Section icon={<Dumbbell className="size-[18px]" />} tone="bg-hobby-soft text-hobby" title="Workouts & hobbies">
+      <Section i={2} icon={Dumbbell} tone="hobby" title="Workouts & hobbies">
         <p className="text-[13px] text-muted">
           <b className="text-ink">+{WORKOUT_BONUS.stars}★</b> on days with at least one logged session (max once a day).
         </p>
       </Section>
-      <Section icon={<Flame className="size-[18px]" />} tone="bg-star-soft text-star" title="Streaks">
+      <Section i={3} icon={Flame} tone="star" title="Streaks">
         <p className="text-[13px] text-muted">
           Steps streak: days in a row with at least {STREAKS.stepsMinStars}★ of steps. Sleep streak: nights in a row with at least {STREAKS.sleepMinStars}★ of sleep.
           Today never breaks a streak while it is still in progress.
@@ -44,11 +44,11 @@ export default function ScoringSheet({ open, onClose }: { open: boolean; onClose
   )
 }
 
-function Section({ icon, tone, title, children }: { icon: ReactNode; tone: string; title: string; children: ReactNode }) {
+function Section({ i, icon, tone, title, children }: { i: number; icon: LucideIcon; tone: Tone; title: string; children: ReactNode }) {
   return (
-    <section className="mt-3 rounded-3xl bg-surface p-4 ring-1 ring-line/60">
-      <h3 className="mb-2 flex items-center gap-2 font-bold">
-        <span className={`grid size-8 place-items-center rounded-xl ${tone}`}>{icon}</span>
+    <section className="surface-card mt-3 animate-rise rounded-[26px] p-4" style={rise(i)}>
+      <h3 className="mb-2 flex items-center gap-2.5 font-bold">
+        <IconTile icon={icon} tone={tone} size={32} />
         {title}
       </h3>
       <div className="divide-y divide-line">{children}</div>

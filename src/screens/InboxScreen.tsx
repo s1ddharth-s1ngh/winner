@@ -2,7 +2,7 @@ import { ArrowLeft, BellRing, Footprints, Trophy } from 'lucide-react'
 import { useEffect } from 'react'
 import { Link } from 'react-router'
 import { useInbox } from '../app/inbox'
-import { Avatar, Card, EmptyState, IconButton, PageHeader, cx } from '../components/ui'
+import { Avatar, Card, EmptyState, IconButton, PageHeader, cx, rise } from '../components/ui'
 import { timeAgo } from '../lib/dates'
 
 export default function InboxScreen() {
@@ -22,7 +22,7 @@ export default function InboxScreen() {
           <IconButton icon={ArrowLeft} label="Back" />
         </Link>
         {items.length > 0 && (
-          <button type="button" onClick={clear} className="text-sm font-semibold text-muted">
+          <button type="button" onClick={clear} className="surface-card h-9 rounded-full px-4 text-sm font-semibold text-muted transition hover:text-ink active:scale-95">
             Clear all
           </button>
         )}
@@ -30,16 +30,16 @@ export default function InboxScreen() {
       <PageHeader title="Notifications" />
       <div className="px-4">
         {items.length === 0 ? (
-          <Card>
+          <Card className="animate-rise">
             <EmptyState icon={BellRing} title="All quiet" text="You'll see it here when a friend passes you in today's steps or overall ranking." />
           </Card>
         ) : (
-          <Card className="divide-y divide-line">
-            {items.map((i) => (
-              <div key={i.id} className={cx('flex items-center gap-3 px-4 py-3.5', !i.read && 'bg-brand-soft/50')}>
+          <Card className="divide-y divide-line overflow-hidden">
+            {items.map((i, n) => (
+              <div key={i.id} className={cx('flex animate-rise items-center gap-3 px-4 py-3.5', !i.read && 'bg-brand-soft/50')} style={rise(Math.min(n, 8))}>
                 <div className="relative">
                   <Avatar name={i.username} color={i.color} size={42} />
-                  <span className={cx('absolute -right-1 -bottom-1 grid size-5 place-items-center rounded-full text-white ring-2 ring-surface', i.board === 'steps' ? 'bg-steps' : 'bg-star')}>
+                  <span className={cx('absolute -right-1 -bottom-1 grid size-5 place-items-center rounded-full text-white ring-2 ring-surface', i.board === 'steps' ? 'bg-[linear-gradient(135deg,var(--steps),var(--steps-strong))]' : 'bg-[linear-gradient(135deg,var(--star),var(--hobby))]')}>
                     {i.board === 'steps' ? <Footprints className="size-3" /> : <Trophy className="size-3" />}
                   </span>
                 </div>
@@ -50,7 +50,7 @@ export default function InboxScreen() {
                   <p className="text-[13px] text-muted">{i.board === 'steps' ? "Today's steps ranking" : "Today's overall ranking"}</p>
                 </div>
                 <span className="text-xs text-faint">{timeAgo(i.at)}</span>
-                {!i.read && <span className="size-2 rounded-full bg-brand" />}
+                {!i.read && <span className="size-2 rounded-full bg-brand shadow-[0_0_8px_var(--brand)]" />}
               </div>
             ))}
           </Card>

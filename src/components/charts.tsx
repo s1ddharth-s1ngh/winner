@@ -1,9 +1,9 @@
-import { useId, type ReactNode } from 'react'
+import { useEffect, useId, useState, type ReactNode } from 'react'
 import { addDays, clock, endOfMonth, startOfMonth, weekday, type ISODate } from '../lib/dates'
 import { bedtimeRank, fromBedtimeRank } from '../domain/scoring'
 import { cx } from './ui'
 
-/** Circular progress ring with content in the middle. */
+/** Circular progress ring with content in the middle. Fills in on mount, with a soft glow. */
 export function Ring({
   value,
   size = 180,
@@ -22,32 +22,42 @@ export function Ring({
   children?: ReactNode
 }) {
   const id = useId()
+  const [ready, setReady] = useState(false)
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setReady(true))
+    return () => cancelAnimationFrame(raf)
+  }, [])
   const r = (size - stroke) / 2
   const c = 2 * Math.PI * r
-  const p = Math.max(0, Math.min(1, value))
+  const p = ready ? Math.max(0, Math.min(1, value)) : 0
+  const arc = {
+    cx: size / 2,
+    cy: size / 2,
+    r,
+    fill: 'none',
+    stroke: `url(#${id})`,
+    strokeWidth: stroke,
+    strokeLinecap: 'round' as const,
+    strokeDasharray: c,
+    strokeDashoffset: c * (1 - p),
+    style: { transition: 'stroke-dashoffset 1100ms cubic-bezier(.2,.8,.2,1)' },
+    opacity: value <= 0 ? 0 : 1,
+  }
   return (
     <div className="relative grid place-items-center" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90" aria-hidden>
+      <svg width={size} height={size} className="-rotate-90 overflow-visible" aria-hidden>
         <defs>
           <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
             <stop offset="0" stopColor={from} />
             <stop offset="1" stopColor={to} />
           </linearGradient>
+          <filter id={`${id}-glow`} x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation={stroke * 0.55} />
+          </filter>
         </defs>
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={track} strokeWidth={stroke} />
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={r}
-          fill="none"
-          stroke={`url(#${id})`}
-          strokeWidth={stroke}
-          strokeLinecap="round"
-          strokeDasharray={c}
-          strokeDashoffset={c * (1 - p)}
-          style={{ transition: 'stroke-dashoffset 700ms cubic-bezier(.2,.8,.2,1)' }}
-          opacity={p === 0 ? 0 : 1}
-        />
+        <circle {...arc} filter={`url(#${id}-glow)`} opacity={value <= 0 ? 0 : 0.45} />
+        <circle {...arc} />
       </svg>
       <div className="absolute inset-0 grid place-items-center text-center">{children}</div>
     </div>
@@ -101,7 +111,7 @@ export function BarChart({
               )}
               <div
                 className={cx(
-                  'w-full rounded-t-[6px] rounded-b-[3px] transition-[height] duration-500',
+                  'w-full rounded-[7px] transition-[height] duration-500',
                   b.value == null ? 'bg-transparent' : toneCls[b.tone ?? 'good'],
                   b.active && 'ring-2 ring-ink/80 ring-offset-2 ring-offset-surface',
                 )}
@@ -144,7 +154,7 @@ export function SleepChart({ nights, target, height = 220 }: { nights: Night[]; 
   const y = (rank: number) => ((rank - lo) / span) * 100
   const ticks: number[] = []
   for (let r = lo; r <= hi; r += span > 14 * 60 ? 180 : 120) ticks.push(r)
-  const tone = (s: number) => (s >= 4 ? 'from-sleep to-sleep-strong' : s >= 3 ? 'from-sleep/80 to-sleep' : s >= 2 ? 'from-sleep/45 to-sleep/70' : 'from-[#f59e0b]/60 to-[#f97316]/80')
+  const tone = (s: number) => (s >= 4 ? 'from-sleep to-sleep-strong' : s >= 3 ? 'from-sleep/80 to-sleep' : s >= 2 ? 'from-sleep/45 to-sleep/70' : 'from-star/70 to-hobby/80')
   const dense = nights.length > 14
   return (
     <div className="flex gap-2">

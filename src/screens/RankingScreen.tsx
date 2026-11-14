@@ -1,18 +1,18 @@
-import { ChevronDown, CircleHelp, Crown, UserPlus } from 'lucide-react'
-import { useState } from 'react'
+import { BedDouble, ChevronDown, CircleHelp, Crown, Footprints, Sparkles, UserPlus } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { useGroupData, useToday } from '../app/hooks'
 import { useSession } from '../app/session'
-import { Avatar, Card, Chip, IconButton, PageHeader, Segmented, Skeleton, StarCount, cx } from '../components/ui'
+import { Avatar, Card, Chip, IconButton, PageHeader, RankBadge, Segmented, Skeleton, StarCount, cx, rise } from '../components/ui'
 import { buildLeaderboard, periodRange, type Board, type Period, type Row } from '../domain/leaderboard'
 import { clock, timeAgo } from '../lib/dates'
 import { compact, duration, formatNumber } from '../lib/format'
 import ScoringSheet from './sheets/ScoringSheet'
 
-const BOARDS: { value: Board; label: string }[] = [
-  { value: 'steps', label: 'Steps' },
-  { value: 'sleep', label: 'Sleep' },
-  { value: 'overall', label: 'Overall' },
+const BOARDS: { value: Board; label: ReactNode }[] = [
+  { value: 'steps', label: <><Footprints className="size-4" /> Steps</> },
+  { value: 'sleep', label: <><BedDouble className="size-4" /> Sleep</> },
+  { value: 'overall', label: <><Sparkles className="size-4" /> Overall</> },
 ]
 const PERIODS: { value: Period; label: string }[] = [
   { value: 'today', label: 'Today' },
@@ -58,7 +58,7 @@ export default function RankingScreen() {
 
       <div className="px-4">
         <Segmented value={board} onChange={setBoard} options={BOARDS} />
-        <Segmented value={period} onChange={setPeriod} options={PERIODS} size="sm" className="mt-2 bg-transparent" />
+        <Segmented value={period} onChange={setPeriod} options={PERIODS} size="sm" className="mx-auto mt-2.5 w-3/4" />
 
         {error && <p className="mt-6 text-center text-sm text-danger">{error}</p>}
         {!rows ? (
@@ -69,17 +69,17 @@ export default function RankingScreen() {
           </div>
         ) : (
           <>
-            {podium && <Podium rows={podium} board={board} me={user.id} />}
-            <Card className={cx('divide-y divide-line', podium ? 'mt-4' : 'mt-5')}>
-              {rest.map((r) => (
-                <RankRow key={r.profile.id} row={r} board={board} period={period} me={r.profile.id === user.id} />
+            {podium && <Podium key={`${board}-${period}`} rows={podium} board={board} me={user.id} />}
+            <Card className={cx('divide-y divide-line overflow-hidden', podium ? 'mt-4' : 'mt-5')}>
+              {rest.map((r, i) => (
+                <RankRow key={`${board}-${period}-${r.profile.id}`} index={i} row={r} board={board} period={period} me={r.profile.id === user.id} />
               ))}
               <Link to="/groups" className="flex items-center gap-3 px-4 py-3.5 text-[15px] font-semibold text-brand">
                 <span className="grid size-10 place-items-center rounded-full border-2 border-dashed border-brand/40">
                   <UserPlus className="size-[18px]" />
                 </span>
                 Invite your friends
-                <span className="ml-auto rounded-lg bg-brand-soft px-2 py-1 font-mono text-xs tracking-widest">{group?.invite_code}</span>
+                <span className="ml-auto rounded-full bg-brand-soft px-2.5 py-1 font-mono text-xs tracking-widest">{group?.invite_code}</span>
               </Link>
             </Card>
             {board !== 'steps' && (
@@ -117,11 +117,12 @@ function subline(r: Row, board: Board, period: Period) {
   return null
 }
 
-function RankRow({ row: r, board, period, me }: { row: Row; board: Board; period: Period; me: boolean }) {
+function RankRow({ row: r, board, period, me, index }: { row: Row; board: Board; period: Period; me: boolean; index: number }) {
   const sub = subline(r, board, period)
   return (
-    <div className={cx('flex items-center gap-3 px-4 py-3', me && 'bg-brand-soft/60')}>
-      <span className="w-6 text-center text-[15px] font-bold text-muted tabular">{r.rank ?? '–'}</span>
+    <div style={rise(index)} className={cx('relative flex animate-rise items-center gap-3 px-4 py-3', me && 'bg-brand-soft/60')}>
+      {me && <span className="absolute inset-y-2 left-0 w-1 rounded-r-full bg-brand" />}
+      <RankBadge rank={r.rank} size={26} />
       <Avatar name={r.profile.username} color={r.profile.avatar_color} size={40} />
       <div className="min-w-0 flex-1">
         <p className="truncate text-[15px] font-semibold">
@@ -147,34 +148,41 @@ function RankRow({ row: r, board, period, me }: { row: Row; board: Board; period
 function Podium({ rows, board, me }: { rows: Row[]; board: Board; me: string }) {
   // Visual order: 2nd, 1st, 3rd.
   const order = [rows[1], rows[0], rows[2]]
-  const height = { 1: 'h-28', 2: 'h-20', 3: 'h-16' } as Record<number, string>
-  const block = {
-    1: 'from-brand/25 to-brand/5 text-brand/50',
-    2: 'from-[#cbd5e1]/70 to-[#cbd5e1]/10 text-[#94a3b8]',
-    3: 'from-[#f6c9a0]/70 to-[#f6c9a0]/10 text-[#d9894b]/70',
-  } as Record<number, string>
-  const medal = { 1: 'from-[#ffd76a] to-[#f5a524]', 2: 'from-[#e3e8f0] to-[#b6c0cf]', 3: 'from-[#f6c9a0] to-[#d9894b]' } as Record<number, string>
+  const height = { 1: 'h-28', 2: 'h-20', 3: 'h-14' } as Record<number, string>
+  const delay = { 1: 2, 2: 1, 3: 0 } as Record<number, number>
   return (
-    <div className="mt-6 grid grid-cols-3 items-end gap-2">
-      {order.map((r) => {
-        const rank = r.rank ?? 3
-        return (
-          <div key={r.profile.id} className="flex animate-pop flex-col items-center">
-            <div className="relative">
-              {rank === 1 && <Crown className="absolute -top-6 left-1/2 size-6 -translate-x-1/2 fill-star text-star" />}
-              <Avatar name={r.profile.username} color={r.profile.avatar_color} size={rank === 1 ? 68 : 56} ring />
-              <span className={cx('absolute -bottom-2 left-1/2 grid size-6 -translate-x-1/2 place-items-center rounded-full bg-gradient-to-b text-xs font-extrabold text-white ring-2 ring-bg', medal[rank])}>
-                {rank}
-              </span>
+    <div className="relative mt-5 overflow-hidden rounded-[30px] bg-[image:var(--hero)] px-3 pt-10 text-white shadow-[var(--shadow-float)]">
+      <div className="pointer-events-none absolute top-6 left-1/2 size-48 -translate-x-1/2 rounded-full bg-[#ffd76a]/25 blur-3xl" />
+      <div className="pointer-events-none absolute -right-16 -bottom-24 size-60 rounded-full border border-white/10" />
+      <div className="pointer-events-none absolute -left-20 -top-20 size-52 rounded-full border border-white/10" />
+      <div className="relative grid grid-cols-3 items-end gap-2">
+        {order.map((r) => {
+          const rank = r.rank ?? 3
+          return (
+            <div key={r.profile.id} style={rise(delay[rank])} className="flex animate-rise flex-col items-center">
+              <div className="relative">
+                {rank === 1 && <Crown className="absolute -top-7 left-1/2 size-7 -translate-x-1/2 animate-float fill-[#ffd76a] text-[#ffd76a] drop-shadow-[0_0_10px_rgb(255_215_106/0.7)]" />}
+                <span className={cx('block rounded-full p-[3px]', rank === 1 ? 'bg-[linear-gradient(135deg,#ffe8a3,#f5a524)]' : 'bg-white/25')}>
+                  <Avatar name={r.profile.username} color={r.profile.avatar_color} size={rank === 1 ? 70 : 56} />
+                </span>
+                <span className="absolute -bottom-2 left-1/2 -translate-x-1/2">
+                  <RankBadge rank={rank} size={24} />
+                </span>
+              </div>
+              <p className="mt-3.5 max-w-full truncate text-sm font-semibold text-white/90">{r.profile.id === me ? 'You' : r.profile.username}</p>
+              <p className="text-base font-extrabold">{board === 'steps' ? <span className="tabular">{compact(r.steps)}</span> : value(r, board)}</p>
+              <div
+                className={cx(
+                  'mt-2.5 w-full rounded-t-[18px] bg-[linear-gradient(180deg,rgb(255_255_255/0.22),rgb(255_255_255/0.04))] shadow-[inset_0_1px_0_rgb(255_255_255/0.35)] backdrop-blur',
+                  height[rank],
+                )}
+              >
+                <p className="pt-2 text-center text-2xl font-black text-white/40">{rank}</p>
+              </div>
             </div>
-            <p className={cx('mt-3 max-w-full truncate text-sm font-semibold', r.profile.id === me && 'text-brand')}>
-              {r.profile.id === me ? 'You' : r.profile.username}
-            </p>
-            <p className="text-[15px] font-bold">{board === 'steps' ? <span className="tabular">{compact(r.steps)}</span> : value(r, board)}</p>
-            <div className={cx('mt-2 grid w-full place-items-start justify-center rounded-t-2xl bg-gradient-to-b pt-2 text-2xl font-extrabold', height[rank], block[rank])}>{rank}</div>
-          </div>
-        )
-      })}
+          )
+        })}
+      </div>
     </div>
   )
 }

@@ -2,7 +2,7 @@ import { ChevronRight, Lock, Settings, Users } from 'lucide-react'
 import { Link } from 'react-router'
 import { useMyData, useToday } from '../app/hooks'
 import { useSession } from '../app/session'
-import { Avatar, Card, IconButton, SectionTitle, Skeleton, cx } from '../components/ui'
+import { Avatar, Card, IconTile, SectionTitle, Skeleton, cx, rise } from '../components/ui'
 import { BADGES, type BadgeTone } from '../config/badges'
 import { longestStreak, qualifiesSleep, qualifiesSteps } from '../domain/scoring'
 import { addDays, formatDayShort, formatMonth } from '../lib/dates'
@@ -26,18 +26,25 @@ export default function ProfileScreen() {
 
   return (
     <div className="animate-fade-in">
-      <div className="relative h-40 overflow-hidden bg-[radial-gradient(120%_120%_at_10%_0%,#6d6bff,#4f46e5_45%,#3b1fa8)]">
+      <div className="relative h-48 overflow-hidden rounded-b-[36px] bg-[image:var(--hero)]">
+        <div className="absolute -top-20 left-1/3 size-56 rounded-full bg-white/10 blur-3xl" />
         <div className="absolute -right-16 -bottom-24 size-64 rounded-full border border-white/10" />
         <div className="absolute right-10 -bottom-10 size-32 rounded-full bg-white/5" />
         <div className="safe-top absolute top-0 right-4">
-          <Link to="/settings">
-            <IconButton icon={Settings} label="Settings" className="mt-3 bg-white/15 text-white ring-white/20 hover:bg-white/25" />
+          <Link
+            to="/settings"
+            aria-label="Settings"
+            className="mt-3 grid size-10 place-items-center rounded-full bg-white/15 text-white ring-1 ring-white/25 backdrop-blur transition hover:bg-white/25 active:scale-90"
+          >
+            <Settings className="size-[19px]" />
           </Link>
         </div>
       </div>
-      <div className="relative z-10 -mt-12 px-5">
-        <Avatar name={profile.username} color={profile.avatar_color} size={96} ring />
-        <h1 className="mt-3 text-[26px] font-bold tracking-tight">{profile.username}</h1>
+      <div className="relative z-10 -mt-14 flex flex-col items-center px-5 text-center">
+        <span className="rounded-full bg-[linear-gradient(135deg,var(--brand),var(--brand-2))] p-1 shadow-[var(--shadow-float)]">
+          <Avatar name={profile.username} color={profile.avatar_color} size={100} ring />
+        </span>
+        <h1 className="mt-3 text-[28px] font-extrabold tracking-[-0.03em]">{profile.username}</h1>
         <p className="text-[13px] text-muted">
           Member since {formatMonth(profile.created_at.slice(0, 10))} · {profile.timezone.replace(/_/g, ' ')}
         </p>
@@ -49,10 +56,10 @@ export default function ProfileScreen() {
             { label: 'Stars', value: history ? formatNumber(history.reduce((s, d) => s + d.total, 0)) : '–' },
             { label: 'Badges', value: badges ? `${earned.length}/${BADGES.length}` : '–' },
             { label: 'Best streak', value: history ? `${Math.max(longestStreak(history, qualifiesSteps), longestStreak(history, qualifiesSleep))}d` : '–' },
-          ].map((k) => (
-            <Card key={k.label} className="px-3 py-3.5 text-center">
-              <p className="text-xl font-bold tabular">{k.value}</p>
-              <p className="text-[11px] font-medium text-muted">{k.label}</p>
+          ].map((k, i) => (
+            <Card key={k.label} style={rise(i)} className="animate-rise px-3 py-4 text-center">
+              <p className="display text-[22px]">{k.value}</p>
+              <p className="mt-1 text-[11px] font-semibold tracking-wide text-muted uppercase">{k.label}</p>
             </Card>
           ))}
         </div>
@@ -62,18 +69,18 @@ export default function ProfileScreen() {
           <Skeleton className="h-64" />
         ) : (
           <div className="grid grid-cols-3 gap-2">
-            {badges.map((b) => (
-              <Card key={b.id} className={cx('flex flex-col items-center p-3 text-center', !b.at && 'bg-surface/60')}>
+            {badges.map((b, i) => (
+              <Card key={b.id} style={rise(i)} className={cx('flex animate-rise flex-col items-center p-3 text-center', !b.at && 'opacity-80')}>
                 <span
                   className={cx(
                     'relative grid size-14 place-items-center rounded-2xl text-white',
-                    b.at ? `${TONE[b.tone]} shadow-[0_8px_20px_-10px_rgba(0,0,0,0.5)]` : 'bg-surface-2 text-faint',
+                    b.at ? `${TONE[b.tone]} shadow-[inset_0_1px_0_rgb(255_255_255/0.35),0_10px_22px_-10px_rgb(0_0_0/0.55)]` : 'bg-surface-2 text-faint',
                   )}
                   title={b.description}
                 >
                   <b.icon className="size-7" strokeWidth={2} />
                   {!b.at && (
-                    <span className="absolute -right-1.5 -bottom-1.5 grid size-6 place-items-center rounded-full bg-ink-2 text-white ring-2 ring-surface">
+                    <span className="absolute -right-1.5 -bottom-1.5 grid size-6 place-items-center rounded-full bg-surface-3 text-ink-2 ring-2 ring-surface">
                       <Lock className="size-3" strokeWidth={2.5} />
                     </span>
                   )}
@@ -91,11 +98,9 @@ export default function ProfileScreen() {
         )}
 
         <SectionTitle>Groups</SectionTitle>
-        <Card className="divide-y divide-line">
+        <Card className="divide-y divide-line overflow-hidden">
           <Link to="/groups" className="flex items-center gap-3 p-4">
-            <span className="grid size-10 place-items-center rounded-xl bg-brand-soft text-brand">
-              <Users className="size-5" />
-            </span>
+            <IconTile icon={Users} tone="brand" />
             <span className="flex-1">
               <span className="block font-semibold">Your groups</span>
               <span className="block text-[13px] text-muted">{groups.map((g) => g.name).join(', ')}</span>
@@ -103,9 +108,7 @@ export default function ProfileScreen() {
             <ChevronRight className="size-5 text-faint" />
           </Link>
           <Link to="/settings" className="flex items-center gap-3 p-4">
-            <span className="grid size-10 place-items-center rounded-xl bg-surface-2 text-ink-2">
-              <Settings className="size-5" />
-            </span>
+            <IconTile icon={Settings} tone="muted" />
             <span className="flex-1">
               <span className="block font-semibold">Settings</span>
               <span className="block text-[13px] text-muted">Profile, data sources, notifications</span>

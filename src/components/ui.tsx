@@ -1,28 +1,44 @@
 import { Star, X, type LucideIcon } from 'lucide-react'
-import { useEffect, useId, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode } from 'react'
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type ButtonHTMLAttributes,
+  type CSSProperties,
+  type InputHTMLAttributes,
+  type ReactNode,
+} from 'react'
 import { createPortal } from 'react-dom'
 
 export const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(' ')
 
-export function Card({ className, children, onClick }: { className?: string; children: ReactNode; onClick?: () => void }) {
-  const cls = cx('rounded-3xl bg-surface shadow-[var(--shadow-card)] ring-1 ring-line/60', className)
+/** Staggered entrance: use with the `animate-rise` class. */
+export const rise = (i: number): CSSProperties => ({ animationDelay: `${i * 55}ms` })
+
+export function Card({ className, children, onClick, style }: { className?: string; children: ReactNode; onClick?: () => void; style?: CSSProperties }) {
+  const cls = cx('surface-card rounded-[26px]', className)
   return onClick ? (
-    <button type="button" onClick={onClick} className={cx(cls, 'block w-full text-left transition active:scale-[0.99]')}>
+    <button type="button" onClick={onClick} style={style} className={cx(cls, 'block w-full text-left transition active:scale-[0.985]')}>
       {children}
     </button>
   ) : (
-    <div className={cls}>{children}</div>
+    <div className={cls} style={style}>
+      {children}
+    </div>
   )
 }
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
 const variants: Record<Variant, string> = {
-  primary: 'bg-brand text-white shadow-[var(--shadow-float)] hover:brightness-110 disabled:shadow-none',
+  primary:
+    'bg-[linear-gradient(120deg,var(--brand),color-mix(in_oklab,var(--brand)_55%,var(--brand-2)))] text-white shadow-[var(--shadow-float)] hover:brightness-110 disabled:shadow-none',
   secondary: 'bg-surface text-ink ring-1 ring-line hover:bg-surface-2',
   ghost: 'text-brand hover:bg-brand-soft',
   danger: 'bg-danger-soft text-danger hover:brightness-95',
 }
 
+/** Every button is a pill (same rule as Telebi's NexSuite). */
 export function Button({
   variant = 'primary',
   icon: Icon,
@@ -37,7 +53,7 @@ export function Button({
       {...rest}
       disabled={rest.disabled || loading}
       className={cx(
-        'inline-flex h-12 items-center justify-center gap-2 rounded-2xl px-5 text-[15px] font-semibold transition active:scale-[0.98] disabled:opacity-50',
+        'inline-flex h-12 items-center justify-center gap-2 rounded-full px-6 text-[15px] font-semibold transition active:scale-[0.97] disabled:opacity-50',
         variants[variant],
         className,
       )}
@@ -66,16 +82,22 @@ export function IconButton({
       title={label}
       {...rest}
       className={cx(
-        'relative grid size-10 place-items-center rounded-full bg-surface text-ink-2 ring-1 ring-line transition hover:bg-surface-2 active:scale-95',
+        'surface-card relative grid size-10 place-items-center rounded-full text-ink-2 transition hover:text-ink active:scale-90',
         className,
       )}
     >
       <Icon className="size-[19px]" strokeWidth={2} />
-      {badge && <span className="absolute top-2 right-2 size-2.5 rounded-full bg-danger ring-2 ring-surface" />}
+      {badge && (
+        <span className="absolute top-1.5 right-1.5 flex size-2.5">
+          <span className="absolute inset-0 animate-ping rounded-full bg-danger opacity-60" />
+          <span className="relative size-2.5 rounded-full bg-danger ring-2 ring-surface" />
+        </span>
+      )}
     </button>
   )
 }
 
+/** Pill tabs with a sliding indicator. */
 export function Segmented<T extends string>({
   value,
   options,
@@ -89,8 +111,14 @@ export function Segmented<T extends string>({
   className?: string
   size?: 'sm' | 'md'
 }) {
+  const i = Math.max(0, options.findIndex((o) => o.value === value))
   return (
-    <div role="tablist" className={cx('flex rounded-2xl bg-surface-2 p-1', className)}>
+    <div role="tablist" className={cx('relative flex rounded-full bg-surface-2 p-1 ring-1 ring-line/60', className)}>
+      <span
+        aria-hidden
+        className="surface-card absolute top-1 bottom-1 left-1 rounded-full transition-transform duration-300 ease-[cubic-bezier(.2,.8,.2,1)]"
+        style={{ width: `calc((100% - 0.5rem) / ${options.length})`, transform: `translateX(${i * 100}%)` }}
+      />
       {options.map((o) => (
         <button
           key={o.value}
@@ -99,9 +127,9 @@ export function Segmented<T extends string>({
           aria-selected={o.value === value}
           onClick={() => onChange(o.value)}
           className={cx(
-            'flex-1 rounded-xl font-semibold transition',
+            'relative z-10 flex flex-1 items-center justify-center gap-1.5 rounded-full font-semibold transition-colors',
             size === 'sm' ? 'h-8 text-[13px]' : 'h-10 text-sm',
-            o.value === value ? 'bg-surface text-ink shadow-sm' : 'text-muted hover:text-ink-2',
+            o.value === value ? 'text-ink' : 'text-muted hover:text-ink-2',
           )}
         >
           {o.label}
@@ -120,12 +148,13 @@ export function Avatar({ name, color, size = 40, ring }: { name: string; color: 
     .toUpperCase()
   return (
     <span
-      className={cx('grid shrink-0 place-items-center rounded-full font-semibold text-white', ring && 'ring-3 ring-surface')}
+      className={cx('grid shrink-0 place-items-center rounded-full font-bold text-white', ring && 'ring-[3px] ring-bg')}
       style={{
         width: size,
         height: size,
         fontSize: size * 0.38,
-        background: `linear-gradient(135deg, ${color}, color-mix(in oklab, ${color} 70%, black))`,
+        background: `radial-gradient(120% 120% at 25% 15%, color-mix(in oklab, ${color} 80%, white), ${color} 45%, color-mix(in oklab, ${color} 65%, black))`,
+        boxShadow: `inset 0 1px 0 rgb(255 255 255 / 0.25), 0 6px 16px -8px ${color}`,
       }}
       aria-hidden
     >
@@ -141,8 +170,8 @@ export function Stars({ value, max, size = 14, className }: { value: number; max
       {Array.from({ length: max }, (_, i) => (
         <Star
           key={i}
-          style={{ width: size, height: size }}
-          className={i < value ? 'fill-star text-star' : 'fill-line text-line'}
+          style={{ width: size, height: size, animationDelay: `${i * 70}ms` }}
+          className={i < value ? 'animate-pop fill-star text-star drop-shadow-[0_0_6px_color-mix(in_oklab,var(--star)_55%,transparent)]' : 'fill-surface-3 text-surface-3'}
           strokeWidth={1.5}
         />
       ))}
@@ -160,19 +189,62 @@ export function StarCount({ value, className }: { value: number; className?: str
   )
 }
 
-export function Chip({ children, tone = 'muted', className }: { children: ReactNode; tone?: 'muted' | 'steps' | 'sleep' | 'star' | 'hobby' | 'brand' | 'danger'; className?: string }) {
-  const tones = {
+// Metal colors look the same in both themes on purpose.
+const MEDAL: Record<number, string> = {
+  1: 'bg-[linear-gradient(135deg,#ffe08a,#f5a524)] text-[#6b3d00]',
+  2: 'bg-[linear-gradient(135deg,#f1f4f9,#a9b5c7)] text-[#3b4658]',
+  3: 'bg-[linear-gradient(135deg,#f8d2ae,#c97a3d)] text-[#5a2e0b]',
+}
+
+/** Rank number, shown as a medal for the top 3. */
+export function RankBadge({ rank, size = 24 }: { rank: number | null; size?: number }) {
+  return rank && MEDAL[rank] ? (
+    <span
+      className={cx('grid shrink-0 place-items-center rounded-full font-extrabold shadow-[inset_0_1px_0_rgb(255_255_255/0.6),0_4px_10px_-4px_rgb(0_0_0/0.35)]', MEDAL[rank])}
+      style={{ width: size, height: size, fontSize: size * 0.46 }}
+    >
+      {rank}
+    </span>
+  ) : (
+    <span className="shrink-0 text-center text-sm font-bold text-muted tabular" style={{ width: size }}>
+      {rank ?? '–'}
+    </span>
+  )
+}
+
+export type Tone ='muted' | 'steps' | 'sleep' | 'star' | 'hobby' | 'brand' | 'danger'
+
+export function Chip({ children, tone = 'muted', className }: { children: ReactNode; tone?: Tone; className?: string }) {
+  const tones: Record<Tone, string> = {
     muted: 'bg-surface-2 text-muted',
     steps: 'bg-steps-soft text-steps-strong',
     sleep: 'bg-sleep-soft text-sleep-strong',
-    star: 'bg-star-soft text-[#a15c00]',
-    hobby: 'bg-hobby-soft text-[#b4500b]',
+    star: 'bg-star-soft text-star-strong',
+    hobby: 'bg-hobby-soft text-hobby-strong',
     brand: 'bg-brand-soft text-brand',
     danger: 'bg-danger-soft text-danger',
   }
   return (
-    <span className={cx('inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold', tones[tone], className)}>
+    <span className={cx('inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold', tones[tone], className)}>
       {children}
+    </span>
+  )
+}
+
+/** Rounded square holding an icon, tinted by tone. */
+export function IconTile({ icon: Icon, tone = 'brand', size = 40, className }: { icon: LucideIcon; tone?: Tone; size?: number; className?: string }) {
+  const tones: Record<Tone, string> = {
+    muted: 'bg-surface-2 text-ink-2',
+    steps: 'bg-steps-soft text-steps-strong',
+    sleep: 'bg-sleep-soft text-sleep-strong',
+    star: 'bg-star-soft text-star-strong',
+    hobby: 'bg-hobby-soft text-hobby-strong',
+    brand: 'bg-brand-soft text-brand',
+    danger: 'bg-danger-soft text-danger',
+  }
+  return (
+    <span className={cx('grid shrink-0 place-items-center rounded-[14px]', tones[tone], className)} style={{ width: size, height: size }}>
+      <Icon style={{ width: size * 0.48, height: size * 0.48 }} strokeWidth={2.1} />
     </span>
   )
 }
@@ -188,23 +260,23 @@ export function Field({
   const id = useId()
   return (
     <div className={cx('block', className)}>
-      <label htmlFor={id} className="mb-1.5 block text-[13px] font-semibold text-ink-2">
+      <label htmlFor={id} className="mb-1.5 block px-1 text-[13px] font-semibold text-ink-2">
         {label}
       </label>
-      <span className="flex h-12 items-center gap-2.5 rounded-2xl bg-surface-2 px-3.5 ring-1 ring-transparent transition focus-within:bg-surface focus-within:ring-brand">
+      <span className="flex h-12 items-center gap-2.5 rounded-full bg-surface-2 px-4 ring-1 ring-line/60 transition focus-within:bg-surface focus-within:ring-2 focus-within:ring-brand">
         {Icon && <Icon className="size-[18px] shrink-0 text-faint" />}
         <input id={id} {...input} className="h-full w-full min-w-0 bg-transparent text-[15px] text-ink outline-none placeholder:text-faint" />
         {trailing}
       </span>
-      {hint && <span className="mt-1.5 block text-xs text-muted">{hint}</span>}
+      {hint && <span className="mt-1.5 block px-1 text-xs text-muted">{hint}</span>}
     </div>
   )
 }
 
 export function SectionTitle({ children, action }: { children: ReactNode; action?: ReactNode }) {
   return (
-    <div className="mt-7 mb-3 flex items-center justify-between px-1">
-      <h2 className="text-[17px] font-bold tracking-tight">{children}</h2>
+    <div className="mt-8 mb-3 flex items-center justify-between gap-3 px-1">
+      <h2 className="truncate text-[17px] font-bold tracking-tight">{children}</h2>
       {action}
     </div>
   )
@@ -212,10 +284,10 @@ export function SectionTitle({ children, action }: { children: ReactNode; action
 
 export function PageHeader({ title, subtitle, actions }: { title: ReactNode; subtitle?: ReactNode; actions?: ReactNode }) {
   return (
-    <header className="safe-top flex items-end justify-between gap-3 px-5 pb-4">
+    <header className="safe-top flex items-end justify-between gap-3 px-5 pb-5">
       <div className="min-w-0 pt-3">
-        {subtitle && <p className="text-[13px] font-medium text-muted">{subtitle}</p>}
-        <h1 className="truncate text-[28px] font-bold tracking-tight">{title}</h1>
+        {subtitle && <div className="text-[13px] font-medium text-muted">{subtitle}</div>}
+        <h1 className="truncate text-[30px] leading-tight font-extrabold tracking-[-0.03em]">{title}</h1>
       </div>
       {actions && <div className="flex shrink-0 items-center gap-2 pb-1">{actions}</div>}
     </header>
@@ -225,8 +297,9 @@ export function PageHeader({ title, subtitle, actions }: { title: ReactNode; sub
 export function EmptyState({ icon: Icon, title, text, action }: { icon: LucideIcon; title: string; text: ReactNode; action?: ReactNode }) {
   return (
     <div className="flex flex-col items-center px-6 py-10 text-center">
-      <span className="mb-4 grid size-14 place-items-center rounded-2xl bg-brand-soft text-brand">
-        <Icon className="size-7" />
+      <span className="relative mb-5 grid size-16 animate-float place-items-center rounded-[22px] bg-brand-soft text-brand">
+        <span className="absolute inset-0 rounded-[22px] bg-brand/20 blur-xl" />
+        <Icon className="relative size-8" />
       </span>
       <h3 className="text-base font-bold">{title}</h3>
       <p className="mt-1 max-w-xs text-sm text-muted">{text}</p>
@@ -236,7 +309,39 @@ export function EmptyState({ icon: Icon, title, text, action }: { icon: LucideIc
 }
 
 export function Skeleton({ className }: { className?: string }) {
-  return <div className={cx('animate-pulse rounded-2xl bg-line/60', className)} />
+  return (
+    <div
+      className={cx(
+        'animate-shimmer rounded-[26px] bg-[linear-gradient(90deg,var(--surface-2)_0%,var(--surface-3)_50%,var(--surface-2)_100%)] bg-[length:200%_100%]',
+        className,
+      )}
+    />
+  )
+}
+
+/** Number that counts up to its value when it changes. */
+export function AnimatedNumber({ value, format = (n) => String(Math.round(n)), duration = 900 }: { value: number; format?: (n: number) => string; duration?: number }) {
+  const [shown, setShown] = useState(0)
+  const from = useRef(0)
+  useEffect(() => {
+    const ms = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : duration
+    const start = performance.now()
+    const a = from.current
+    let raf = 0
+    const tick = (t: number) => {
+      const p = ms ? Math.min(1, (t - start) / ms) : 1
+      const v = a + (value - a) * (1 - Math.pow(1 - p, 3))
+      setShown(v)
+      if (p < 1) raf = requestAnimationFrame(tick)
+      else from.current = value
+    }
+    raf = requestAnimationFrame(tick)
+    return () => {
+      cancelAnimationFrame(raf)
+      from.current = value
+    }
+  }, [value, duration])
+  return <>{format(shown)}</>
 }
 
 /** Bottom sheet modal. Closes on backdrop tap and Escape. */
@@ -256,10 +361,10 @@ export function Sheet({ open, onClose, title, children }: { open: boolean; onClo
   if (!open) return null
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center" role="dialog" aria-modal aria-label={title}>
-      <div className="absolute inset-0 animate-fade-in bg-ink/40 backdrop-blur-[2px]" onClick={onClose} />
-      <div className="safe-bottom no-scrollbar relative max-h-[92dvh] w-full max-w-md animate-sheet-in overflow-y-auto rounded-t-[28px] bg-bg">
-        <div className="sticky top-0 z-10 bg-bg/95 px-5 pt-3 pb-3 backdrop-blur">
-          <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-line" />
+      <div className="absolute inset-0 animate-fade-in bg-scrim backdrop-blur-[3px]" onClick={onClose} />
+      <div className="safe-bottom no-scrollbar relative max-h-[92dvh] w-full max-w-md animate-sheet-in overflow-y-auto rounded-t-[32px] bg-bg shadow-[0_-20px_60px_-20px_rgb(0_0_0/0.5)] ring-1 ring-line/60">
+        <div className="sticky top-0 z-10 bg-bg/90 px-5 pt-3 pb-3 backdrop-blur-xl">
+          <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-surface-3" />
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold tracking-tight">{title}</h2>
             <IconButton icon={X} label="Close" onClick={onClose} className="size-9" />

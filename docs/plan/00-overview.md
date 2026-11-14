@@ -11,7 +11,7 @@ so it can be switched on as soon as the Supabase project exists.
 | [phase-2-sync.md](phase-2-sync.md) | `ingest-health`, iOS Shortcut, Capacitor + Health Connect | done; APK built and tested on emulator — real-phone + live Supabase checks are owner steps |
 | [phase-3-game.md](phase-3-game.md) | Stars, rankings, streaks, badges | done |
 | [phase-4-notifications.md](phase-4-notifications.md) | "X passed you" | in-app + phone notifications done; closed-app push needs Supabase |
-| [phase-5-extras.md](phase-5-extras.md) | Workouts, stats and charts, polish | done (dark theme later) |
+| [phase-5-extras.md](phase-5-extras.md) | Workouts, stats and charts, polish | done (incl. dark theme) |
 
 ## Key decisions
 
@@ -26,6 +26,8 @@ so it can be switched on as soon as the Supabase project exists.
   Connect while sleep is entered by hand.
 - **Data layer:** one `Repo` interface; `localRepo` (localStorage, demo friends) now, `supabaseRepo`
   when env vars exist. Screens never import Supabase directly.
-- **Theme:** light only for now. All colors are CSS variables in `src/index.css`, so dark mode is
-  one extra block later.
+- **Theme:** light and dark ("midnight navy", inspired by Telebi's NexSuite: pill controls,
+  glass surfaces). Colors are CSS variables in `src/index.css`, switched by `data-theme` on
+  `<html>`. Preference (System / Light / Dark) lives in Settings → Appearance, stored in
+  localStorage `wfl:theme`; `src/app/theme.ts` also sets the Android status bar icon style.
 - **Hosting (later):** Cloudflare Pages (free, commercial use allowed).

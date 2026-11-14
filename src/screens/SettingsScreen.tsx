@@ -8,10 +8,13 @@ import {
   Database,
   KeyRound,
   LogOut,
+  MonitorSmartphone,
+  Moon,
   PenLine,
   RefreshCw,
   Smartphone,
   Sparkles,
+  Sun,
   Trash2,
 } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
@@ -19,7 +22,8 @@ import { Link } from 'react-router'
 import { useLive } from '../app/hooks'
 import { usePrefs } from '../app/inbox'
 import { useSession } from '../app/session'
-import { Avatar, Button, Card, Chip, Field, IconButton, PageHeader, SectionTitle, cx } from '../components/ui'
+import { useTheme, type ThemePref } from '../app/theme'
+import { Avatar, Button, Card, Chip, Field, IconButton, IconTile, PageHeader, SectionTitle, Segmented, cx, rise, type Tone } from '../components/ui'
 import { useToast } from '../components/toast'
 import { TimezoneSelect } from '../components/TimezoneSelect'
 import { APP, AVATAR_COLORS } from '../config/app'
@@ -41,14 +45,15 @@ export default function SettingsScreen() {
       <PageHeader title="Settings" />
       <div className="px-4">
         <ProfileSection onSaved={refresh} />
+        <Appearance />
         <DataSources />
         <Notifications />
         {repo.demo && <DemoTools />}
 
         <SectionTitle>About</SectionTitle>
         <Card className="divide-y divide-line">
-          <Row icon={CircleHelp} title="How scoring works" onClick={() => setRules(true)} />
-          <Row icon={Sparkles} title={APP.name} text={`Version ${__APP_VERSION__} · ${repo.kind === 'local' ? 'demo mode' : 'connected'}`} />
+          <Row icon={CircleHelp} tone="star" title="How scoring works" onClick={() => setRules(true)} />
+          <Row icon={Sparkles} tone="brand" title={APP.name} text={`Version ${__APP_VERSION__} · ${repo.kind === 'local' ? 'demo mode' : 'connected'}`} />
         </Card>
 
         <Button variant="danger" icon={LogOut} onClick={() => void repo.signOut()} className="mt-6 w-full">
@@ -60,12 +65,24 @@ export default function SettingsScreen() {
   )
 }
 
-function Row({ icon: Icon, title, text, onClick, right }: { icon: typeof Bell; title: string; text?: ReactNode; onClick?: () => void; right?: ReactNode }) {
+function Row({
+  icon,
+  tone = 'muted',
+  title,
+  text,
+  onClick,
+  right,
+}: {
+  icon: typeof Bell
+  tone?: Tone
+  title: string
+  text?: ReactNode
+  onClick?: () => void
+  right?: ReactNode
+}) {
   const body = (
     <>
-      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-surface-2 text-ink-2">
-        <Icon className="size-[18px]" />
-      </span>
+      <IconTile icon={icon} tone={tone} size={36} />
       <span className="min-w-0 flex-1">
         <span className="block text-[15px] font-semibold">{title}</span>
         {text && <span className="block text-[13px] text-muted">{text}</span>}
@@ -74,7 +91,7 @@ function Row({ icon: Icon, title, text, onClick, right }: { icon: typeof Bell; t
     </>
   )
   return onClick ? (
-    <button type="button" onClick={onClick} className="flex w-full items-center gap-3 p-4 text-left">
+    <button type="button" onClick={onClick} className="flex w-full items-center gap-3 p-4 text-left transition active:bg-surface-2">
       {body}
     </button>
   ) : (
@@ -90,9 +107,17 @@ function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: 
       aria-checked={checked}
       aria-label={label}
       onClick={() => onChange(!checked)}
-      className={cx('relative h-7 w-12 shrink-0 rounded-full transition', checked ? 'bg-steps' : 'bg-line')}
+      className={cx(
+        'relative h-7 w-12 shrink-0 rounded-full transition-colors duration-300',
+        checked ? 'bg-[linear-gradient(120deg,var(--brand),var(--brand-2))] shadow-[0_6px_16px_-6px_var(--brand)]' : 'bg-surface-3',
+      )}
     >
-      <span className={cx('absolute top-0.5 size-6 rounded-full bg-white shadow transition-all', checked ? 'left-[22px]' : 'left-0.5')} />
+      <span
+        className={cx(
+          'absolute top-0.5 left-0.5 size-6 rounded-full bg-white shadow-[0_2px_6px_rgb(0_0_0/0.25)] transition-transform duration-300 ease-[cubic-bezier(.2,.8,.2,1.2)]',
+          checked && 'translate-x-5',
+        )}
+      />
     </button>
   )
 }
@@ -122,7 +147,7 @@ function ProfileSection({ onSaved }: { onSaved: () => Promise<void> }) {
   return (
     <>
       <SectionTitle>Profile</SectionTitle>
-      <Card className="p-4">
+      <Card className="animate-rise p-4">
         <div className="flex items-center gap-4">
           <Avatar name={username || '?'} color={color} size={56} />
           <div className="flex flex-wrap gap-2">
@@ -154,6 +179,31 @@ function ProfileSection({ onSaved }: { onSaved: () => Promise<void> }) {
   )
 }
 
+const THEMES: { value: ThemePref; label: ReactNode }[] = [
+  { value: 'system', label: <><MonitorSmartphone className="size-4" /> System</> },
+  { value: 'light', label: <><Sun className="size-4" /> Light</> },
+  { value: 'dark', label: <><Moon className="size-4" /> Dark</> },
+]
+
+function Appearance() {
+  const { pref, theme, setPref } = useTheme()
+  return (
+    <>
+      <SectionTitle>Appearance</SectionTitle>
+      <Card className="animate-rise p-4" style={rise(1)}>
+        <div className="mb-4 flex items-center gap-3">
+          <IconTile icon={theme === 'dark' ? Moon : Sun} tone={theme === 'dark' ? 'sleep' : 'star'} size={36} />
+          <span className="min-w-0 flex-1">
+            <span className="block text-[15px] font-semibold">Theme</span>
+            <span className="block text-[13px] text-muted">{pref === 'system' ? `Follows your device · now ${theme}` : `Always ${theme}`}</span>
+          </span>
+        </div>
+        <Segmented value={pref} onChange={setPref} options={THEMES} />
+      </Card>
+    </>
+  )
+}
+
 function DataSources() {
   return (
     <>
@@ -162,8 +212,8 @@ function DataSources() {
       <div className="space-y-3">
         <AndroidCard />
         <ShortcutCard />
-        <Card>
-          <Row icon={PenLine} title="Manual entry" text="Always available from the + button." right={<Chip tone="steps">On</Chip>} />
+        <Card className="animate-rise" style={rise(3)}>
+          <Row icon={PenLine} tone="brand" title="Manual entry" text="Always available from the + button." right={<Chip tone="steps">On</Chip>} />
         </Card>
       </div>
     </>
@@ -197,11 +247,9 @@ function AndroidCard() {
 
   const last = lastHealthSync()
   return (
-    <Card className="p-4">
+    <Card className="animate-rise p-4" style={rise(1)}>
       <div className="flex items-center gap-3">
-        <span className="grid size-9 place-items-center rounded-xl bg-steps-soft text-steps-strong">
-          <Smartphone className="size-[18px]" />
-        </span>
+        <IconTile icon={Smartphone} tone="steps" size={36} />
         <div className="flex-1">
           <p className="text-[15px] font-semibold">Android · Health Connect</p>
           <p className="text-[13px] text-muted">Steps and sleep from your phone, Garmin, Samsung, Fitbit…</p>
@@ -224,7 +272,7 @@ function AndroidCard() {
           </div>
         )
       ) : (
-        <p className="mt-3 rounded-2xl bg-surface-2 px-3 py-2.5 text-[13px] text-muted">
+        <p className="mt-3 rounded-[18px] bg-surface-2 px-3.5 py-2.5 text-[13px] text-muted">
           Install the {APP.name} Android app to sync automatically. It syncs every time you open it.
         </p>
       )}
@@ -251,11 +299,9 @@ function ShortcutCard() {
   const copy = (text: string, what: string) => void navigator.clipboard.writeText(text).then(() => toast(`${what} copied`))
 
   return (
-    <Card className="p-4">
+    <Card className="animate-rise p-4" style={rise(2)}>
       <div className="flex items-center gap-3">
-        <span className="grid size-9 place-items-center rounded-xl bg-sleep-soft text-sleep-strong">
-          <Apple className="size-[18px]" />
-        </span>
+        <IconTile icon={Apple} tone="sleep" size={36} />
         <div className="flex-1">
           <p className="text-[15px] font-semibold">iPhone · Shortcuts</p>
           <p className="text-[13px] text-muted">An automation sends Apple Health steps and sleep with a personal token.</p>
@@ -271,7 +317,7 @@ function ShortcutCard() {
         ))}
       </ol>
 
-      <div className="mt-4 rounded-2xl bg-surface-2 p-3">
+      <div className="mt-4 rounded-[18px] bg-surface-2 p-3 ring-1 ring-line/60">
         <p className="text-xs font-semibold text-muted">Endpoint</p>
         {endpoint ? (
           <button type="button" onClick={() => copy(endpoint, 'Endpoint')} className="mt-0.5 flex w-full items-center gap-2 text-left">
@@ -284,8 +330,8 @@ function ShortcutCard() {
       </div>
 
       {fresh && (
-        <div className="mt-3 animate-pop rounded-2xl bg-star-soft p-3 ring-1 ring-star/30">
-          <p className="text-xs font-bold text-[#a15c00]">Your new token. It is shown only once.</p>
+        <div className="mt-3 animate-pop rounded-[18px] bg-star-soft p-3 ring-1 ring-star/30">
+          <p className="text-xs font-bold text-star-strong">Your new token. It is shown only once.</p>
           <button type="button" onClick={() => copy(fresh, 'Token')} className="mt-1 flex w-full items-center gap-2 text-left">
             <code className="min-w-0 flex-1 text-[12px] break-all">{fresh}</code>
             <Copy className="size-4 shrink-0" />
@@ -294,7 +340,7 @@ function ShortcutCard() {
       )}
 
       {tokens.data && tokens.data.length > 0 && (
-        <div className="mt-3 divide-y divide-line rounded-2xl ring-1 ring-line">
+        <div className="mt-3 divide-y divide-line rounded-[18px] ring-1 ring-line">
           {tokens.data.map((t) => (
             <div key={t.id} className="flex items-center gap-3 px-3 py-2.5">
               <KeyRound className="size-4 text-faint" />
@@ -338,12 +384,13 @@ function Notifications() {
   return (
     <>
       <SectionTitle>Notifications</SectionTitle>
-      <Card className="divide-y divide-line">
-        <Row icon={Bell} title="Passed in today's steps" text="When a friend moves above you" right={<Toggle label="Steps overtakes" checked={prefs.steps} onChange={(v) => setPrefs({ ...prefs, steps: v })} />} />
-        <Row icon={Bell} title="Passed in the overall ranking" text="Steps + sleep + hobby stars" right={<Toggle label="Overall overtakes" checked={prefs.overall} onChange={(v) => setPrefs({ ...prefs, overall: v })} />} />
+      <Card className="animate-rise divide-y divide-line">
+        <Row icon={Bell} tone="steps" title="Passed in today's steps" text="When a friend moves above you" right={<Toggle label="Steps overtakes" checked={prefs.steps} onChange={(v) => setPrefs({ ...prefs, steps: v })} />} />
+        <Row icon={Bell} tone="star" title="Passed in the overall ranking" text="Steps + sleep + hobby stars" right={<Toggle label="Overall overtakes" checked={prefs.overall} onChange={(v) => setPrefs({ ...prefs, overall: v })} />} />
         {supported && (
           <Row
             icon={Smartphone}
+            tone="brand"
             title="Phone notifications"
             text="On iPhone, add the app to the Home Screen first."
             right={<Toggle label="Phone notifications" checked={prefs.system} onChange={(v) => void toggleSystem(v)} />}
@@ -363,6 +410,7 @@ function DemoTools() {
       <Card className="divide-y divide-line">
         <Row
           icon={Database}
+          tone="brand"
           title="Fill my history"
           text="Adds 90 days of sample data (existing days are kept)."
           onClick={async () => {
@@ -375,6 +423,7 @@ function DemoTools() {
         />
         <Row
           icon={Trash2}
+          tone="danger"
           title="Reset demo"
           text="Deletes every local account and its data."
           onClick={() => confirm('Delete all local demo data on this device?') && repo.demo!.reset()}

@@ -2,36 +2,101 @@
 @import '@fontsource-variable/inter';
 
 /*
- * Design tokens. Semantic colors are CSS variables so a dark theme is one extra :root block later.
+ * Design tokens. Every color is a CSS variable so the light and dark themes are two :root blocks.
+ * The theme is chosen by `data-theme` on <html> (see src/app/theme.ts and the inline script in index.html).
  */
 :root {
-  --bg: #f5f6fa;
+  --bg: #f3f5fa;
   --surface: #ffffff;
-  --surface-2: #f0f2f7;
-  --ink: #0f172a;
-  --ink-2: #334155;
-  --muted: #64748b;
-  --faint: #94a3b8;
-  --line: #e7e9f0;
+  --surface-2: #eef1f7;
+  --surface-3: #e4e8f1;
+  --ink: #0b1220;
+  --ink-2: #2b384f;
+  --muted: #5f6b84;
+  --faint: #98a2b6;
+  --line: #e3e7ef;
+  --scrim: rgb(8 12 24 / 0.45);
 
-  --brand: #4f46e5;
-  --brand-2: #7c3aed;
-  --brand-soft: #eef0ff;
+  --brand: #1e6fff;
+  --brand-2: #7a4dff;
+  --brand-soft: #e8efff;
 
-  --steps: #0fa36b;
-  --steps-strong: #0b8a5a;
-  --steps-soft: #e6f7ef;
+  --steps: #10b47a;
+  --steps-strong: #078a5c;
+  --steps-soft: #e2f6ed;
   --sleep: #7c5cfa;
-  --sleep-strong: #6340e8;
-  --sleep-soft: #f1edff;
+  --sleep-strong: #5c3ce4;
+  --sleep-soft: #efeaff;
   --star: #f5a524;
-  --star-soft: #fff5e1;
-  --hobby: #f2700f;
-  --hobby-soft: #fff0e4;
+  --star-strong: #a65f00;
+  --star-soft: #fff3da;
+  --hobby: #f97316;
+  --hobby-strong: #b84d06;
+  --hobby-soft: #ffeedf;
   --danger: #e5484d;
   --danger-soft: #fdecec;
 
+  /* Hero surfaces (Profile, Group, Auth): deep blue → violet. */
+  --hero: radial-gradient(130% 120% at 0% 0%, #3d8bff 0%, #1e5dff 38%, #4b2fd6 78%, #2a1a8f 100%);
+  --night: linear-gradient(140deg, #1b1554 0%, #3a26a8 55%, #6d4dff 100%);
+
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 6px 20px -6px rgb(15 23 42 / 0.08);
+  --shadow-float: 0 14px 34px -10px rgb(30 111 255 / 0.55);
+  --card-ring: rgb(15 23 42 / 0.05);
+  --card-highlight: transparent;
+  --nav-bg: rgb(255 255 255 / 0.78);
+  --aurora:
+    radial-gradient(60% 40% at 15% -5%, rgb(30 111 255 / 0.1), transparent 70%),
+    radial-gradient(50% 35% at 100% 0%, rgb(122 77 255 / 0.08), transparent 70%);
+
   color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --bg: #050913;
+  --surface: #0c1324;
+  --surface-2: #141d32;
+  --surface-3: #1c2740;
+  --ink: #eef2fb;
+  --ink-2: #c4ccdd;
+  --muted: #8d97ad;
+  --faint: #5c677f;
+  --line: #1c2740;
+  --scrim: rgb(0 0 0 / 0.6);
+
+  --brand: #3f86ff;
+  --brand-2: #8c6dff;
+  --brand-soft: rgb(63 134 255 / 0.15);
+
+  --steps: #22d68f;
+  --steps-strong: #4ae6a8;
+  --steps-soft: rgb(34 214 143 / 0.13);
+  --sleep: #957bff;
+  --sleep-strong: #b6a5ff;
+  --sleep-soft: rgb(149 123 255 / 0.15);
+  --star: #ffb733;
+  --star-strong: #ffc95c;
+  --star-soft: rgb(255 183 51 / 0.14);
+  --hobby: #ff8a3d;
+  --hobby-strong: #ffa86e;
+  --hobby-soft: rgb(255 138 61 / 0.14);
+  --danger: #ff5d63;
+  --danger-soft: rgb(255 93 99 / 0.14);
+
+  --hero: radial-gradient(130% 120% at 0% 0%, #2a6cff 0%, #1745c9 40%, #35209e 78%, #160d52 100%);
+  --night: linear-gradient(140deg, #120d3a 0%, #2b1d86 55%, #5b3ff0 100%);
+
+  --shadow-card: 0 12px 32px -14px rgb(0 0 0 / 0.7);
+  --shadow-float: 0 14px 36px -8px rgb(63 134 255 / 0.6);
+  --card-ring: rgb(255 255 255 / 0.06);
+  --card-highlight: rgb(255 255 255 / 0.05);
+  --nav-bg: rgb(12 19 36 / 0.72);
+  --aurora:
+    radial-gradient(70% 45% at 10% -8%, rgb(63 134 255 / 0.22), transparent 70%),
+    radial-gradient(55% 40% at 105% 2%, rgb(140 109 255 / 0.18), transparent 70%),
+    radial-gradient(60% 30% at 50% 110%, rgb(34 214 143 / 0.06), transparent 70%);
+
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -40,11 +105,13 @@
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
   --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
   --color-muted: var(--muted);
   --color-faint: var(--faint);
   --color-line: var(--line);
+  --color-scrim: var(--scrim);
   --color-brand: var(--brand);
   --color-brand-2: var(--brand-2);
   --color-brand-soft: var(--brand-soft);
@@ -55,18 +122,23 @@
   --color-sleep-strong: var(--sleep-strong);
   --color-sleep-soft: var(--sleep-soft);
   --color-star: var(--star);
+  --color-star-strong: var(--star-strong);
   --color-star-soft: var(--star-soft);
   --color-hobby: var(--hobby);
+  --color-hobby-strong: var(--hobby-strong);
   --color-hobby-soft: var(--hobby-soft);
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
 
-  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 4px 16px -4px rgb(15 23 42 / 0.06);
-  --shadow-float: 0 12px 32px -8px rgb(79 70 229 / 0.45);
+  --shadow-card: var(--shadow-card);
+  --shadow-float: var(--shadow-float);
 
-  --animate-sheet-in: sheet-in 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
-  --animate-fade-in: fade-in 200ms ease-out;
-  --animate-pop: pop 320ms cubic-bezier(0.2, 0.8, 0.2, 1.2);
+  --animate-sheet-in: sheet-in 320ms cubic-bezier(0.2, 0.9, 0.25, 1);
+  --animate-fade-in: fade-in 220ms ease-out;
+  --animate-pop: pop 380ms cubic-bezier(0.2, 0.8, 0.2, 1.2);
+  --animate-rise: rise 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-float: float 6s ease-in-out infinite;
 
   @keyframes sheet-in {
     from { transform: translateY(100%); }
@@ -77,8 +149,20 @@
     to { opacity: 1; }
   }
   @keyframes pop {
-    from { opacity: 0; transform: scale(0.92) translateY(6px); }
+    from { opacity: 0; transform: scale(0.9) translateY(6px); }
     to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to { background-position: 200% 0; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
   }
 }
 
@@ -86,11 +170,22 @@
   html {
     -webkit-tap-highlight-color: transparent;
     -webkit-text-size-adjust: 100%;
+    background: var(--bg);
   }
   body {
     @apply bg-bg font-sans text-ink antialiased;
-    font-feature-settings: 'cv11', 'ss01';
+    font-feature-settings: 'cv11', 'ss01', 'ss03';
     overscroll-behavior-y: none;
+    transition: background-color 300ms ease, color 300ms ease;
+  }
+  /* Soft colored glow behind every screen; fixed so it stays put while scrolling. */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: var(--aurora);
   }
   :focus-visible {
     outline: 2px solid var(--brand);
@@ -101,6 +196,9 @@
   textarea,
   button {
     font: inherit;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--brand) 30%, transparent);
   }
 }
 
@@ -123,11 +221,37 @@
   }
 }
 
+/* Card surface: hairline ring plus a faint top highlight in dark mode. */
+@utility surface-card {
+  background: var(--surface);
+  box-shadow:
+    inset 0 1px 0 var(--card-highlight),
+    0 0 0 1px var(--card-ring),
+    var(--shadow-card);
+}
+
+/* Big display numbers. */
+@utility display {
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+/* Text with the brand gradient. */
+@utility text-gradient {
+  background: linear-gradient(120deg, var(--brand), var(--brand-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
     transition-duration: 1ms !important;
   }
 }

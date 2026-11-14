@@ -1,18 +1,18 @@
-import { Bell, BedDouble, ChevronRight, Dumbbell, Flame, Footprints, MoonStar, Plus, Sunrise, Trash2 } from 'lucide-react'
+import { Bell, BedDouble, ChevronRight, Dumbbell, Flame, Footprints, MoonStar, Plus, Star, Sunrise, Trash2, Trophy } from 'lucide-react'
 import { Link } from 'react-router'
 import { useGroupData, useMyData, useToday } from '../app/hooks'
 import { useInbox } from '../app/inbox'
 import { useSession } from '../app/session'
 import { useSheets } from '../app/AppShell'
 import { Ring } from '../components/charts'
-import { Avatar, Card, Chip, IconButton, PageHeader, SectionTitle, Skeleton, StarCount, Stars, cx } from '../components/ui'
+import { AnimatedNumber, Avatar, Card, Chip, IconButton, IconTile, PageHeader, RankBadge, SectionTitle, Skeleton, StarCount, Stars, cx, rise } from '../components/ui'
 import { workoutIcon } from '../components/workoutIcons'
 import { GOALS, MAX_SLEEP_STARS, MAX_STEP_STARS, STEP_TIERS, WORKOUT_BONUS } from '../config/scoring'
 import { repo } from '../data/repo'
 import { buildLeaderboard, periodRange } from '../domain/leaderboard'
 import { currentStreak, qualifiesSleep, qualifiesSteps, type DayScore } from '../domain/scoring'
 import { addDays, clock, formatWeekdayLetter, minutesOfDayIn, startOfWeek, timeAgo, type ISODate } from '../lib/dates'
-import { compact, duration, formatNumber, greeting, plural } from '../lib/format'
+import { compact, duration, formatNumber, greeting } from '../lib/format'
 
 const SOURCE = { health_connect: 'Health Connect', ios_shortcut: 'iPhone Shortcut', manual: 'Manual' } as const
 
@@ -44,9 +44,9 @@ export default function TodayScreen() {
         }
       />
 
-      <div className="px-4">
+      <div className="px-4 [&>*]:animate-rise">
         {!day ? (
-          <Skeleton className="h-[330px]" />
+          <Skeleton className="h-[380px]" />
         ) : (
           <StepsHero day={day} source={stat?.steps_source ? `${SOURCE[stat.steps_source]} · ${timeAgo(stat.updated_at)}` : null} onAdd={() => openEntry(today)} />
         )}
@@ -84,24 +84,59 @@ export default function TodayScreen() {
 function StepsHero({ day, source, onAdd }: { day: DayScore; source: string | null; onAdd: () => void }) {
   const steps = day.steps ?? 0
   const next = STEP_TIERS.find((t) => steps < t.min)
+  const top = STEP_TIERS.at(-1)!.min
   return (
     <Card className="relative overflow-hidden p-5">
-      <div className="pointer-events-none absolute -top-24 -right-24 size-64 rounded-full bg-steps/10 blur-2xl" />
+      <div className="pointer-events-none absolute -top-28 -right-20 size-72 rounded-full bg-steps/20 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-32 -left-24 size-64 rounded-full bg-brand/10 blur-3xl" />
       <div className="relative flex items-center justify-between">
-        <Chip tone="steps">
-          <Footprints className="size-3.5" /> Steps
+        <Chip tone="steps" className="py-1 text-xs">
+          <Footprints className="size-3.5" /> Steps today
         </Chip>
-        <Stars value={day.stepsStars} max={MAX_STEP_STARS} size={16} />
+        <Stars value={day.stepsStars} max={MAX_STEP_STARS} size={17} />
       </div>
-      <div className="relative mt-2 flex justify-center">
-        <Ring value={steps / GOALS.dailySteps} size={196} stroke={18} from="#34d399" to="var(--steps-strong)">
+      <div className="relative mt-3 flex justify-center">
+        <Ring value={steps / GOALS.dailySteps} size={212} stroke={20} from="color-mix(in oklab, var(--steps) 55%, #b9f5dc)" to="var(--steps)">
           <div>
-            <div className="text-[44px] leading-none font-extrabold tracking-tight tabular">{formatNumber(steps)}</div>
-            <div className="mt-1.5 text-[13px] font-medium text-muted">of {formatNumber(GOALS.dailySteps)} steps</div>
+            <div className="display text-[48px]">
+              <AnimatedNumber value={steps} format={formatNumber} />
+            </div>
+            <div className="mt-2 text-[13px] font-medium text-muted">of {formatNumber(GOALS.dailySteps)} goal</div>
+            <div className="mx-auto mt-2 w-fit rounded-full bg-steps-soft px-2.5 py-0.5 text-xs font-bold text-steps-strong tabular">
+              {Math.round((steps / GOALS.dailySteps) * 100)}%
+            </div>
           </div>
         </Ring>
       </div>
-      <div className="relative mt-4 flex items-center justify-between gap-3">
+
+      {/* Star tiers along one track. */}
+      <div className="relative mt-5 px-3">
+        <div className="relative h-2 rounded-full bg-surface-2">
+          <div
+            className="absolute inset-y-0 left-0 rounded-full bg-[linear-gradient(90deg,color-mix(in_oklab,var(--steps)_45%,transparent),var(--steps))] transition-[width] duration-1000"
+            style={{ width: `${Math.min(1, steps / top) * 100}%` }}
+          />
+          {STEP_TIERS.map((t) => {
+            const hit = steps >= t.min
+            return (
+              <span key={t.min} className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2" style={{ left: `${(t.min / top) * 100}%` }}>
+                <span className={cx('grid size-6 place-items-center rounded-full ring-[3px] ring-surface transition', hit ? 'bg-star text-white' : 'bg-surface-3 text-faint')}>
+                  <Star className={cx('size-3', hit && 'fill-white')} strokeWidth={2.5} />
+                </span>
+              </span>
+            )
+          })}
+        </div>
+        <div className="relative mt-3 h-4">
+          {STEP_TIERS.map((t) => (
+            <span key={t.min} className="absolute -translate-x-1/2 text-[10.5px] font-semibold text-faint tabular" style={{ left: `${(t.min / top) * 100}%` }}>
+              {compact(t.min)}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="relative mt-4 flex items-center justify-between gap-3 border-t border-line pt-4">
         <p className="text-[13px] text-muted">
           {day.steps == null ? (
             'No steps yet today.'
@@ -114,57 +149,76 @@ function StepsHero({ day, source, onAdd }: { day: DayScore; source: string | nul
           )}
           {source && <span className="block text-xs text-faint">{source}</span>}
         </p>
-        <button type="button" onClick={onAdd} className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-steps-soft px-3.5 text-[13px] font-semibold text-steps-strong transition active:scale-95">
-          <Plus className="size-4" /> Update
+        <button
+          type="button"
+          onClick={onAdd}
+          className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-steps px-4 text-[13px] font-bold text-white shadow-[0_10px_24px_-10px_var(--steps)] transition active:scale-95"
+        >
+          <Plus className="size-4" strokeWidth={2.6} /> Update
         </button>
       </div>
     </Card>
   )
 }
 
-function StreakCard({ icon: Icon, tone, value, unit, label }: { icon: typeof Flame; tone: 'steps' | 'sleep'; value: number; unit: string; label: string }) {
+function StreakCard({ icon, tone, value, unit, label }: { icon: typeof Flame; tone: 'steps' | 'sleep'; value: number; unit: string; label: string }) {
   return (
-    <Card className="p-4">
-      <span className={cx('grid size-9 place-items-center rounded-xl', tone === 'steps' ? 'bg-hobby-soft text-hobby' : 'bg-sleep-soft text-sleep')}>
-        <Icon className="size-5" />
-      </span>
-      <p className="mt-3 text-[22px] leading-none font-bold tabular">{plural(value, unit)}</p>
+    <Card className="relative overflow-hidden p-4">
+      <div className={cx('pointer-events-none absolute -top-10 -right-10 size-28 rounded-full blur-2xl', tone === 'steps' ? 'bg-hobby/20' : 'bg-sleep/20')} />
+      <IconTile icon={icon} tone={tone === 'steps' ? 'hobby' : 'sleep'} size={38} />
+      <p className="display mt-3 text-[26px]">
+        <AnimatedNumber value={value} />
+        <span className="ml-1 text-sm font-semibold tracking-normal text-muted">{value === 1 ? unit : `${unit}s`}</span>
+      </p>
       <p className="mt-1 text-xs font-medium text-muted">{label}</p>
     </Card>
   )
 }
+
+/** A few twinkling dots for the night card: [x%, y%, radius]. */
+const NIGHT_DOTS = [
+  [8, 18, 1.4],
+  [22, 64, 1],
+  [38, 12, 1.2],
+  [55, 30, 0.9],
+  [64, 70, 1.1],
+  [86, 58, 1],
+]
 
 function SleepCard({ day, onAdd }: { day: DayScore; onAdd: () => void }) {
   const s = day.sleep
   if (!s)
     return (
       <Card className="flex items-center gap-4 p-5">
-        <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-sleep-soft text-sleep">
-          <BedDouble className="size-6" />
-        </span>
+        <IconTile icon={BedDouble} tone="sleep" size={48} />
         <div className="min-w-0 flex-1">
           <p className="font-bold">No sleep data</p>
           <p className="text-[13px] text-muted">No data means 0★ for the night. Add it in seconds.</p>
         </div>
-        <button type="button" onClick={onAdd} className="h-9 shrink-0 rounded-full bg-sleep px-4 text-[13px] font-semibold text-white">
+        <button type="button" onClick={onAdd} className="h-10 shrink-0 rounded-full bg-sleep px-4 text-[13px] font-bold text-white shadow-[0_10px_24px_-10px_var(--sleep)]">
           Add
         </button>
       </Card>
     )
   return (
     <Card className="overflow-hidden">
-      <div className="bg-[linear-gradient(135deg,#2e1f7a,#5b3fd6_60%,#7c5cfa)] p-5 text-white">
-        <div className="flex items-center justify-between">
-          <span className="text-[13px] font-semibold text-white/70">Time asleep</span>
-          <Stars value={s.stars} max={MAX_SLEEP_STARS} size={16} />
-        </div>
-        <p className="mt-1 text-[34px] leading-none font-extrabold tracking-tight">{duration(s.minutes)}</p>
-        <div className="mt-5 flex items-center gap-3 text-sm">
-          <span className="flex items-center gap-1.5 rounded-full bg-white/12 px-3 py-1.5 font-semibold">
+      <div className="relative overflow-hidden bg-[image:var(--night)] p-5 text-white">
+        <svg className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden>
+          {NIGHT_DOTS.map(([x, y, r], i) => (
+            <circle key={i} cx={`${x}%`} cy={`${y}%`} r={r} fill="white" className="animate-pulse" style={{ animationDelay: `${i * 300}ms` }} opacity={0.6} />
+          ))}
+        </svg>
+        {/* Crescent moon. */}
+        <div className="pointer-events-none absolute top-4 right-5 size-12 rotate-[-20deg] rounded-full shadow-[inset_-10px_6px_0_0_#fff1c2] drop-shadow-[0_0_14px_rgb(255_220_140/0.55)]" />
+        <span className="relative text-[13px] font-semibold text-white/70">Time asleep</span>
+        <p className="display relative mt-2 text-[40px]">{duration(s.minutes)}</p>
+        <Stars value={s.stars} max={MAX_SLEEP_STARS} size={16} className="relative mt-3" />
+        <div className="relative mt-5 flex items-center gap-3 text-sm">
+          <span className="flex items-center gap-1.5 rounded-full bg-white/12 px-3 py-1.5 font-semibold ring-1 ring-white/15 backdrop-blur">
             <MoonStar className="size-4" /> {clock(s.bedtime)}
           </span>
-          <span className="h-px flex-1 bg-white/25" />
-          <span className="flex items-center gap-1.5 rounded-full bg-white/12 px-3 py-1.5 font-semibold">
+          <span className="h-px flex-1 bg-[linear-gradient(90deg,rgb(255_255_255/0.45),rgb(255_255_255/0.1),rgb(255_255_255/0.45))]" />
+          <span className="flex items-center gap-1.5 rounded-full bg-white/12 px-3 py-1.5 font-semibold ring-1 ring-white/15 backdrop-blur">
             <Sunrise className="size-4" /> {s.wake != null ? clock(s.wake) : '—'}
           </span>
         </div>
@@ -185,26 +239,32 @@ function StarsCard({ day }: { day: DayScore }) {
   ]
   const max = parts.reduce((s, p) => s + p.max, 0)
   return (
-    <Card className="p-5">
-      <div className="flex items-end justify-between">
-        <p className="text-[40px] leading-none font-extrabold tracking-tight tabular">
-          {day.total}
-          <span className="text-xl font-bold text-faint"> / {max}</span>
+    <Card className="relative overflow-hidden p-5">
+      <div className="pointer-events-none absolute -top-16 -right-12 size-40 rounded-full bg-star/15 blur-3xl" />
+      <div className="relative flex items-end justify-between">
+        <p className="display text-[46px]">
+          <AnimatedNumber value={day.total} />
+          <span className="text-xl font-bold tracking-normal text-faint"> / {max}</span>
         </p>
-        <span className="grid size-12 place-items-center rounded-2xl bg-star-soft text-2xl">⭐</span>
+        <span className="grid size-12 place-items-center rounded-[16px] bg-[linear-gradient(135deg,color-mix(in_oklab,var(--star)_70%,white),var(--star))] text-white shadow-[0_10px_24px_-10px_var(--star)]">
+          <Star className="size-6 fill-white" />
+        </span>
       </div>
-      <div className="mt-4 flex h-3 gap-1 overflow-hidden rounded-full bg-surface-2">
+      <div className="relative mt-4 flex h-3 gap-1 overflow-hidden rounded-full bg-surface-2">
         {parts.map((p) => (
           <div key={p.label} className={cx('h-full rounded-full transition-[width] duration-700', p.color)} style={{ width: `${(p.value / max) * 100}%` }} />
         ))}
       </div>
-      <div className="mt-3 grid grid-cols-3 gap-2">
+      <div className="relative mt-4 grid grid-cols-3 gap-2">
         {parts.map((p) => (
-          <div key={p.label} className="flex items-center gap-1.5 text-[13px]">
-            <span className={cx('size-2.5 rounded-full', p.color)} />
-            <span className="text-muted">{p.label}</span>
-            <span className="ml-auto font-semibold tabular">
-              {p.value}/{p.max}
+          <div key={p.label} className="rounded-[18px] bg-surface-2/70 px-3 py-2.5">
+            <span className="flex items-center gap-1.5 text-xs font-medium text-muted">
+              <span className={cx('size-2 rounded-full', p.color)} />
+              {p.label}
+            </span>
+            <span className="mt-1 block text-lg leading-none font-bold tabular">
+              {p.value}
+              <span className="text-[13px] font-semibold text-faint">/{p.max}</span>
             </span>
           </div>
         ))}
@@ -221,16 +281,21 @@ function WeekStrip({ history, today }: { history: DayScore[]; today: ISODate }) 
   return (
     <>
       <SectionTitle action={<StarCount value={weekTotal} className="text-sm text-muted" />}>This week</SectionTitle>
-      <Card className="grid grid-cols-7 gap-1 p-3">
+      <Card className="grid grid-cols-7 gap-1 p-2.5">
         {days.map((d) => {
           const s = byDate.get(d)
           const future = d > today
           const pct = Math.min(1, (s?.steps ?? 0) / GOALS.dailySteps)
           return (
-            <div key={d} className={cx('flex flex-col items-center gap-1.5 rounded-2xl py-2', d === today && 'bg-brand-soft')}>
+            <div key={d} className={cx('flex flex-col items-center gap-1.5 rounded-full py-2.5', d === today && 'bg-brand-soft ring-1 ring-brand/25')}>
               <span className={cx('text-[11px] font-semibold', d === today ? 'text-brand' : 'text-faint')}>{formatWeekdayLetter(d)}</span>
-              <div className="relative h-14 w-2.5 overflow-hidden rounded-full bg-surface-2">
-                {!future && <div className="absolute inset-x-0 bottom-0 rounded-full bg-steps transition-[height] duration-700" style={{ height: `${pct * 100}%` }} />}
+              <div className="relative h-16 w-3 overflow-hidden rounded-full bg-surface-2">
+                {!future && (
+                  <div
+                    className={cx('absolute inset-x-0 bottom-0 rounded-full transition-[height] duration-700', pct >= 1 ? 'bg-[linear-gradient(180deg,var(--star),var(--steps))]' : 'bg-steps')}
+                    style={{ height: `${pct * 100}%` }}
+                  />
+                )}
               </div>
               <span className={cx('text-[11px] font-bold tabular', future ? 'text-line' : 'text-ink-2')}>{future ? '·' : `${s?.total ?? 0}★`}</span>
             </div>
@@ -247,8 +312,8 @@ function WorkoutsToday({ workouts }: { workouts: { id: string; type: string; dur
     <>
       <SectionTitle
         action={
-          <button type="button" onClick={openWorkout} className="inline-flex items-center gap-1 text-sm font-semibold text-hobby">
-            <Plus className="size-4" /> Log
+          <button type="button" onClick={openWorkout} className="inline-flex h-8 items-center gap-1 rounded-full bg-hobby-soft px-3 text-[13px] font-bold text-hobby-strong transition active:scale-95">
+            <Plus className="size-4" strokeWidth={2.6} /> Log
           </button>
         }
       >
@@ -256,9 +321,7 @@ function WorkoutsToday({ workouts }: { workouts: { id: string; type: string; dur
       </SectionTitle>
       {workouts.length === 0 ? (
         <Card onClick={openWorkout} className="flex items-center gap-4 p-4">
-          <span className="grid size-11 place-items-center rounded-2xl bg-hobby-soft text-hobby">
-            <Dumbbell className="size-5" />
-          </span>
+          <IconTile icon={Dumbbell} tone="hobby" size={44} />
           <div className="flex-1">
             <p className="text-[15px] font-semibold">Nothing logged today</p>
             <p className="text-[13px] text-muted">One session = +{WORKOUT_BONUS.stars}★ for the day</p>
@@ -266,14 +329,12 @@ function WorkoutsToday({ workouts }: { workouts: { id: string; type: string; dur
           <ChevronRight className="size-5 text-faint" />
         </Card>
       ) : (
-        <Card className="divide-y divide-line">
+        <Card className="divide-y divide-line overflow-hidden">
           {workouts.map((w) => {
             const Icon = workoutIcon(w.type)
             return (
               <div key={w.id} className="flex items-center gap-3 p-4">
-                <span className="grid size-10 place-items-center rounded-xl bg-hobby-soft text-hobby">
-                  <Icon className="size-5" />
-                </span>
+                <IconTile icon={Icon} tone="hobby" />
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold">{w.type}</p>
                   <p className="truncate text-[13px] text-muted">{w.note ?? duration(w.duration_min)}</p>
@@ -303,19 +364,22 @@ function MiniRanking({ today }: { today: ISODate }) {
     <>
       <SectionTitle
         action={
-          <Link to="/ranking" className="inline-flex items-center text-sm font-semibold text-brand">
+          <Link to="/ranking" className="inline-flex h-8 items-center gap-0.5 rounded-full bg-brand-soft pr-2 pl-3 text-[13px] font-bold text-brand">
             See all <ChevronRight className="size-4" />
           </Link>
         }
       >
-        {group?.name} · steps today
+        <span className="inline-flex items-center gap-2">
+          <Trophy className="size-[18px] text-star" /> {group?.name}
+        </span>
       </SectionTitle>
-      <Card className="divide-y divide-line">
+      <Card className="divide-y divide-line overflow-hidden">
+        <p className="px-4 pt-3 pb-2 text-[11px] font-bold tracking-[0.08em] text-faint uppercase">Steps today</p>
         {!data
           ? Array.from({ length: 3 }, (_, i) => <Skeleton key={i} className="m-3 h-10" />)
-          : shown.map((r) => (
-              <div key={r.profile.id} className={cx('flex items-center gap-3 px-4 py-3', r.profile.id === user.id && 'bg-brand-soft/60')}>
-                <span className="w-5 text-center text-sm font-bold text-muted tabular">{r.rank ?? '–'}</span>
+          : shown.map((r, i) => (
+              <div key={r.profile.id} style={rise(i)} className={cx('flex animate-rise items-center gap-3 px-4 py-3', r.profile.id === user.id && 'bg-brand-soft/60')}>
+                <RankBadge rank={r.rank} />
                 <Avatar name={r.profile.username} color={r.profile.avatar_color} size={34} />
                 <span className="flex-1 truncate font-semibold">
                   {r.profile.username}

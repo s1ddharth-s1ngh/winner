@@ -8,7 +8,7 @@ import { addDays, timeIn, zonedTimeToInstant, type ISODate } from '../../lib/dat
 import { duration, formatNumber } from '../../lib/format'
 import { useSession } from '../../app/session'
 import { useToday } from '../../app/hooks'
-import { Button, Chip, Sheet, Stars, cx } from '../../components/ui'
+import { Button, Chip, IconTile, Sheet, Stars, cx } from '../../components/ui'
 import { useToast } from '../../components/toast'
 import { DatePicker } from './DatePicker'
 
@@ -107,7 +107,7 @@ export default function EntrySheet({ open, onClose, initialDate }: { open: boole
         <DatePicker value={date} onChange={setDate} today={today} />
 
         {synced && (
-          <p className="mt-4 flex gap-2 rounded-2xl bg-brand-soft px-3.5 py-3 text-[13px] text-brand">
+          <p className="mt-4 flex animate-rise gap-2 rounded-[20px] bg-brand-soft px-3.5 py-3 text-[13px] text-brand">
             <Info className="mt-0.5 size-4 shrink-0" />
             <span>
               Synced from {SOURCE_LABEL[synced]}. Values you change here are saved as manual entries.
@@ -115,12 +115,11 @@ export default function EntrySheet({ open, onClose, initialDate }: { open: boole
           </p>
         )}
 
-        <section className="mt-5 rounded-3xl bg-surface p-4 ring-1 ring-line/60">
+        <section className="surface-card relative mt-5 animate-rise overflow-hidden rounded-[26px] p-4">
+          <span className="pointer-events-none absolute -top-16 -right-16 size-40 rounded-full bg-steps opacity-15 blur-3xl" />
           <div className="flex items-center justify-between">
             <h3 className="flex items-center gap-2 text-[15px] font-bold">
-              <span className="grid size-8 place-items-center rounded-xl bg-steps-soft text-steps-strong">
-                <Footprints className="size-[18px]" />
-              </span>
+              <IconTile icon={Footprints} tone="steps" size={32} />
               Steps
             </h3>
             <Stars value={stepStars(stepsNum)} max={MAX_STEP_STARS} />
@@ -132,22 +131,21 @@ export default function EntrySheet({ open, onClose, initialDate }: { open: boole
             placeholder="0"
             value={steps}
             onChange={(e) => setSteps(e.target.value.replace(/\D/g, '').slice(0, 6))}
-            className="mt-3 w-full bg-transparent text-[40px] leading-none font-bold tracking-tight tabular outline-none placeholder:text-line"
+            className="display relative mt-3 w-full bg-transparent text-[44px] text-ink outline-none placeholder:text-surface-3"
           />
           <p className="mt-1 text-xs text-muted">Total steps for the whole day.</p>
         </section>
 
-        <section className="mt-3 rounded-3xl bg-surface p-4 ring-1 ring-line/60">
+        <section className="surface-card relative mt-3 animate-rise overflow-hidden rounded-[26px] p-4" style={{ animationDelay: '60ms' }}>
+          <span className="pointer-events-none absolute -top-16 -right-16 size-40 rounded-full bg-sleep opacity-15 blur-3xl" />
           <div className="flex items-center justify-between">
             <h3 className="flex items-center gap-2 text-[15px] font-bold">
-              <span className="grid size-8 place-items-center rounded-xl bg-sleep-soft text-sleep-strong">
-                <BedDouble className="size-[18px]" />
-              </span>
+              <IconTile icon={BedDouble} tone="sleep" size={32} />
               Last night's sleep
             </h3>
             <Stars value={sleepScore?.stars ?? 0} max={MAX_SLEEP_STARS} />
           </div>
-          <div className="mt-4 grid grid-cols-2 gap-3">
+          <div className="relative mt-4 grid grid-cols-2 gap-3">
             <TimeInput label="Fell asleep" icon={BedDouble} value={bed} onChange={setBed} stars={bed ? bedtimeStars(toMin(bed)) : null} />
             <TimeInput label="Woke up" icon={Sunrise} value={wake} onChange={setWake} />
           </div>
@@ -170,7 +168,7 @@ export default function EntrySheet({ open, onClose, initialDate }: { open: boole
           </div>
         </section>
 
-        {error && <p className="mt-4 rounded-2xl bg-danger-soft px-4 py-3 text-sm font-medium text-danger" role="alert">{error}</p>}
+        {error && <p className="mt-4 rounded-[20px] bg-danger-soft px-4 py-3 text-sm font-medium text-danger" role="alert">{error}</p>}
         <Button type="submit" loading={busy} className="mt-5 w-full">
           Save
         </Button>
@@ -193,14 +191,14 @@ function TimeInput({
   stars?: number | null
 }) {
   return (
-    <label className={cx('block rounded-2xl bg-surface-2 p-3 transition focus-within:bg-surface focus-within:ring-1 focus-within:ring-sleep')}>
+    <label className={cx('block rounded-[20px] bg-surface-2 p-3 ring-1 ring-line/60 transition focus-within:bg-surface focus-within:ring-2 focus-within:ring-sleep')}>
       <span className="flex items-center justify-between text-xs font-semibold text-muted">
         <span className="flex items-center gap-1.5">
           <Icon className="size-3.5" /> {label}
         </span>
-        {stars != null && <span className="text-star">{'★'.repeat(stars) || '0★'}</span>}
+        {stars != null && <span className="text-star-strong">{'★'.repeat(stars) || '0★'}</span>}
       </span>
-      <input type="time" value={value} onChange={(e) => onChange(e.target.value)} className="mt-1 w-full bg-transparent text-xl font-bold tabular outline-none" />
+      <input type="time" value={value} onChange={(e) => onChange(e.target.value)} className="display mt-1.5 w-full bg-transparent text-2xl text-ink outline-none" />
     </label>
   )
 }

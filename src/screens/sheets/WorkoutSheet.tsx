@@ -60,8 +60,10 @@ export default function WorkoutSheet({ open, onClose }: { open: boolean; onClose
                 onClick={() => setType(t)}
                 aria-pressed={type === t}
                 className={cx(
-                  'flex flex-col items-center gap-1.5 rounded-2xl py-3 text-[12px] font-semibold transition active:scale-95',
-                  type === t ? 'bg-hobby text-white shadow-[0_8px_20px_-8px_var(--hobby)]' : 'bg-surface text-ink-2 ring-1 ring-line',
+                  'flex flex-col items-center gap-1.5 rounded-[20px] py-3 text-[12px] font-semibold transition active:scale-95',
+                  type === t
+                    ? 'bg-[linear-gradient(135deg,var(--star),var(--hobby))] text-white shadow-[0_10px_24px_-10px_var(--hobby),inset_0_1px_0_rgb(255_255_255/0.3)]'
+                    : 'surface-card text-ink-2',
                 )}
               >
                 <Icon className="size-5" />
@@ -72,7 +74,7 @@ export default function WorkoutSheet({ open, onClose }: { open: boolean; onClose
         </div>
 
         <h3 className="mt-6 mb-2.5 flex items-center justify-between text-[13px] font-semibold text-ink-2">
-          Duration <span className="text-base font-bold text-ink tabular">{duration(minutes || 0)}</span>
+          Duration <span className="display text-xl text-hobby-strong">{duration(minutes || 0)}</span>
         </h3>
         <div className="flex flex-wrap gap-2">
           {PRESETS.map((m) => (
@@ -80,12 +82,12 @@ export default function WorkoutSheet({ open, onClose }: { open: boolean; onClose
               key={m}
               type="button"
               onClick={() => setMinutes(m)}
-              className={cx('h-10 min-w-14 rounded-full px-3 text-sm font-semibold transition', minutes === m ? 'bg-ink text-white' : 'bg-surface text-ink-2 ring-1 ring-line')}
+              className={cx('h-10 min-w-14 rounded-full px-3 text-sm font-semibold transition', minutes === m ? 'bg-ink text-bg' : 'surface-card text-ink-2')}
             >
               {duration(m)}
             </button>
           ))}
-          <label className="flex h-10 items-center gap-1 rounded-full bg-surface px-3 text-sm ring-1 ring-line focus-within:ring-hobby">
+          <label className="flex h-10 items-center gap-1 rounded-full bg-surface px-3 text-sm ring-1 ring-line transition focus-within:ring-2 focus-within:ring-hobby">
             <input
               inputMode="numeric"
               aria-label="Custom minutes"
@@ -106,15 +108,15 @@ export default function WorkoutSheet({ open, onClose }: { open: boolean; onClose
             rows={2}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Legs day, 5k in the park…"
-            className="w-full resize-none rounded-2xl bg-surface-2 px-3.5 py-3 text-[15px] outline-none focus:bg-surface focus:ring-1 focus:ring-hobby"
+            className="w-full resize-none rounded-[20px] bg-surface-2 px-4 py-3 text-[15px] text-ink ring-1 ring-line/60 outline-none placeholder:text-faint focus:bg-surface focus:ring-2 focus:ring-hobby"
           />
         </label>
 
         <p className="mt-3 flex items-center gap-2 text-[13px] text-muted">
           <Chip tone="hobby">+{WORKOUT_BONUS.stars}★</Chip> on days with at least one session.
         </p>
-        {error && <p className="mt-4 rounded-2xl bg-danger-soft px-4 py-3 text-sm font-medium text-danger">{error}</p>}
-        <Button type="submit" loading={busy} className="mt-5 w-full !bg-hobby !shadow-[0_12px_32px_-8px_var(--hobby)]">
+        {error && <p className="mt-4 rounded-[20px] bg-danger-soft px-4 py-3 text-sm font-medium text-danger">{error}</p>}
+        <Button type="submit" loading={busy} className="mt-5 w-full !bg-[linear-gradient(120deg,var(--star),var(--hobby))] !shadow-[0_14px_34px_-10px_var(--hobby)]">
           Log {type.toLowerCase()}
         </Button>
       </form>

@@ -4,7 +4,7 @@ import { AVATAR_COLORS } from '../config/app'
 import { repo } from '../data/repo'
 import { DEMO_GROUP_CODE } from '../data/demoSeed'
 import { useSession } from '../app/session'
-import { Avatar, Button, Card, Field, cx } from '../components/ui'
+import { Avatar, Button, Card, Field, IconTile, cx, rise } from '../components/ui'
 import { TimezoneSelect } from '../components/TimezoneSelect'
 
 /** Shown after sign-up until the user belongs to a group. */
@@ -49,19 +49,20 @@ export default function Onboarding() {
     <div className="safe-top safe-bottom mx-auto flex min-h-dvh max-w-md flex-col px-5">
       <div className="mt-4 flex gap-1.5">
         {['profile', 'group'].map((s, i) => (
-          <span key={s} className={cx('h-1.5 flex-1 rounded-full transition', i <= (step === 'profile' ? 0 : 1) ? 'bg-brand' : 'bg-line')} />
+          <span key={s} className={cx('h-1.5 flex-1 rounded-full transition', i <= (step === 'profile' ? 0 : 1) ? 'bg-[linear-gradient(90deg,var(--brand),var(--brand-2))]' : 'bg-surface-3')} />
         ))}
       </div>
 
       {step === 'profile' ? (
         <form onSubmit={saveProfile} className="flex flex-1 animate-fade-in flex-col">
           <p className="mt-8 text-[13px] font-semibold text-brand">Step 1 of 2</p>
-          <h1 className="mt-1 text-[28px] font-bold tracking-tight">Make it yours</h1>
+          <h1 className="mt-1 text-[32px] font-extrabold tracking-[-0.03em]">Make it yours</h1>
           <p className="mt-1 text-[15px] text-muted">This is how your friends will see you in the rankings.</p>
 
           <div className="mt-8 flex justify-center">
             <div className="relative">
-              <Avatar name={username || '?'} color={color} size={96} />
+              <span className="absolute inset-0 scale-125 rounded-full blur-2xl" style={{ background: color, opacity: 0.35 }} />
+              <Avatar name={username || '?'} color={color} size={104} />
               <span className="absolute -right-1 -bottom-1 grid size-8 place-items-center rounded-full bg-star text-white ring-4 ring-bg">
                 <Sparkles className="size-4" />
               </span>
@@ -96,15 +97,13 @@ export default function Onboarding() {
       ) : (
         <div className="flex flex-1 animate-fade-in flex-col">
           <p className="mt-8 text-[13px] font-semibold text-brand">Step 2 of 2</p>
-          <h1 className="mt-1 text-[28px] font-bold tracking-tight">Join your crew</h1>
+          <h1 className="mt-1 text-[32px] font-extrabold tracking-[-0.03em]">Join your crew</h1>
           <p className="mt-1 text-[15px] text-muted">Rankings are per group. Create one and share the code, or join a friend's.</p>
 
-          <Card className="mt-7 p-5">
+          <Card className="mt-7 animate-rise p-5">
             <form onSubmit={run('create', () => repo.createGroup(groupName))}>
               <div className="mb-4 flex items-center gap-3">
-                <span className="grid size-11 place-items-center rounded-2xl bg-brand-soft text-brand">
-                  <Plus className="size-5" />
-                </span>
+<IconTile icon={Plus} tone="brand" size={44} />
                 <div>
                   <h2 className="font-bold">Create a group</h2>
                   <p className="text-[13px] text-muted">You'll get an invite code to share.</p>
@@ -117,12 +116,10 @@ export default function Onboarding() {
             </form>
           </Card>
 
-          <Card className="mt-4 p-5">
+          <Card style={rise(1)} className="mt-4 animate-rise p-5">
             <form onSubmit={run('join', () => repo.joinGroup(code))}>
               <div className="mb-4 flex items-center gap-3">
-                <span className="grid size-11 place-items-center rounded-2xl bg-steps-soft text-steps-strong">
-                  <Users className="size-5" />
-                </span>
+<IconTile icon={Users} tone="steps" size={44} />
                 <div>
                   <h2 className="font-bold">Join with a code</h2>
                   <p className="text-[13px] text-muted">Ask a friend for their 6-character code.</p>

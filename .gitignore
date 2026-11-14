@@ -24,3 +24,4 @@ supabase/.temp
 supabase/.branches
 .playwright-mcp
 android/.kotlin
+shots/
