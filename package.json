@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "test": "vitest run",
     "icons": "pwa-assets-generator",
-    "test:db": "node supabase/tests/rls.test.mjs"
+    "test:db": "node supabase/tests/check-rls.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.2",
