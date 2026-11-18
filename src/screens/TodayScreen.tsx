@@ -48,7 +48,7 @@ export default function TodayScreen() {
         {!day ? (
           <Skeleton className="h-[380px]" />
         ) : (
-          <Slides labels={['Steps', 'Stairs']}>
+          <Slides labels={['Steps', 'Stairs', 'Sleep']}>
             <GoalHero
               kind="steps"
               value={day.steps}
@@ -63,6 +63,7 @@ export default function TodayScreen() {
               source={stat?.flights_source ? `${SOURCE[stat.flights_source]} · ${timeAgo(stat.updated_at)}` : null}
               onAdd={() => openEntry(today)}
             />
+            <SleepHero day={day} onAdd={() => openEntry(today)} />
           </Slides>
         )}
 
@@ -79,9 +80,6 @@ export default function TodayScreen() {
             </>
           )}
         </div>
-
-        <SectionTitle>Last night</SectionTitle>
-        {day ? <SleepCard day={day} onAdd={() => openEntry(today)} /> : <Skeleton className="h-36" />}
 
         <SectionTitle>Today's stars</SectionTitle>
         {day && <StarsCard day={day} />}
@@ -159,7 +157,7 @@ function GoalHero({ kind, value, stars, source, onAdd }: { kind: keyof typeof HE
   const next = tiers.find((t) => v < t.min)
   const top = tiers.at(-1)!.min
   return (
-    <Card className="relative overflow-hidden p-5">
+    <Card className="relative h-full overflow-hidden p-5">
       <div className="relative flex items-center justify-between">
         <Chip tone={h.tone} className="py-1 text-xs">
           <Icon className="size-3.5" /> {h.label}
@@ -220,13 +218,7 @@ function GoalHero({ kind, value, stars, source, onAdd }: { kind: keyof typeof HE
           )}
           {source && <span className="block text-xs text-faint">{source}</span>}
         </p>
-        <button
-          type="button"
-          onClick={onAdd}
-          className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-brand px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[color-mix(in_oklab,var(--brand)_88%,black)]"
-        >
-          <Plus className="size-4" strokeWidth={2.6} /> Update
-        </button>
+        <UpdateButton onClick={onAdd} />
       </div>
     </Card>
   )
@@ -244,40 +236,62 @@ function StreakCard({ value, unit, label }: { value: number; unit: string; label
   )
 }
 
-function SleepCard({ day, onAdd }: { day: DayScore; onAdd: () => void }) {
-  const s = day.sleep
-  if (!s)
-    return (
-      <Card className="flex items-center gap-4 p-5">
-        <div className="min-w-0 flex-1">
-          <p className="font-bold">No sleep data</p>
-          <p className="text-[13px] text-muted">No data means 0★ for the night. Add it in seconds.</p>
-        </div>
-        <button type="button" onClick={onAdd} className="h-10 shrink-0 rounded-full bg-brand px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[color-mix(in_oklab,var(--brand)_88%,black)]">
-          Add
-        </button>
-      </Card>
-    )
+function UpdateButton({ onClick }: { onClick: () => void }) {
   return (
-    <Card className="overflow-hidden">
-      <div className="relative overflow-hidden bg-night p-5 text-white">
-        <MoonStar className="pointer-events-none absolute top-5 right-5 size-7 text-white/40" aria-hidden />
-        <span className="relative text-[13px] font-semibold text-white/70">Time asleep</span>
-        <p className="display relative mt-2 text-[40px]">{duration(s.minutes)}</p>
-        <Stars value={s.stars} max={MAX_SLEEP_STARS} size={16} className="relative mt-3" />
-        <div className="relative mt-5 flex items-center gap-3 text-sm">
-          <span className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 font-semibold ring-1 ring-white/15">
-            <MoonStar className="size-4" /> {clock(s.bedtime)}
-          </span>
-          <span className="h-px flex-1 bg-white/25" />
-          <span className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 font-semibold ring-1 ring-white/15">
-            <Sunrise className="size-4" /> {s.wake != null ? clock(s.wake) : '—'}
-          </span>
-        </div>
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-brand px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[color-mix(in_oklab,var(--brand)_88%,black)]"
+    >
+      <Plus className="size-4" strokeWidth={2.6} /> Update
+    </button>
+  )
+}
+
+function SleepHero({ day, onAdd }: { day: DayScore; onAdd: () => void }) {
+  const s = day.sleep
+  const minutes = s?.minutes ?? 0
+  return (
+    <Card className="relative flex h-full flex-col overflow-hidden p-5">
+      <div className="flex items-center justify-between">
+        <Chip tone="sleep" className="py-1 text-xs">
+          <MoonStar className="size-3.5" /> Last night
+        </Chip>
+        <Stars value={s?.stars ?? 0} max={MAX_SLEEP_STARS} size={17} />
       </div>
-      <div className="flex flex-wrap gap-2 p-4">
-        <Chip tone={s.bedtimeStars >= 3 ? 'sleep' : s.bedtimeStars > 0 ? 'star' : 'danger'}>Bedtime +{s.bedtimeStars}★</Chip>
-        <Chip tone={s.durationBonus ? 'sleep' : 'muted'}>{s.durationBonus ? '7–9h bonus +1★' : 'No 7–9h bonus'}</Chip>
+      <div className="mt-3 flex justify-center">
+        <Ring value={minutes / GOALS.sleepMinutes} size={212} stroke={20} from="var(--sleep)" to="var(--sleep)">
+          <div>
+            <div className="display text-[40px]">{s ? duration(minutes) : '0h'}</div>
+            <div className="mt-2 text-[13px] font-medium text-muted">of {duration(GOALS.sleepMinutes)} goal</div>
+            <div className="mx-auto mt-2 w-fit rounded-full bg-sleep-soft px-2.5 py-0.5 text-xs font-bold text-sleep-strong tabular">
+              {Math.round((minutes / GOALS.sleepMinutes) * 100)}%
+            </div>
+          </div>
+        </Ring>
+      </div>
+
+      <div className="mt-5 mb-4 flex items-center gap-3 px-1 text-sm">
+        <span className="flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1.5 font-semibold tabular">
+          <MoonStar className="size-4 text-sleep" /> {s ? clock(s.bedtime) : '—'}
+        </span>
+        <span className="h-px flex-1 bg-line" />
+        <span className="flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1.5 font-semibold tabular">
+          <Sunrise className="size-4 text-star" /> {s?.wake != null ? clock(s.wake) : '—'}
+        </span>
+      </div>
+
+      <div className="mt-auto flex items-center justify-between gap-3 border-t border-line pt-4">
+        <p className="text-[13px] text-muted">
+          {s ? (
+            <>
+              Bedtime <b className="text-ink">+{s.bedtimeStars}★</b> · {s.durationBonus ? <b className="text-sleep-strong">7–9h bonus +1★</b> : 'no 7–9h bonus'}
+            </>
+          ) : (
+            'No sleep data. That means 0★ for the night.'
+          )}
+        </p>
+        <UpdateButton onClick={onAdd} />
       </div>
     </Card>
   )
