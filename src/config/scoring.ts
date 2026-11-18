@@ -37,7 +37,7 @@ export const SLEEP_DURATION_BONUS = { minMinutes: 7 * 60, maxMinutes: 9 * 60, st
 export const WORKOUT_BONUS = { stars: 1 } as const
 
 /** A day / night extends a streak when it reaches these stars. */
-export const STREAKS = { stepsMinStars: 1, sleepMinStars: 2 } as const
+export const STREAKS = { stepsMinStars: 1, flightsMinStars: 1, sleepMinStars: 2 } as const
 
 /** Personal targets shown in the UI (rings, chart goal lines). */
 export const GOALS = { dailySteps: 25_000, dailyFlights: 120, bedtime: '23:00', sleepMinutes: 8 * 60 } as const

@@ -126,7 +126,8 @@ export function buildHistory(
 }
 
 export const qualifiesSteps = (d: DayScore) => d.stepsStars >= STREAKS.stepsMinStars
-export const qualifiesSleep = (d: DayScore) => d.sleepStars >= STREAKS.sleepMinStars
+export const qualifiesFlights = (d: DayScore) => d.flightsStars >= STREAKS.flightsMinStars
+export const qualifiesSleep =(d: DayScore) => d.sleepStars >= STREAKS.sleepMinStars
 
 /**
  * Current streak ending today. Today still in progress does not break it:

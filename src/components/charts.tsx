@@ -85,12 +85,13 @@ export function BarChart({
   goal?: number
   goalLabel?: string
   height?: number
-  color?: 'steps' | 'hobby' | 'brand'
+  color?: 'steps' | 'stairs' | 'hobby' | 'brand'
   format?: (v: number) => string
 }) {
   const max = Math.max(goal ?? 0, ...bars.map((b) => b.value ?? 0)) * 1.12 || 1
   const toneCls = {
     steps: { good: 'bg-steps', ok: 'bg-steps/45', low: 'bg-steps/20' },
+    stairs: { good: 'bg-stairs', ok: 'bg-stairs/45', low: 'bg-stairs/20' },
     hobby: { good: 'bg-hobby', ok: 'bg-hobby/60', low: 'bg-hobby/25' },
     brand: { good: 'bg-brand', ok: 'bg-brand/50', low: 'bg-brand/20' },
   }[color]

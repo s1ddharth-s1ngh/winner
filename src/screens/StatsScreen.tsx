@@ -5,7 +5,7 @@ import { BarChart, MonthGrid, SleepChart } from '../components/charts'
 import { AnimatedNumber, Card, EmptyState, PageHeader, SectionTitle, Segmented, Skeleton, cx, rise, type Tone } from '../components/ui'
 import { GOALS } from '../config/scoring'
 import { repo } from '../data/repo'
-import { bedtimeRank, fromBedtimeRank, longestStreak, currentStreak, qualifiesSleep, qualifiesSteps, type DayScore } from '../domain/scoring'
+import { bedtimeRank, fromBedtimeRank, longestStreak, currentStreak, qualifiesFlights, qualifiesSleep, qualifiesSteps, type DayScore } from '../domain/scoring'
 import type { Workout } from '../domain/types'
 import {
   addDays,
@@ -22,7 +22,7 @@ import {
 } from '../lib/dates'
 import { compact, duration, formatNumber, plural } from '../lib/format'
 
-type Tab = 'steps' | 'sleep' | 'hobbies'
+type Tab = 'steps' | 'stairs' | 'sleep' | 'hobbies'
 type Span = 'week' | 'month'
 
 const HISTORY_DAYS = 400
@@ -51,6 +51,7 @@ export default function StatsScreen() {
           onChange={setTab}
           options={[
             { value: 'steps', label: 'Steps' },
+            { value: 'stairs', label: 'Stairs' },
             { value: 'sleep', label: 'Sleep' },
             { value: 'hobbies', label: 'Hobbies' },
           ]}
@@ -82,8 +83,8 @@ export default function StatsScreen() {
             <Skeleton className="h-24" />
             <Skeleton className="h-64" />
           </div>
-        ) : tab === 'steps' ? (
-          <StepsStats days={days} all={data.history} span={span} today={today} />
+        ) : tab === 'steps' || tab === 'stairs' ? (
+          <CountStats metric={METRICS[tab]} days={days} all={data.history} span={span} today={today} />
         ) : tab === 'sleep' ? (
           <SleepStats days={days} all={data.history} span={span} today={today} />
         ) : (
@@ -153,26 +154,33 @@ function Records({ items }: { items: { label: string; value: ReactNode; sub?: Re
   )
 }
 
-function StepsStats({ days, all, span, today }: { days: DayScore[]; all: DayScore[]; span: Span; today: ISODate }) {
+/** Steps and stairs share one view: a daily count scored in stars. */
+const METRICS = {
+  steps: { value: (d: DayScore) => d.steps, stars: (d: DayScore) => d.stepsStars, goal: GOALS.dailySteps, tone: 'steps', unit: 'steps', qualifies: qualifiesSteps },
+  stairs: { value: (d: DayScore) => d.flights, stars: (d: DayScore) => d.flightsStars, goal: GOALS.dailyFlights, tone: 'stairs', unit: 'flights', qualifies: qualifiesFlights },
+} as const
+type Metric = (typeof METRICS)[keyof typeof METRICS]
+
+function CountStats({ metric: m, days, all, span, today }: { metric: Metric; days: DayScore[]; all: DayScore[]; span: Span; today: ISODate }) {
   const done = past(days, today)
-  const withData = done.filter((d) => d.steps != null)
-  const total = withData.reduce((s, d) => s + d.steps!, 0)
-  const best = withData.reduce<DayScore | null>((b, d) => (!b || d.steps! > b.steps! ? d : b), null)
-  const goalDays = withData.filter((d) => d.steps! >= GOALS.dailySteps).length
+  const withData = done.filter((d) => m.value(d) != null)
+  const total = withData.reduce((s, d) => s + m.value(d)!, 0)
+  const best = withData.reduce<DayScore | null>((b, d) => (!b || m.value(d)! > m.value(b)! ? d : b), null)
+  const goalDays = withData.filter((d) => m.value(d)! >= m.goal).length
 
   const months = new Map<string, number>()
-  for (const d of all) months.set(d.date.slice(0, 7), (months.get(d.date.slice(0, 7)) ?? 0) + (d.steps ?? 0))
+  for (const d of all) months.set(d.date.slice(0, 7), (months.get(d.date.slice(0, 7)) ?? 0) + (m.value(d) ?? 0))
   const bestMonth = [...months].sort((a, b) => b[1] - a[1])[0]
-  const bestEver = all.reduce<DayScore | null>((b, d) => (d.steps != null && (!b || d.steps > b.steps!) ? d : b), null)
+  const bestEver = all.reduce<DayScore | null>((b, d) => (m.value(d) != null && (!b || m.value(d)! > m.value(b)!) ? d : b), null)
   const byDate = new Map(all.map((d) => [d.date, d]))
 
   return (
     <>
       <Kpis
         items={[
-          { label: 'Total steps', value: <AnimatedNumber value={total} format={compact} />, tone: 'steps' },
+          { label: `Total ${m.unit}`, value: <AnimatedNumber value={total} format={compact} />, tone: m.tone },
           { label: 'Daily average', value: withData.length ? <AnimatedNumber value={total / withData.length} format={compact} /> : '—', tone: 'brand' },
-          { label: `Days at ${compact(GOALS.dailySteps)}+`, value: `${goalDays}/${done.length}`, tone: 'star' },
+          { label: `Days at ${compact(m.goal)}+`, value: `${goalDays}/${done.length}`, tone: 'star' },
         ]}
       />
       <Card className="mt-3 animate-rise p-4 pt-6" style={rise(3)}>
@@ -180,17 +188,18 @@ function StepsStats({ days, all, span, today }: { days: DayScore[]; all: DayScor
           bars={days.map((d) => ({
             key: d.date,
             label: dayLabel(d.date, span),
-            value: d.date > today ? null : d.steps,
-            tone: d.stepsStars >= 3 ? 'good' : d.stepsStars >= 1 ? 'ok' : 'low',
+            value: d.date > today ? null : m.value(d),
+            tone: m.stars(d) >= 3 ? 'good' : m.stars(d) >= 1 ? 'ok' : 'low',
             active: d.date === best?.date,
           }))}
-          goal={GOALS.dailySteps}
-          goalLabel={compact(GOALS.dailySteps)}
+          color={m.tone}
+          goal={m.goal}
+          goalLabel={compact(m.goal)}
           format={compact}
         />
         {best && (
           <p className="mt-3 text-center text-xs text-muted">
-            Best day: <b className="text-ink">{formatNumber(best.steps!)}</b> on {formatDay(best.date)}
+            Best day: <b className="text-ink">{formatNumber(m.value(best)!)}</b> on {formatDay(best.date)}
           </p>
         )}
       </Card>
@@ -204,13 +213,14 @@ function StepsStats({ days, all, span, today }: { days: DayScore[]; all: DayScor
               today={today}
               render={(d) => {
                 const s = byDate.get(d)
-                if (!s || s.steps == null || d > today) return <span className="text-[13px] font-semibold text-line">·</span>
-                const color = s.stepsStars >= 3 ? 'text-steps-strong' : s.stepsStars >= 1 ? 'text-brand' : 'text-faint'
-                return <span className={cx('text-[13px] font-bold tabular', color)}>{compact(s.steps)}</span>
+                const v = s && m.value(s)
+                if (!s || v == null || d > today) return <span className="text-[13px] font-semibold text-line">·</span>
+                const color = m.stars(s) >= 3 ? KPI_TEXT[m.tone] : m.stars(s) >= 1 ? 'text-brand' : 'text-faint'
+                return <span className={cx('text-[13px] font-bold tabular', color)}>{compact(v)}</span>
               }}
             />
             <div className="mt-2 flex justify-center gap-4 text-[11px] text-muted">
-              <span className="flex items-center gap-1"><i className="size-2 rounded-full bg-steps" /> 3★+</span>
+              <span className="flex items-center gap-1"><i className={cx('size-2 rounded-full', m.tone === 'steps' ? 'bg-steps' : 'bg-stairs')} /> 3★+</span>
               <span className="flex items-center gap-1"><i className="size-2 rounded-full bg-brand" /> 1–2★</span>
               <span className="flex items-center gap-1"><i className="size-2 rounded-full bg-faint" /> 0★</span>
             </div>
@@ -220,9 +230,9 @@ function StepsStats({ days, all, span, today }: { days: DayScore[]; all: DayScor
 
       <Records
         items={[
-          { label: 'Current streak', value: plural(currentStreak(all, qualifiesSteps), 'day') },
-          { label: 'Longest streak', value: plural(longestStreak(all, qualifiesSteps), 'day') },
-          { label: 'Best day ever', value: bestEver ? formatNumber(bestEver.steps!) : '—', sub: bestEver && formatDay(bestEver.date) },
+          { label: 'Current streak', value: plural(currentStreak(all, m.qualifies), 'day') },
+          { label: 'Longest streak', value: plural(longestStreak(all, m.qualifies), 'day') },
+          { label: 'Best day ever', value: bestEver ? formatNumber(m.value(bestEver)!) : '—', sub: bestEver && formatDay(bestEver.date) },
           { label: 'Best month', value: bestMonth && bestMonth[1] ? compact(bestMonth[1]) : '—', sub: bestMonth && bestMonth[1] ? formatMonth(`${bestMonth[0]}-01`) : undefined },
         ]}
       />
