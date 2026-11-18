@@ -6,13 +6,14 @@ export type ThemePref = 'system' | 'light' | 'dark'
 
 // Same key and logic as the inline script in index.html, which applies the theme before first paint.
 const KEY = 'wfl:theme'
-const BG = { light: '#f3f5fa', dark: '#050913' } as const
+const BG = { light: '#f7f7f8', dark: '#000000' } as const
 const media = window.matchMedia('(prefers-color-scheme: dark)')
 const listeners = new Set<() => void>()
 
+// Light is the default; 'system' is only used when picked explicitly.
 function read(): ThemePref {
   const v = localStorage.getItem(KEY)
-  return v === 'light' || v === 'dark' ? v : 'system'
+  return v === 'system' || v === 'dark' ? v : 'light'
 }
 
 export const resolveTheme = (pref: ThemePref) => (pref === 'system' ? (media.matches ? 'dark' : 'light') : pref)
@@ -32,7 +33,7 @@ export function initTheme() {
 }
 
 export function setThemePref(pref: ThemePref) {
-  if (pref === 'system') localStorage.removeItem(KEY)
+  if (pref === 'light') localStorage.removeItem(KEY)
   else localStorage.setItem(KEY, pref)
   apply()
 }

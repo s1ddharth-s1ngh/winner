@@ -284,8 +284,8 @@ export function PageHeader({ title, subtitle, actions }: { title: ReactNode; sub
   return (
     <header className="safe-top flex items-end justify-between gap-3 px-5 pb-5">
       <div className="min-w-0 pt-3">
-        {subtitle && <div className="text-[13px] font-medium text-muted">{subtitle}</div>}
-        <h1 className="truncate text-[30px] leading-tight font-extrabold tracking-[-0.03em]">{title}</h1>
+        {subtitle && <div className="mb-1 text-[12px] font-semibold tracking-[0.04em] text-faint uppercase">{subtitle}</div>}
+        <h1 className="truncate text-[28px] leading-tight font-bold tracking-[-0.02em]">{title}</h1>
       </div>
       {actions && <div className="flex shrink-0 items-center gap-2 pb-1">{actions}</div>}
     </header>

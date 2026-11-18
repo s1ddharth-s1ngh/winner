@@ -25,13 +25,13 @@ export default function TodayScreen() {
   const stat = my.data?.stats.find((s) => s.date === today)
   const { openEntry } = useSheets()
 
-  const shortDate = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: profile.timezone }).format(new Date())
+  const longDate = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: '2-digit', month: 'short', timeZone: profile.timezone }).format(new Date())
 
   return (
     <div className="animate-fade-in">
       <PageHeader
-        subtitle={`${greeting(Math.floor(minutesOfDayIn(new Date(), profile.timezone) / 60))} · ${shortDate}`}
-        title={profile.username}
+        subtitle={longDate}
+        title={`${greeting(Math.floor(minutesOfDayIn(new Date(), profile.timezone) / 60))} ${profile.username}`}
         actions={
           <>
             <Link to="/inbox">

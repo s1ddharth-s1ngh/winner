@@ -33,29 +33,23 @@ export default function AppShell() {
     <Ctx.Provider value={{ openEntry: (date) => setSheet({ kind: 'entry', date }), openWorkout: () => setSheet({ kind: 'workout' }) }}>
       {/* Scrim behind the status bar on edge-to-edge devices (height is 0 elsewhere). */}
       <div className="fixed inset-x-0 top-0 z-30 h-[env(safe-area-inset-top)] bg-bg/80 backdrop-blur-xl" />
-      <div className="mx-auto min-h-dvh max-w-md pb-36">
+      <div className="mx-auto min-h-dvh max-w-md pb-28">
         <Outlet />
       </div>
 
-      {/* Floating tab bar. */}
-      <nav className="safe-bottom pointer-events-none fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md px-4">
-        <div className="pointer-events-auto mb-2 grid h-[68px] grid-cols-5 items-center rounded-full bg-[var(--nav-bg)] px-1 ring-1 ring-line backdrop-blur-xl">
+      {/* Flat tab bar: hairline on top, outlined icons, the active tab in the accent color. */}
+      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-line bg-[var(--nav-bg)]">
+        <div className="mx-auto grid h-[62px] max-w-md grid-cols-5 items-center">
           {TABS.map((t) =>
             t ? (
               <NavLink
                 key={t.to}
                 to={t.to}
                 end={t.to === '/'}
-                className={({ isActive }) => cx('group flex flex-col items-center gap-0.5 text-[10.5px] font-semibold transition', isActive ? 'text-brand' : 'text-faint hover:text-muted')}
+                className={({ isActive }) => cx('flex flex-col items-center gap-1 text-[11px] font-medium transition-colors', isActive ? 'text-brand' : 'text-faint hover:text-muted')}
               >
-                {({ isActive }) => (
-                  <>
-                    <span className={cx('grid h-8 w-12 place-items-center rounded-full transition-all duration-300', isActive && 'bg-brand-soft')}>
-                      <t.icon className={cx('size-[21px] transition-transform', isActive && 'scale-110')} strokeWidth={isActive ? 2.4 : 2} />
-                    </span>
-                    {t.label}
-                  </>
-                )}
+                <t.icon className="size-[22px]" strokeWidth={1.6} />
+                {t.label}
               </NavLink>
             ) : (
               <div key="add" className="flex justify-center">
@@ -63,9 +57,9 @@ export default function AppShell() {
                   type="button"
                   aria-label="Add data"
                   onClick={() => setSheet({ kind: 'chooser' })}
-                  className="relative -mt-9 grid size-[60px] place-items-center rounded-full bg-brand text-white ring-[5px] ring-bg transition-colors hover:bg-[color-mix(in_oklab,var(--brand)_88%,black)]"
+                  className="grid size-11 place-items-center rounded-full bg-brand text-white transition-colors hover:bg-[color-mix(in_oklab,var(--brand)_88%,black)]"
                 >
-                  <Plus className="size-7" strokeWidth={2.4} />
+                  <Plus className="size-6" strokeWidth={2.2} />
                 </button>
               </div>
             ),

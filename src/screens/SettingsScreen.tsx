@@ -180,8 +180,8 @@ function ProfileSection({ onSaved }: { onSaved: () => Promise<void> }) {
 }
 
 const THEMES: { value: ThemePref; label: ReactNode }[] = [
-  { value: 'system', label: <><MonitorSmartphone className="size-4" /> System</> },
   { value: 'light', label: <><Sun className="size-4" /> Light</> },
+  { value: 'system', label: <><MonitorSmartphone className="size-4" /> System</> },
   { value: 'dark', label: <><Moon className="size-4" /> Dark</> },
 ]
 

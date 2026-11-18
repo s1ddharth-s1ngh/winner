@@ -2,27 +2,30 @@
 @import '@fontsource-variable/manrope';
 
 /*
- * Design tokens. Every color is a CSS variable so the light and dark themes are two :root blocks.
+ * Light is the default theme: white surfaces, near-black ink, one pink accent.
+ * Dark is pure black with neutral greys (no blue tint) and the same accent.
+ * Every color is a CSS variable so the light and dark themes are two :root blocks.
  * The theme is chosen by `data-theme` on <html> (see src/app/theme.ts and the inline script in index.html).
  */
 :root {
-  --bg: #f3f5fa;
+  --bg: #f7f7f8;
   --surface: #ffffff;
-  --surface-2: #eef1f7;
-  --surface-3: #e4e8f1;
-  --ink: #0b1220;
-  --ink-2: #2b384f;
-  --muted: #5f6b84;
-  --faint: #98a2b6;
-  --line: #e3e7ef;
-  --scrim: rgb(8 12 24 / 0.45);
+  --surface-2: #f2f2f4;
+  --surface-3: #e9e9ec;
+  --ink: #0f0f0f;
+  --ink-2: #2e2e33;
+  --muted: #7c7c84;
+  --faint: #a9a9b0;
+  --line: #ececef;
+  --scrim: rgb(0 0 0 / 0.4);
 
-  --brand: #1e6fff;
-  --brand-soft: #e8efff;
+  --brand: #e01d61;
+  --brand-soft: #fde8ef;
 
-  --steps: #10b47a;
-  --steps-strong: #078a5c;
-  --steps-soft: #e2f6ed;
+  /* Steps share the accent so the app stays to a few colors. */
+  --steps: #e01d61;
+  --steps-strong: #b5104b;
+  --steps-soft: #fde8ef;
   --sleep: #7c5cfa;
   --sleep-strong: #5c3ce4;
   --sleep-soft: #efeaff;
@@ -32,36 +35,36 @@
   --hobby: #f97316;
   --hobby-strong: #b84d06;
   --hobby-soft: #ffeedf;
-  --danger: #e5484d;
-  --danger-soft: #fdecec;
+  --danger: #d92d20;
+  --danger-soft: #fdecea;
 
   /* Solid header surfaces (Profile, Group, Auth, Ranking) and the sleep card. */
-  --hero: #1a56db;
-  --night: #2a2170;
+  --hero: #e01d61;
+  --night: #16161a;
 
-  --nav-bg: rgb(255 255 255 / 0.92);
+  --nav-bg: #ffffff;
 
   color-scheme: light;
 }
 
 :root[data-theme='dark'] {
-  --bg: #050913;
-  --surface: #0c1324;
-  --surface-2: #141d32;
-  --surface-3: #1c2740;
-  --ink: #eef2fb;
-  --ink-2: #c4ccdd;
-  --muted: #8d97ad;
-  --faint: #5c677f;
-  --line: #1c2740;
-  --scrim: rgb(0 0 0 / 0.6);
+  --bg: #000000;
+  --surface: #0e0e0e;
+  --surface-2: #181818;
+  --surface-3: #222222;
+  --ink: #f5f5f5;
+  --ink-2: #d0d0d0;
+  --muted: #8e8e93;
+  --faint: #5c5c61;
+  --line: #1e1e1e;
+  --scrim: rgb(0 0 0 / 0.7);
 
-  --brand: #3f86ff;
-  --brand-soft: rgb(63 134 255 / 0.15);
+  --brand: #f0306e;
+  --brand-soft: rgb(240 48 110 / 0.15);
 
-  --steps: #22d68f;
-  --steps-strong: #4ae6a8;
-  --steps-soft: rgb(34 214 143 / 0.13);
+  --steps: #f0306e;
+  --steps-strong: #ff6b98;
+  --steps-soft: rgb(240 48 110 / 0.15);
   --sleep: #957bff;
   --sleep-strong: #b6a5ff;
   --sleep-soft: rgb(149 123 255 / 0.15);
@@ -71,13 +74,13 @@
   --hobby: #ff8a3d;
   --hobby-strong: #ffa86e;
   --hobby-soft: rgb(255 138 61 / 0.14);
-  --danger: #ff5d63;
-  --danger-soft: rgb(255 93 99 / 0.14);
+  --danger: #ff5d55;
+  --danger-soft: rgb(255 93 85 / 0.14);
 
-  --hero: #1745c9;
-  --night: #1d1650;
+  --hero: #e01d61;
+  --night: #121212;
 
-  --nav-bg: rgb(12 19 36 / 0.92);
+  --nav-bg: #000000;
 
   color-scheme: dark;
 }
