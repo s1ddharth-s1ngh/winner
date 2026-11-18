@@ -27,7 +27,7 @@ Ispirata a StepUp, ma fatta da noi e su misura per il nostro gruppo.
 - Gli allenamenti contano poco: sono un hobby, non il centro dell'app (ma ne registriamo la durata).
 - L'app crescerà a poco a poco: aggiungeremo e toglieremo funzioni, quindi il codice deve essere facile da modificare.
 - Anche se è per amici, deve sembrare un prodotto professionale che un domani si potrebbe vendere.
-- Font: **Inter**.
+- Font: **Manrope**.
 
 ---
 

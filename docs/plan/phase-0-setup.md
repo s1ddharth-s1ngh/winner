@@ -3,7 +3,7 @@
 - [x] `git init`, `.gitignore`, `.env.example`
 - [x] Vite + React + TypeScript, ESLint
 - [x] Tailwind v4 (`@tailwindcss/vite`), design tokens as CSS variables (light theme)
-- [x] Inter via `@fontsource-variable/inter` (self-hosted, works offline)
+- [x] Manrope via `@fontsource-variable/manrope` (self-hosted, works offline)
 - [x] PWA: `vite-plugin-pwa`, manifest, generated icons, auto update
 - [x] `@supabase/supabase-js` client, created only when env vars exist
 - [x] Vitest for pure logic

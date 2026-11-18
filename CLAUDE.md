@@ -9,7 +9,7 @@ Private steps + sleep challenge app for a small group of friends. Full brief: `d
 - Local commits only unless the owner asks to push.
 
 ## Stack
-- Vite + React + TypeScript + Tailwind v4, PWA via `vite-plugin-pwa`, font Inter (`@fontsource-variable/inter`).
+- Vite + React + TypeScript + Tailwind v4, PWA via `vite-plugin-pwa`, font Manrope (`@fontsource-variable/manrope`).
 - Data access goes through `src/data/repo.ts` (`Repo` interface). Two implementations:
   - `localRepo` — localStorage demo backend, used when `VITE_SUPABASE_URL` is not set.
   - `supabaseRepo` — used when Supabase env vars are present.
