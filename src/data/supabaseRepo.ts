@@ -1,10 +1,27 @@
 // Supabase backend. Active when VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY are set.
 // Schema + RLS: supabase/migrations. Group create/join go through security-definer RPCs.
-import { createClient, type PostgrestError } from '@supabase/supabase-js'
+import { createClient, type AuthError, type PostgrestError } from '@supabase/supabase-js'
 import { browserTimezone } from '../lib/dates'
 import type { ApiToken, DailyStat, Group, Member, Profile, StatsInput, Workout } from '../domain/types'
 import { randomToken, sha256 } from './shared'
 import type { ProfileInput, Repo, WorkoutInput } from './repo'
+
+// Plain-language messages for auth errors; anything unknown stays generic (details go to the console).
+const AUTH_MESSAGES: Record<string, string> = {
+  invalid_credentials: 'Wrong username or password.',
+  user_already_exists: 'This username is already taken.',
+  email_exists: 'This username is already taken.',
+  weak_password: 'Password too weak. Use at least 6 characters.',
+  over_request_rate_limit: 'Too many attempts. Wait a minute and try again.',
+  over_email_send_rate_limit: 'Sign-up is temporarily unavailable. Try again later.',
+  signup_disabled: 'New accounts are closed right now.',
+  email_provider_disabled: 'Sign-in is not set up on the server yet.',
+  email_not_confirmed: 'Sign-in is not set up on the server yet.',
+}
+const authError = (e: AuthError) => {
+  console.error('auth error', e.code, e.message)
+  return new Error(AUTH_MESSAGES[e.code ?? ''] ?? 'Something went wrong. Try again.')
+}
 
 export function createSupabaseRepo(url: string, key: string): Repo {
   const sb = createClient(url, key)
@@ -34,13 +51,13 @@ export function createSupabaseRepo(url: string, key: string): Repo {
         password,
         options: { data: { timezone: browserTimezone() } },
       })
-      if (error) throw new Error(error.message === 'User already registered' ? 'This username is already taken.' : error.message)
-      if (!data.session) throw new Error('Account created but not active: turn off "Confirm email" in Supabase Auth settings.')
+      if (error) throw authError(error)
+      if (!data.session) throw new Error(AUTH_MESSAGES.email_provider_disabled)
     },
 
     async signIn(email, password) {
       const { error } = await sb.auth.signInWithPassword({ email: email.trim(), password })
-      if (error) throw new Error(error.message === 'Invalid login credentials' ? 'Wrong username or password.' : error.message)
+      if (error) throw authError(error)
     },
 
     async signOut() {
