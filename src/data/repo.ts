@@ -8,7 +8,7 @@ export interface AuthUser {
   email: string
 }
 
-export type ProfileInput = Pick<Profile, 'username' | 'avatar_color' | 'timezone'>
+export type ProfileInput = Partial<Pick<Profile, 'username' | 'avatar_color' | 'avatar_url' | 'cover_color' | 'cover_url' | 'timezone'>>
 export type WorkoutInput = Pick<Workout, 'date' | 'type' | 'duration_min' | 'note'>
 
 /** Everything the UI needs from a backend. Screens never talk to a backend directly. */
@@ -23,6 +23,8 @@ export interface Repo {
 
   getProfile(userId: string): Promise<Profile | null>
   saveProfile(input: ProfileInput): Promise<Profile>
+  /** Stores a JPEG for the signed-in user and returns its URL (save it with saveProfile). */
+  uploadProfileImage(kind: 'avatar' | 'cover', jpeg: Blob): Promise<string>
 
   listGroups(): Promise<Group[]>
   createGroup(name: string): Promise<Group>

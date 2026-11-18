@@ -19,6 +19,13 @@ await db.exec(`
   grant usage on schema auth to authenticated, anon;
   grant execute on function auth.uid() to authenticated, anon;
   create publication supabase_realtime;
+  create schema storage;
+  create table storage.buckets (id text primary key, name text, public boolean, file_size_limit bigint, allowed_mime_types text[]);
+  create table storage.objects (id uuid primary key default gen_random_uuid(), bucket_id text, name text);
+  alter table storage.objects enable row level security;
+  create function storage.foldername(name text) returns text[] language sql immutable as $$ select (string_to_array(name, '/'))[1:array_length(string_to_array(name, '/'), 1) - 1] $$;
+  grant usage on schema storage to authenticated;
+  grant select, insert, update, delete on storage.objects to authenticated;
 `)
 for (const f of readdirSync(dir).sort()) {
   await db.exec(readFileSync(join(dir, f), 'utf8'))
@@ -87,6 +94,15 @@ await new Promise(r => setTimeout(r, 20))
 await as(A, () => q(`update public.daily_stats set steps = 9500 where user_id=$1`, [A]))
 const after = (await q(`select updated_at from public.daily_stats where user_id=$1`, [A])).rows[0].updated_at
 check('updated_at touched', after > before)
+
+await as(A, () => q(`insert into storage.objects (bucket_id, name) values ('profile-images', $1)`, [`${A}/avatar.jpg`]))
+err = null
+try { await as(B, () => q(`insert into storage.objects (bucket_id, name) values ('profile-images', $1)`, [`${A}/cover.jpg`])) } catch (e) { err = e.message }
+check('B cannot upload into A image folder', !!err)
+check('B cannot delete A avatar', (await as(B, () => q(`delete from storage.objects where name like $1`, [`${A}/%`]))).affectedRows === 0)
+err = null
+try { await as(A, () => q(`update public.profiles set cover_color = 'red' where id=$1`, [A])) } catch (e) { err = e.message }
+check('bad cover color rejected', !!err)
 
 console.log(fails ? `${fails} FAILED` : 'ALL PASSED')
 process.exit(fails ? 1 : 0)

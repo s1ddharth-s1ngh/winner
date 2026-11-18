@@ -79,6 +79,8 @@ export function createLocalRepo(): Repo {
         username: normalized.split('@')[0].slice(0, 20),
         avatar_color: AVATAR_COLORS[db.users.length % AVATAR_COLORS.length],
         avatar_url: null,
+        cover_color: null,
+        cover_url: null,
         timezone: browserTimezone(),
         created_at: new Date().toISOString(),
       })
@@ -116,6 +118,16 @@ export function createLocalRepo(): Repo {
       Object.assign(p, input)
       save(db)
       return p
+    },
+
+    // Demo: the image lives inline in localStorage as a data URL.
+    uploadProfileImage(_kind, jpeg) {
+      return new Promise((resolve, reject) => {
+        const r = new FileReader()
+        r.onload = () => resolve(r.result as string)
+        r.onerror = () => reject(r.error)
+        r.readAsDataURL(jpeg)
+      })
     },
 
     async listGroups() {

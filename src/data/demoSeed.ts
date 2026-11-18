@@ -121,6 +121,8 @@ export function demoProfiles(): Profile[] {
     username: p.username,
     avatar_color: p.color,
     avatar_url: null,
+    cover_color: null,
+    cover_url: null,
     timezone: TZ,
     created_at: '2026-01-01T00:00:00Z',
   }))

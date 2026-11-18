@@ -79,6 +79,15 @@ export function createSupabaseRepo(url: string, key: string): Repo {
       return check(await sb.from('profiles').update(input).eq('id', await uid()).select().single()) as Profile
     },
 
+    async uploadProfileImage(kind, jpeg) {
+      const path = `${await uid()}/${kind}.jpg`
+      const bucket = sb.storage.from('profile-images')
+      const { error } = await bucket.upload(path, jpeg, { upsert: true, contentType: 'image/jpeg' })
+      if (error) throw new Error(error.message)
+      // Same path on every upload: the version param busts browser and CDN caches.
+      return `${bucket.getPublicUrl(path).data.publicUrl}?v=${Date.now()}`
+    },
+
     async listGroups() {
       return check(await sb.from('groups').select('*').order('created_at')) as Group[]
     },

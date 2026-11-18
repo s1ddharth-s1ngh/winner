@@ -138,7 +138,7 @@ function ProfileSection({ onSaved }: { onSaved: () => Promise<void> }) {
       <Card className="animate-rise p-4">
         <div className="flex items-center gap-4">
           <Avatar name={username || '?'} color={color} size={56} />
-          <div className="flex flex-wrap gap-2">
+          <div className="flex gap-2">
             {AVATAR_COLORS.map((c) => (
               <button
                 key={c}

@@ -7,6 +7,9 @@ export interface Profile {
   username: string
   avatar_color: string
   avatar_url: string | null
+  /** Null = default hero color. */
+  cover_color: string | null
+  cover_url: string | null
   timezone: string
   created_at: string
 }

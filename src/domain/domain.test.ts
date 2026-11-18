@@ -150,6 +150,8 @@ describe('leaderboard', () => {
     username: id,
     avatar_color: '#000',
     avatar_url: null,
+    cover_color: null,
+    cover_url: null,
     timezone: TZ,
     created_at: '',
   })
