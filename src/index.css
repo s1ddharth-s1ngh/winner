@@ -118,8 +118,11 @@
   --color-hero: var(--hero);
   --color-night: var(--night);
 
-  --animate-sheet-in: sheet-in 320ms cubic-bezier(0.2, 0.9, 0.25, 1);
-  --animate-fade-in: fade-in 220ms ease-out;
+  /* iOS-style sheet curve: fast start, long soft settle. */
+  --animate-sheet-in: sheet-in 460ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  --animate-sheet-out: sheet-in 280ms cubic-bezier(0.4, 0, 0.9, 0.4) reverse both;
+  --animate-fade-in: fade-in 300ms ease-out both;
+  --animate-fade-out: fade-in 280ms ease-in reverse both;
   --animate-pop: pop 380ms cubic-bezier(0.2, 0.8, 0.2, 1.2);
   --animate-rise: rise 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
   --animate-shimmer: shimmer 1.6s linear infinite;

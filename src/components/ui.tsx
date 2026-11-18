@@ -341,8 +341,12 @@ export function AnimatedNumber({ value, format = (n) => String(Math.round(n)), d
   return <>{format(shown)}</>
 }
 
-/** Bottom sheet modal. Closes on backdrop tap and Escape. */
+/** Bottom sheet modal. Closes on backdrop tap and Escape. Slides out before unmounting. */
 export function Sheet({ open, onClose, title, children }: { open: boolean; onClose: () => void; title: string; children: ReactNode }) {
+  const [mounted, setMounted] = useState(open)
+  if (open && !mounted) setMounted(true)
+  const closing = mounted && !open
+
   useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
@@ -355,11 +359,24 @@ export function Sheet({ open, onClose, title, children }: { open: boolean; onClo
     }
   }, [open, onClose])
 
-  if (!open) return null
+  if (!mounted) return null
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-end justify-center" role="dialog" aria-modal aria-label={title}>
-      <div className="absolute inset-0 animate-fade-in bg-scrim backdrop-blur-[3px]" onClick={onClose} />
-      <div className="safe-bottom no-scrollbar relative max-h-[92dvh] w-full max-w-md animate-sheet-in overflow-y-auto rounded-t-[32px] bg-bg ring-1 ring-line">
+    <div
+      className={cx('fixed inset-0 z-50 flex items-end justify-center', closing && 'pointer-events-none')}
+      role="dialog"
+      aria-modal
+      aria-label={title}
+      aria-hidden={closing || undefined}
+    >
+      <div className={cx('absolute inset-0 bg-scrim backdrop-blur-[3px]', closing ? 'animate-fade-out' : 'animate-fade-in')} onClick={onClose} />
+      <div
+        // Children run their own animations; only the panel's own end should unmount.
+        onAnimationEnd={(e) => closing && e.target === e.currentTarget && setMounted(false)}
+        className={cx(
+          'safe-bottom no-scrollbar relative max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-[32px] bg-bg ring-1 ring-line will-change-transform',
+          closing ? 'animate-sheet-out' : 'animate-sheet-in',
+        )}
+      >
         <div className="sticky top-0 z-10 bg-bg/90 px-5 pt-3 pb-3 backdrop-blur-xl">
           <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-surface-3" />
           <div className="flex items-center justify-between">

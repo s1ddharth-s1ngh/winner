@@ -57,7 +57,7 @@ export default function AppShell() {
                   type="button"
                   aria-label="Add data"
                   onClick={() => setSheet({ kind: 'chooser' })}
-                  className="grid size-11 place-items-center rounded-full bg-brand text-white transition-colors hover:bg-[color-mix(in_oklab,var(--brand)_88%,black)]"
+                  className="grid size-11 place-items-center rounded-full bg-brand text-white transition-[background-color,transform] duration-200 ease-out hover:bg-[color-mix(in_oklab,var(--brand)_88%,black)] active:scale-90"
                 >
                   <Plus className="size-6" strokeWidth={2.2} />
                 </button>
