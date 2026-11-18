@@ -547,7 +547,7 @@ function MiniRanking({ today }: { today: ISODate }) {
                   {r.profile.username}
                   {r.profile.id === user.id && <span className="ml-1.5 text-xs font-semibold text-brand">You</span>}
                 </span>
-                <span className="font-bold tabular">{r.rank ? compact(r.steps) : '—'}</span>
+                {r.rank ? <span className="font-bold tabular">{compact(r.steps)}</span> : <span className="text-[13px] font-medium text-faint">No steps yet</span>}
               </div>
             ))}
       </Card>

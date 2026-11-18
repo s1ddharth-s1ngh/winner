@@ -141,7 +141,7 @@ function RankRow({ row: r, board, period, me, index }: { row: Row; board: Board;
           )}
         </div>
       </div>
-      <span className="text-[17px] font-bold">{r.rank == null && board === 'steps' ? <span className="text-faint">—</span> : value(r, board)}</span>
+      <span className="text-[17px] font-bold">{r.rank == null && board === 'steps' ? <span className="text-[13px] font-medium text-faint">No steps yet</span> : value(r, board)}</span>
     </div>
   )
 }

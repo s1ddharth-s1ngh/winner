@@ -205,7 +205,7 @@ export function RankBadge({ rank, size = 24 }: { rank: number | null; size?: num
     </span>
   ) : (
     <span className="shrink-0 text-center text-sm font-bold text-muted tabular" style={{ width: size }}>
-      {rank ?? '–'}
+      {rank}
     </span>
   )
 }
