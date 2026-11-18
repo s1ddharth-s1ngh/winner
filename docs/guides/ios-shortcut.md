@@ -35,6 +35,10 @@ Apri **Comandi** → **+** in alto a destra → rinominalo **"Winner for Life sy
 2. Aggiungi **Calcola statistiche** (*Calculate Statistics*) → **Somma** (*Sum*) dei campioni.
 3. Rinomina il risultato in **Passi**: tieni premuta l'icona → *Rinomina*.
 
+### Piani di scale di oggi
+
+3b. Ripeti i punti 1–3 con tipo **Piani saliti** (*Flights Climbed*) e rinomina il risultato in **Scale**.
+
 ### Sonno dell'ultima notte
 
 4. Aggiungi **Trova campioni di Salute**.
@@ -57,8 +61,9 @@ Apri **Comandi** → **+** in alto a destra → rinominalo **"Winner for Life sy
    - Metodo: **POST**.
    - Intestazioni (*Headers*): chiave `Authorization`, valore `Bearer ` seguito dal token
      (esempio: `Bearer wfl_3f9a…`). Attenzione allo spazio dopo `Bearer`.
-   - Corpo della richiesta (*Request Body*): **JSON**, con tre campi:
+   - Corpo della richiesta (*Request Body*): **JSON**, con quattro campi:
      - `steps` → tipo **Numero** → variabile **Passi**
+     - `flights` → tipo **Numero** → variabile **Scale**
      - `sleep_start` → tipo **Testo** → variabile **Inizio**
      - `sleep_end` → tipo **Testo** → variabile **Fine**
 10. (Solo per la prova) aggiungi **Mostra risultato** (*Show Result*) con il **Contenuti dell'URL**.

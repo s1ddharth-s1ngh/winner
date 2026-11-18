@@ -1,4 +1,5 @@
-import { Bell, ChevronRight, Footprints, MoonStar, Plus, Star, Sunrise, Trash2, Trophy } from 'lucide-react'
+import { Bell, ChevronRight, Footprints, MoonStar, Plus, Star, Sunrise, Trash2, TrendingUp, Trophy } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { useGroupData, useMyData, useToday } from '../app/hooks'
 import { useInbox } from '../app/inbox'
@@ -6,7 +7,7 @@ import { useSession } from '../app/session'
 import { useSheets } from '../app/AppShell'
 import { Ring } from '../components/charts'
 import { AnimatedNumber, Avatar, Card, Chip, IconButton, PageHeader, RankBadge, SectionTitle, Skeleton, StarCount, Stars, cx, rise } from '../components/ui'
-import { GOALS, MAX_SLEEP_STARS, MAX_STEP_STARS, STEP_TIERS, WORKOUT_BONUS } from '../config/scoring'
+import { FLIGHT_TIERS, GOALS, MAX_FLIGHT_STARS, MAX_SLEEP_STARS, MAX_STEP_STARS, STEP_TIERS, WORKOUT_BONUS } from '../config/scoring'
 import { repo } from '../data/repo'
 import { buildLeaderboard, periodRange } from '../domain/leaderboard'
 import { currentStreak, qualifiesSleep, qualifiesSteps, type DayScore } from '../domain/scoring'
@@ -47,7 +48,22 @@ export default function TodayScreen() {
         {!day ? (
           <Skeleton className="h-[380px]" />
         ) : (
-          <StepsHero day={day} source={stat?.steps_source ? `${SOURCE[stat.steps_source]} · ${timeAgo(stat.updated_at)}` : null} onAdd={() => openEntry(today)} />
+          <Slides labels={['Steps', 'Stairs']}>
+            <GoalHero
+              kind="steps"
+              value={day.steps}
+              stars={day.stepsStars}
+              source={stat?.steps_source ? `${SOURCE[stat.steps_source]} · ${timeAgo(stat.updated_at)}` : null}
+              onAdd={() => openEntry(today)}
+            />
+            <GoalHero
+              kind="flights"
+              value={day.flights}
+              stars={day.flightsStars}
+              source={stat?.flights_source ? `${SOURCE[stat.flights_source]} · ${timeAgo(stat.updated_at)}` : null}
+              onAdd={() => openEntry(today)}
+            />
+          </Slides>
         )}
 
         <div className="mt-3 grid grid-cols-2 gap-3">
@@ -80,27 +96,85 @@ export default function TodayScreen() {
   )
 }
 
-function StepsHero({ day, source, onAdd }: { day: DayScore; source: string | null; onAdd: () => void }) {
-  const steps = day.steps ?? 0
-  const next = STEP_TIERS.find((t) => steps < t.min)
-  const top = STEP_TIERS.at(-1)!.min
+/** Horizontally swipeable cards with dots. Each child is one full-width slide. */
+function Slides({ labels, children }: { labels: string[]; children: ReactNode[] }) {
+  const [active, setActive] = useState(0)
+  return (
+    <div>
+      <div
+        className="no-scrollbar -mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4"
+        onScroll={(e) => setActive(Math.round(e.currentTarget.scrollLeft / e.currentTarget.clientWidth))}
+      >
+        {children.map((c, i) => (
+          <div key={labels[i]} className="w-full shrink-0 snap-start" aria-roledescription="slide" aria-label={labels[i]}>
+            {c}
+          </div>
+        ))}
+      </div>
+      <div className="mt-2.5 flex justify-center gap-1.5" aria-hidden>
+        {labels.map((l, i) => (
+          <span key={l} className={cx('h-1.5 rounded-full transition-all', i === active ? 'w-4 bg-ink-2' : 'w-1.5 bg-surface-3')} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+const HERO = {
+  steps: {
+    label: 'Steps today',
+    icon: Footprints,
+    tiers: STEP_TIERS,
+    goal: GOALS.dailySteps,
+    maxStars: MAX_STEP_STARS,
+    tick: compact,
+    empty: 'No steps yet today.',
+    color: 'var(--steps)',
+    tone: 'steps',
+    soft: 'bg-steps-soft text-steps-strong',
+    bar: 'bg-steps',
+    strong: 'text-steps-strong',
+  },
+  flights: {
+    label: 'Flights of stairs',
+    icon: TrendingUp,
+    tiers: FLIGHT_TIERS,
+    goal: GOALS.dailyFlights,
+    maxStars: MAX_FLIGHT_STARS,
+    tick: String,
+    empty: 'No stairs yet today.',
+    color: 'var(--stairs)',
+    tone: 'stairs',
+    soft: 'bg-stairs-soft text-stairs-strong',
+    bar: 'bg-stairs',
+    strong: 'text-stairs-strong',
+  },
+} as const
+
+function GoalHero({ kind, value, stars, source, onAdd }: { kind: keyof typeof HERO; value: number | null; stars: number; source: string | null; onAdd: () => void }) {
+  const h = HERO[kind]
+  const Icon = h.icon
+  const v = value ?? 0
+  const tiers: readonly { min: number }[] = h.tiers
+  const next = tiers.find((t) => v < t.min)
+  const top = tiers.at(-1)!.min
   return (
     <Card className="relative overflow-hidden p-5">
       <div className="relative flex items-center justify-between">
-        <Chip tone="steps" className="py-1 text-xs">
-          <Footprints className="size-3.5" /> Steps today
+        <Chip tone={h.tone} className="py-1 text-xs">
+          <Icon className="size-3.5" /> {h.label}
         </Chip>
-        <Stars value={day.stepsStars} max={MAX_STEP_STARS} size={17} />
+        <Stars value={stars} max={h.maxStars} size={17} />
       </div>
       <div className="relative mt-3 flex justify-center">
-        <Ring value={steps / GOALS.dailySteps} size={212} stroke={20} from="var(--steps)" to="var(--steps)">
+        <Ring value={v / h.goal} size={212} stroke={20} from={h.color} to={h.color}>
           <div>
             <div className="display text-[48px]">
-              <AnimatedNumber value={steps} format={formatNumber} />
+              <AnimatedNumber value={v} format={formatNumber} />
             </div>
-            <div className="mt-2 text-[13px] font-medium text-muted">of {formatNumber(GOALS.dailySteps)} goal</div>
-            <div className="mx-auto mt-2 w-fit rounded-full bg-steps-soft px-2.5 py-0.5 text-xs font-bold text-steps-strong tabular">
-              {Math.round((steps / GOALS.dailySteps) * 100)}%
+            <div className="mt-2 text-[13px] font-medium text-muted">of {formatNumber(h.goal)} goal</div>
+            <div className={cx('mx-auto mt-2 w-fit rounded-full px-2.5 py-0.5 text-xs font-bold tabular', h.soft)}>
+              {Math.round((v / h.goal) * 100)}%
             </div>
           </div>
         </Ring>
@@ -110,11 +184,11 @@ function StepsHero({ day, source, onAdd }: { day: DayScore; source: string | nul
       <div className="relative mt-5 px-3">
         <div className="relative h-2 rounded-full bg-surface-2">
           <div
-            className="absolute inset-y-0 left-0 rounded-full bg-steps transition-[width] duration-1000"
-            style={{ width: `${Math.min(1, steps / top) * 100}%` }}
+            className={cx('absolute inset-y-0 left-0 rounded-full transition-[width] duration-1000', h.bar)}
+            style={{ width: `${Math.min(1, v / top) * 100}%` }}
           />
-          {STEP_TIERS.map((t) => {
-            const hit = steps >= t.min
+          {tiers.map((t) => {
+            const hit = v >= t.min
             return (
               <span key={t.min} className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2" style={{ left: `${(t.min / top) * 100}%` }}>
                 <span className={cx('grid size-6 place-items-center rounded-full ring-[3px] ring-surface transition', hit ? 'bg-star text-white' : 'bg-surface-3 text-faint')}>
@@ -125,9 +199,9 @@ function StepsHero({ day, source, onAdd }: { day: DayScore; source: string | nul
           })}
         </div>
         <div className="relative mt-3 h-4">
-          {STEP_TIERS.map((t) => (
+          {tiers.map((t) => (
             <span key={t.min} className="absolute -translate-x-1/2 text-[10.5px] font-semibold text-faint tabular" style={{ left: `${(t.min / top) * 100}%` }}>
-              {compact(t.min)}
+              {h.tick(t.min)}
             </span>
           ))}
         </div>
@@ -135,14 +209,14 @@ function StepsHero({ day, source, onAdd }: { day: DayScore; source: string | nul
 
       <div className="relative mt-4 flex items-center justify-between gap-3 border-t border-line pt-4">
         <p className="text-[13px] text-muted">
-          {day.steps == null ? (
-            'No steps yet today.'
+          {value == null ? (
+            h.empty
           ) : next ? (
             <>
-              <b className="text-ink tabular">{formatNumber(next.min - steps)}</b> to your next star
+              <b className="text-ink tabular">{formatNumber(next.min - v)}</b> to your next star
             </>
           ) : (
-            <b className="text-steps-strong">Max stars reached. Legend.</b>
+            <b className={h.strong}>Max stars reached. Legend.</b>
           )}
           {source && <span className="block text-xs text-faint">{source}</span>}
         </p>
@@ -212,6 +286,7 @@ function SleepCard({ day, onAdd }: { day: DayScore; onAdd: () => void }) {
 function StarsCard({ day }: { day: DayScore }) {
   const parts = [
     { label: 'Steps', value: day.stepsStars, max: MAX_STEP_STARS, color: 'bg-steps' },
+    { label: 'Stairs', value: day.flightsStars, max: MAX_FLIGHT_STARS, color: 'bg-stairs' },
     { label: 'Sleep', value: day.sleepStars, max: MAX_SLEEP_STARS, color: 'bg-sleep' },
     { label: 'Hobby', value: day.workoutStars, max: WORKOUT_BONUS.stars, color: 'bg-hobby' },
   ]
@@ -229,7 +304,7 @@ function StarsCard({ day }: { day: DayScore }) {
           <div key={p.label} className={cx('h-full rounded-full transition-[width] duration-700', p.color)} style={{ width: `${(p.value / max) * 100}%` }} />
         ))}
       </div>
-      <div className="relative mt-4 grid grid-cols-3 gap-2">
+      <div className="relative mt-4 grid grid-cols-2 gap-2">
         {parts.map((p) => (
           <div key={p.label} className="rounded-[18px] bg-surface-2/70 px-3 py-2.5">
             <span className="flex items-center gap-1.5 text-xs font-medium text-muted">

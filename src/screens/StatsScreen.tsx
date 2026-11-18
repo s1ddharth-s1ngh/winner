@@ -105,6 +105,7 @@ function NavButton({ label, disabled, onClick, children }: { label: string; disa
 const KPI_TEXT: Record<Tone, string> = {
   muted: 'text-ink',
   steps: 'text-steps-strong',
+  stairs: 'text-stairs-strong',
   sleep: 'text-sleep-strong',
   star: 'text-star-strong',
   hobby: 'text-hobby-strong',

@@ -7,6 +7,7 @@ import {
   bedtimeStars,
   buildHistory,
   currentStreak,
+  flightStars,
   longestStreak,
   qualifiesSleep,
   qualifiesSteps,
@@ -23,6 +24,8 @@ const stat = (date: string, steps: number | null, bed?: [string, string], wake?:
   date,
   steps,
   steps_source: steps == null ? null : 'manual',
+  flights: null,
+  flights_source: null,
   sleep_start: bed ? zonedTimeToInstant(bed[0], bed[1], TZ).toISOString() : null,
   sleep_end: wake ? zonedTimeToInstant(wake[0], wake[1], TZ).toISOString() : null,
   sleep_minutes: null,
@@ -46,6 +49,23 @@ describe('dates', () => {
   it('weeks start on Monday', () => {
     expect(startOfWeek('2026-11-15')).toBe('2026-11-09') // Sunday → Monday
     expect(startOfWeek('2026-11-09')).toBe('2026-11-09')
+  })
+})
+
+describe('flight stars', () => {
+  it.each([
+    [null, 0],
+    [29, 0],
+    [30, 1],
+    [60, 2],
+    [90, 3],
+    [119, 3],
+    [120, 4],
+    [400, 4],
+  ])('%s flights → %s★', (flights, stars) => expect(flightStars(flights)).toBe(stars))
+  it('counts toward the day total', () => {
+    const [d] = buildHistory([{ ...stat('2026-11-10', 10_000), flights: 60, flights_source: 'manual' }], [], TZ, '2026-11-10', '2026-11-10')
+    expect(d).toMatchObject({ stepsStars: 1, flightsStars: 2, total: 3 })
   })
 })
 
