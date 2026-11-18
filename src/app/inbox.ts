@@ -111,7 +111,7 @@ export function useOvertakeWatcher() {
         void navigator.serviceWorker?.ready.then((reg) =>
           reg.showNotification(`${i.username} passed you`, {
             body: i.board === 'steps' ? "in today's steps ranking" : "in today's overall ranking",
-            icon: '/pwa-192x192.png',
+            icon: `${import.meta.env.BASE_URL}pwa-192x192.png`,
             tag: `overtake-${i.board}`,
           }),
         )

@@ -15,7 +15,7 @@ import TodayScreen from './screens/TodayScreen'
 function Splash() {
   return (
     <div className="grid min-h-dvh place-items-center">
-      <img src="/pwa-192x192.png" alt="" className="size-16 animate-pulse rounded-[20px]" />
+      <img src={`${import.meta.env.BASE_URL}pwa-192x192.png`} alt="" className="size-16 animate-pulse rounded-[20px]" />
     </div>
   )
 }
@@ -43,7 +43,7 @@ function Gate() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <ToastProvider>
         <SessionProvider>
           <Gate />

@@ -12,7 +12,7 @@ function Hero() {
   return (
     <div className="relative overflow-hidden bg-hero px-6 pt-[max(env(safe-area-inset-top),28px)] pb-16 text-white">
       <div className="relative mt-10 animate-pop">
-        <img src="/pwa-192x192.png" alt="" className="size-16 rounded-[20px] ring-1 ring-white/20" />
+        <img src={`${import.meta.env.BASE_URL}pwa-192x192.png`} alt="" className="size-16 rounded-[20px] ring-1 ring-white/20" />
         <h1 className="mt-6 text-[38px] leading-[1.02] font-black tracking-[-0.04em]">{APP.name}</h1>
         <p className="mt-3 max-w-[18rem] text-[15px] leading-relaxed text-white/80">{APP.tagline}</p>
         <div className="mt-6 flex flex-wrap gap-2">
