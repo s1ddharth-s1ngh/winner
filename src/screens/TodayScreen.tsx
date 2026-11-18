@@ -319,7 +319,7 @@ function HobbyHero({ day, workouts, today, onAdd }: { day: DayScore; workouts: W
             <div className="display text-[40px]">{duration(minutes)}</div>
             <div className="mt-2 text-[13px] font-medium text-muted">of {duration(goal)} goal</div>
             <div className="mx-auto mt-2 w-fit rounded-full bg-hobby-soft px-2.5 py-0.5 text-xs font-bold text-hobby-strong tabular">
-              {Math.round((minutes / goal) * 100)}%
+              {minutes > goal ? `+${duration(minutes - goal)} extra` : `${Math.round((minutes / goal) * 100)}%`}
             </div>
           </div>
         </Ring>
