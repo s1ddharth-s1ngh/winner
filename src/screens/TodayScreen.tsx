@@ -38,7 +38,7 @@ export default function TodayScreen() {
               <IconButton icon={Bell} label="Notifications" badge={unread > 0} />
             </Link>
             <Link to="/profile" aria-label="Profile">
-              <Avatar name={profile.username} color={profile.avatar_color} size={40} />
+              <Avatar name={profile.username} color={profile.avatar_color} src={profile.avatar_url} size={40} />
             </Link>
           </>
         }
@@ -344,23 +344,35 @@ function WeekStrip({ history, today }: { history: DayScore[]; today: ISODate }) 
   return (
     <>
       <SectionTitle action={<StarCount value={weekTotal} className="text-sm text-muted" />}>This week</SectionTitle>
-      <Card className="grid grid-cols-7 gap-1 p-2.5">
+      <Card className="grid grid-cols-7 px-3 pt-4 pb-3.5">
         {days.map((d) => {
           const s = byDate.get(d)
           const future = d > today
+          const isToday = d === today
+          const total = s?.total ?? 0
           const pct = Math.min(1, (s?.steps ?? 0) / GOALS.dailySteps)
           return (
-            <div key={d} className={cx('flex flex-col items-center gap-1.5 rounded-full py-2.5', d === today && 'bg-brand-soft ring-1 ring-brand/25')}>
-              <span className={cx('text-[11px] font-semibold', d === today ? 'text-brand' : 'text-faint')}>{formatWeekdayLetter(d)}</span>
-              <div className="relative h-16 w-3 overflow-hidden rounded-full bg-surface-2">
-                {!future && (
+            <div key={d} className="flex flex-col items-center gap-2">
+              <div className={cx('relative h-20 w-2.5 overflow-hidden rounded-full bg-surface-2', future && 'opacity-40')}>
+                {pct > 0 && (
                   <div
                     className={cx('absolute inset-x-0 bottom-0 rounded-full transition-[height] duration-700', pct >= 1 ? 'bg-star' : 'bg-steps')}
-                    style={{ height: `${pct * 100}%` }}
+                    // min height = bar width, so a tiny value shows as a dot instead of a sliver
+                    style={{ height: `max(${pct * 100}%, 10px)` }}
                   />
                 )}
               </div>
-              <span className={cx('text-[11px] font-bold tabular', future ? 'text-line' : 'text-ink-2')}>{future ? '·' : `${s?.total ?? 0}★`}</span>
+              <span className={cx('text-[11px] font-bold tabular', future || total === 0 ? 'text-faint' : 'text-ink')}>
+                {future ? '–' : `${total}★`}
+              </span>
+              <span
+                className={cx(
+                  'grid size-6 place-items-center rounded-full text-[11px] font-bold',
+                  isToday ? 'bg-brand text-white' : 'text-faint',
+                )}
+              >
+                {formatWeekdayLetter(d)}
+              </span>
             </div>
           )
         })}
@@ -440,7 +452,7 @@ function MiniRanking({ today }: { today: ISODate }) {
           : shown.map((r, i) => (
               <div key={r.profile.id} style={rise(i)} className={cx('flex animate-rise items-center gap-3 px-4 py-3', r.profile.id === user.id && 'bg-brand-soft/60')}>
                 <RankBadge rank={r.rank} />
-                <Avatar name={r.profile.username} color={r.profile.avatar_color} size={34} />
+                <Avatar name={r.profile.username} color={r.profile.avatar_color} src={r.profile.avatar_url} size={34} />
                 <span className="flex-1 truncate font-semibold">
                   {r.profile.username}
                   {r.profile.id === user.id && <span className="ml-1.5 text-xs font-semibold text-brand">You</span>}

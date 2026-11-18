@@ -94,7 +94,7 @@ export default function GroupScreen() {
                 .sort((a, b) => (a.role === 'owner' ? -1 : b.role === 'owner' ? 1 : a.profile.username.localeCompare(b.profile.username)))
                 .map((m) => (
                   <div key={m.user_id} className="flex items-center gap-3 px-4 py-3">
-                    <Avatar name={m.profile.username} color={m.profile.avatar_color} size={40} />
+                    <Avatar name={m.profile.username} color={m.profile.avatar_color} src={m.profile.avatar_url} size={40} />
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-semibold">
                         {m.profile.username}

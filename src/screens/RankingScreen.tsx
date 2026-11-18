@@ -123,7 +123,7 @@ function RankRow({ row: r, board, period, me, index }: { row: Row; board: Board;
     <div style={rise(index)} className={cx('relative flex animate-rise items-center gap-3 px-4 py-3', me && 'bg-brand-soft/60')}>
       {me && <span className="absolute inset-y-2 left-0 w-1 rounded-r-full bg-brand" />}
       <RankBadge rank={r.rank} size={26} />
-      <Avatar name={r.profile.username} color={r.profile.avatar_color} size={40} />
+      <Avatar name={r.profile.username} color={r.profile.avatar_color} src={r.profile.avatar_url} size={40} />
       <div className="min-w-0 flex-1">
         <p className="truncate text-[15px] font-semibold">
           {r.profile.username}
@@ -161,7 +161,7 @@ function Podium({ rows, board, me }: { rows: Row[]; board: Board; me: string }) 
               <div className="relative">
                 {rank === 1 && <Crown className="absolute -top-7 left-1/2 size-7 -translate-x-1/2 fill-[#f5b731] text-[#f5b731]" />}
                 <span className={cx('block rounded-full p-[3px]', rank === 1 ? 'bg-[#f5b731]' : 'bg-white/25')}>
-                  <Avatar name={r.profile.username} color={r.profile.avatar_color} size={rank === 1 ? 70 : 56} />
+                  <Avatar name={r.profile.username} color={r.profile.avatar_color} src={r.profile.avatar_url} size={rank === 1 ? 70 : 56} />
                 </span>
                 <span className="absolute -bottom-2 left-1/2 -translate-x-1/2">
                   <RankBadge rank={rank} size={24} />

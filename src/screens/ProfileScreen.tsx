@@ -1,9 +1,14 @@
-import { ChevronRight, Lock, Settings } from 'lucide-react'
+import { Camera, Check, ChevronRight, ImagePlus, Lock, Paintbrush, Settings, Trash2 } from 'lucide-react'
+import { useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { useMyData, useToday } from '../app/hooks'
 import { useSession } from '../app/session'
-import { Avatar, Card, SectionTitle, Skeleton, cx, rise } from '../components/ui'
+import { useToast } from '../components/toast'
+import { Avatar, Button, Card, SectionTitle, Sheet, Skeleton, cx, rise } from '../components/ui'
+import { AVATAR_COLORS } from '../config/app'
 import { BADGES, type BadgeTone } from '../config/badges'
+import { repo, type ProfileInput } from '../data/repo'
+import { toJpeg } from '../lib/image'
 import { longestStreak, qualifiesSleep, qualifiesSteps } from '../domain/scoring'
 import { addDays, formatDayShort, formatMonth } from '../lib/dates'
 import { formatNumber } from '../lib/format'
@@ -23,22 +28,30 @@ export default function ProfileScreen() {
   const history = data?.history
   const badges = history ? BADGES.map((b) => ({ ...b, at: b.earned(history), prog: b.progress?.(history) })) : null
   const earned = badges?.filter((b) => b.at) ?? []
+  const [editing, setEditing] = useState(false)
 
   return (
     <div className="animate-fade-in">
-      <div className="relative h-48 overflow-hidden rounded-b-[36px] bg-hero">
-        <div className="safe-top absolute top-0 right-4">
-          <Link
-            to="/settings"
-            aria-label="Settings"
-            className="mt-3 grid size-10 place-items-center rounded-full bg-white/10 text-white ring-1 ring-white/25 transition-colors hover:bg-white/20"
-          >
+      <div
+        className="relative h-48 overflow-hidden rounded-b-[36px] bg-hero bg-cover bg-center"
+        style={{ backgroundColor: profile.cover_color ?? undefined, backgroundImage: profile.cover_url ? `url("${profile.cover_url}")` : undefined }}
+      >
+        <div className="safe-top absolute top-0 right-4 flex gap-2">
+          <button type="button" aria-label="Customize profile" onClick={() => setEditing(true)} className={HERO_BTN}>
+            <Paintbrush className="size-[18px]" />
+          </button>
+          <Link to="/settings" aria-label="Settings" className={HERO_BTN}>
             <Settings className="size-[19px]" />
           </Link>
         </div>
       </div>
       <div className="relative z-10 -mt-14 flex flex-col items-center px-5 text-center">
-        <Avatar name={profile.username} color={profile.avatar_color} size={100} ring />
+        <button type="button" aria-label="Change profile photo" onClick={() => setEditing(true)} className="relative rounded-full">
+          <Avatar name={profile.username} color={profile.avatar_color} src={profile.avatar_url} size={100} ring />
+          <span className="absolute right-0.5 bottom-0.5 grid size-8 place-items-center rounded-full bg-surface text-ink-2 ring-[3px] ring-bg">
+            <Camera className="size-4" />
+          </span>
+        </button>
         <h1 className="mt-3 text-[28px] font-extrabold tracking-[-0.03em]">{profile.username}</h1>
         <p className="text-[13px] text-muted">
           Member since {formatMonth(profile.created_at.slice(0, 10))} · {profile.timezone.replace(/_/g, ' ')}
@@ -110,6 +123,119 @@ export default function ProfileScreen() {
           </Link>
         </Card>
       </div>
+      <CustomizeSheet open={editing} onClose={() => setEditing(false)} />
     </div>
+  )
+}
+
+// Dark glass so the buttons stay readable on any cover color or photo.
+const HERO_BTN =
+  'mt-3 grid size-10 place-items-center rounded-full bg-black/20 text-white ring-1 ring-white/25 backdrop-blur-md transition-colors hover:bg-black/30'
+
+function CustomizeSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { profile, refresh } = useSession()
+  const toast = useToast()
+  const [busy, setBusy] = useState<string | null>(null)
+  const fileInput = useRef<HTMLInputElement>(null)
+  const picking = useRef<'avatar' | 'cover'>('avatar')
+
+  const save = async (key: string, fn: () => Promise<ProfileInput>) => {
+    setBusy(key)
+    try {
+      await repo.saveProfile(await fn())
+      await refresh()
+    } catch (e) {
+      toast((e as Error).message, 'error')
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  const pick = (kind: 'avatar' | 'cover') => {
+    picking.current = kind
+    fileInput.current?.click()
+  }
+
+  const onFile = (file: File | undefined) => {
+    if (!file) return
+    const kind = picking.current
+    save(`${kind}-upload`, async () => {
+      const jpeg = await (kind === 'avatar' ? toJpeg(file, 400, 400) : toJpeg(file, 1200, 600))
+      const url = await repo.uploadProfileImage(kind, jpeg)
+      return kind === 'avatar' ? { avatar_url: url } : { cover_url: url }
+    })
+  }
+
+  // Null = the app's default hero color.
+  const coverColors = [null, ...AVATAR_COLORS]
+
+  return (
+    <Sheet open={open} onClose={onClose} title="Customize profile">
+      <input
+        ref={fileInput}
+        type="file"
+        accept="image/*"
+        hidden
+        onChange={(e) => {
+          onFile(e.target.files?.[0])
+          e.target.value = ''
+        }}
+      />
+
+      <p className="mb-3 text-[13px] font-semibold tracking-wide text-muted uppercase">Profile photo</p>
+      <div className="flex items-center gap-3">
+        <Avatar name={profile.username} color={profile.avatar_color} src={profile.avatar_url} size={56} />
+        <Button variant="secondary" icon={ImagePlus} loading={busy === 'avatar-upload'} onClick={() => pick('avatar')} className="flex-1">
+          {profile.avatar_url ? 'Change' : 'Upload'}
+        </Button>
+        {profile.avatar_url && (
+          <Button
+            variant="secondary"
+            aria-label="Remove profile photo"
+            icon={Trash2}
+            loading={busy === 'avatar-remove'}
+            onClick={() => save('avatar-remove', async () => ({ avatar_url: null }))}
+            className="px-4"
+          />
+        )}
+      </div>
+
+      <p className="mt-6 mb-3 text-[13px] font-semibold tracking-wide text-muted uppercase">Cover</p>
+      <div className="flex flex-wrap gap-2.5">
+        {coverColors.map((c) => {
+          const selected = !profile.cover_url && profile.cover_color === c
+          return (
+            <button
+              key={c ?? 'default'}
+              type="button"
+              aria-label={c ? `Cover color ${c}` : 'Default cover color'}
+              aria-pressed={selected}
+              disabled={busy != null}
+              // Picking a color replaces the cover photo.
+              onClick={() => save('color', async () => ({ cover_color: c, cover_url: null }))}
+              className={cx('grid size-9 place-items-center rounded-full bg-hero transition active:scale-90', selected && 'ring-2 ring-offset-2 ring-offset-bg')}
+              style={{ backgroundColor: c ?? undefined, ['--tw-ring-color' as string]: c ?? 'var(--hero)' }}
+            >
+              {selected && <Check className="size-4 text-white" strokeWidth={3} />}
+            </button>
+          )
+        })}
+      </div>
+      <div className="mt-4 flex gap-3">
+        <Button variant="secondary" icon={ImagePlus} loading={busy === 'cover-upload'} onClick={() => pick('cover')} className="flex-1">
+          {profile.cover_url ? 'Change cover photo' : 'Upload cover photo'}
+        </Button>
+        {profile.cover_url && (
+          <Button
+            variant="secondary"
+            aria-label="Remove cover photo"
+            icon={Trash2}
+            loading={busy === 'cover-remove'}
+            onClick={() => save('cover-remove', async () => ({ cover_url: null }))}
+            className="px-4"
+          />
+        )}
+      </div>
+    </Sheet>
   )
 }

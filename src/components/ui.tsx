@@ -138,7 +138,7 @@ export function Segmented<T extends string>({
   )
 }
 
-export function Avatar({ name, color, size = 40, ring }: { name: string; color: string; size?: number; ring?: boolean }) {
+export function Avatar({ name, color, src, size = 40, ring }: { name: string; color: string; src?: string | null; size?: number; ring?: boolean }) {
   const initials = name
     .split(/\s+/)
     .map((p) => p[0])
@@ -156,7 +156,7 @@ export function Avatar({ name, color, size = 40, ring }: { name: string; color: 
       }}
       aria-hidden
     >
-      {initials || '?'}
+      {src ? <img src={src} alt="" className="size-full rounded-full object-cover" /> : initials || '?'}
     </span>
   )
 }
