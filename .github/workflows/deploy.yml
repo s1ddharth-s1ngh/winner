@@ -20,18 +20,16 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    # Public by design: both values ship inside the built JS. Data is protected by auth + RLS.
     env:
-      VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      VITE_SUPABASE_URL: https://polaqebdiwycachxrdpb.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_n3SmpM53RBno2D7HoJ3OdA_cBojTLWN
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-      # Without these the build silently falls back to the local demo backend.
-      - name: Check Supabase variables
-        run: test -n "$VITE_SUPABASE_URL" && test -n "$VITE_SUPABASE_PUBLISHABLE_KEY"
       - run: npm ci
       - run: npm test
       - run: npm run build -- --base=/${{ github.event.repository.name }}/
