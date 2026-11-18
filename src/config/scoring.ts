@@ -3,10 +3,10 @@
 
 /** Stars for daily steps. Highest matching tier wins. */
 export const STEP_TIERS = [
-  { min: 5_000, stars: 1 },
-  { min: 8_000, stars: 2 },
-  { min: 10_000, stars: 3 },
-  { min: 15_000, stars: 4 },
+  { min: 10_000, stars: 1 },
+  { min: 15_000, stars: 2 },
+  { min: 20_000, stars: 3 },
+  { min: 28_000, stars: 4 },
 ] as const
 
 /** Stars for the time you fall asleep (local time). First tier whose `until` is not passed wins; later = 0★. */
@@ -29,10 +29,10 @@ export const SLEEP_DURATION_BONUS = { minMinutes: 7 * 60, maxMinutes: 9 * 60, st
 export const WORKOUT_BONUS = { stars: 1 } as const
 
 /** A day / night extends a streak when it reaches these stars. */
-export const STREAKS = { stepsMinStars: 3, sleepMinStars: 2 } as const
+export const STREAKS = { stepsMinStars: 1, sleepMinStars: 2 } as const
 
 /** Personal targets shown in the UI (rings, chart goal lines). */
-export const GOALS = { dailySteps: 10_000, bedtime: '23:00', sleepMinutes: 8 * 60 } as const
+export const GOALS = { dailySteps: 25_000, bedtime: '23:00', sleepMinutes: 8 * 60 } as const
 
 /** Leaderboard notifications ("X passed you"). */
 export const NOTIFICATIONS = { maxPerDay: 5 } as const
