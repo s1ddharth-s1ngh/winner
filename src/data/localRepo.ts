@@ -70,7 +70,7 @@ export function createLocalRepo(): Repo {
     async signUp(email, password) {
       const db = load()
       const normalized = email.trim().toLowerCase()
-      if (db.users.some((u) => u.email === normalized)) throw new Error('An account with this email already exists.')
+      if (db.users.some((u) => u.email === normalized)) throw new Error('This username is already taken.')
       const id = crypto.randomUUID()
       // Demo only: a real backend never stores password hashes in the browser.
       db.users.push({ id, email: normalized, pass: await sha256(`${normalized}:${password}`) })
@@ -90,7 +90,7 @@ export function createLocalRepo(): Repo {
     async signIn(email, password) {
       const normalized = email.trim().toLowerCase()
       const u = load().users.find((x) => x.email === normalized)
-      if (!u || u.pass !== (await sha256(`${normalized}:${password}`))) throw new Error('Wrong email or password.')
+      if (!u || u.pass !== (await sha256(`${normalized}:${password}`))) throw new Error('Wrong username or password.')
       localStorage.setItem(SESSION, u.id)
       authListeners.forEach((l) => l())
     },

@@ -34,13 +34,13 @@ export function createSupabaseRepo(url: string, key: string): Repo {
         password,
         options: { data: { timezone: browserTimezone() } },
       })
-      if (error) throw new Error(error.message)
-      if (!data.session) throw new Error('Account created. Check your inbox to confirm your email, then sign in.')
+      if (error) throw new Error(error.message === 'User already registered' ? 'This username is already taken.' : error.message)
+      if (!data.session) throw new Error('Account created but not active: turn off "Confirm email" in Supabase Auth settings.')
     },
 
     async signIn(email, password) {
       const { error } = await sb.auth.signInWithPassword({ email: email.trim(), password })
-      if (error) throw new Error(error.message === 'Invalid login credentials' ? 'Wrong email or password.' : error.message)
+      if (error) throw new Error(error.message === 'Invalid login credentials' ? 'Wrong username or password.' : error.message)
     },
 
     async signOut() {

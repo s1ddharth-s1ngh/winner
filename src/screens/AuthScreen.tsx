@@ -1,8 +1,11 @@
-import { ArrowRight, Eye, EyeOff, Footprints, Lock, Mail, MoonStar, Trophy } from 'lucide-react'
+import { ArrowRight, Eye, EyeOff, Footprints, Lock, MoonStar, Trophy, User } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { APP } from '../config/app'
 import { repo } from '../data/repo'
 import { Button, Field, Segmented } from '../components/ui'
+
+// shortcut: Supabase Auth needs an email, so a username maps to a fake address (no password reset). Switch to real emails if that is ever needed.
+const toEmail = (username: string) => `${username}@winnerforlife.app`
 
 /** Solid brand header with the app name and what it tracks. */
 function Hero() {
@@ -30,7 +33,7 @@ function Hero() {
 
 export default function AuthScreen() {
   const [mode, setMode] = useState<'in' | 'up'>('in')
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [show, setShow] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -39,10 +42,12 @@ export default function AuthScreen() {
   const submit = async (e: FormEvent) => {
     e.preventDefault()
     setError(null)
-    if (mode === 'up' && password.length < 8) return setError('Use at least 8 characters for your password.')
+    const name = username.trim().toLowerCase()
+    if (!/^[a-z0-9_.]{3,20}$/.test(name)) return setError('Username: 3–20 characters, letters, numbers, _ or .')
+    if (mode === 'up' && password.length < 6) return setError('Use at least 6 characters for your password.')
     setBusy(true)
     try {
-      await (mode === 'in' ? repo.signIn(email, password) : repo.signUp(email, password))
+      await (mode === 'in' ? repo.signIn(toEmail(name), password) : repo.signUp(toEmail(name), password))
     } catch (err) {
       setError((err as Error).message)
     } finally {
@@ -64,22 +69,23 @@ export default function AuthScreen() {
         />
         <div className="mt-6 space-y-4">
           <Field
-            label="Email"
-            icon={Mail}
-            type="email"
-            autoComplete="email"
-            inputMode="email"
-            placeholder="you@example.com"
+            label="Username"
+            icon={User}
+            autoComplete="username"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            placeholder="e.g. marco"
             required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
           />
           <Field
             label="Password"
             icon={Lock}
             type={show ? 'text' : 'password'}
             autoComplete={mode === 'in' ? 'current-password' : 'new-password'}
-            placeholder={mode === 'up' ? 'At least 8 characters' : 'Your password'}
+            placeholder={mode === 'up' ? 'At least 6 characters' : 'Your password'}
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
