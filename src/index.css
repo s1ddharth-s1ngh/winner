@@ -35,6 +35,9 @@
   --hobby: #f97316;
   --hobby-strong: #b84d06;
   --hobby-soft: #ffeedf;
+  --stairs: #0d9488;
+  --stairs-strong: #0f766e;
+  --stairs-soft: #dcf5f1;
   --danger: #d92d20;
   --danger-soft: #fdecea;
 
@@ -74,6 +77,9 @@
   --hobby: #ff8a3d;
   --hobby-strong: #ffa86e;
   --hobby-soft: rgb(255 138 61 / 0.14);
+  --stairs: #2dd4bf;
+  --stairs-strong: #5eead4;
+  --stairs-soft: rgb(45 212 191 / 0.14);
   --danger: #ff5d55;
   --danger-soft: rgb(255 93 85 / 0.14);
 
@@ -112,6 +118,9 @@
   --color-hobby: var(--hobby);
   --color-hobby-strong: var(--hobby-strong);
   --color-hobby-soft: var(--hobby-soft);
+  --color-stairs: var(--stairs);
+  --color-stairs-strong: var(--stairs-strong);
+  --color-stairs-soft: var(--stairs-soft);
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
 

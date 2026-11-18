@@ -134,6 +134,7 @@ function RankRow({ row: r, board, period, me, index }: { row: Row; board: Board;
           {board === 'overall' && (
             <>
               <Chip tone="steps">{r.stepsStars}★ steps</Chip>
+              {r.flightsStars > 0 && <Chip tone="stairs">{r.flightsStars}★ stairs</Chip>}
               {r.sleepNights === 0 ? <Chip>sleep: no data</Chip> : <Chip tone="sleep">{r.sleepStars}★ sleep</Chip>}
               {r.workoutStars > 0 && <Chip tone="hobby">{r.workoutStars}★ hobby</Chip>}
             </>

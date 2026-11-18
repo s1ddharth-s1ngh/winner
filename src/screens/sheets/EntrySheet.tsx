@@ -1,8 +1,8 @@
 import { BedDouble, Info, Sunrise, Trash2 } from 'lucide-react'
 import { useEffect, useState, type FormEvent } from 'react'
-import { LIMITS, MAX_SLEEP_STARS, MAX_STEP_STARS } from '../../config/scoring'
+import { LIMITS, MAX_FLIGHT_STARS, MAX_SLEEP_STARS, MAX_STEP_STARS } from '../../config/scoring'
 import { repo } from '../../data/repo'
-import { bedtimeStars, scoreSleep, stepStars } from '../../domain/scoring'
+import { bedtimeStars, flightStars, scoreSleep, stepStars } from '../../domain/scoring'
 import type { DailyStat } from '../../domain/types'
 import { addDays, timeIn, zonedTimeToInstant, type ISODate } from '../../lib/dates'
 import { duration, formatNumber } from '../../lib/format'
@@ -37,6 +37,7 @@ export default function EntrySheet({ open, onClose, initialDate }: { open: boole
   const [date, setDate] = useState(initialDate ?? today)
   const [existing, setExisting] = useState<DailyStat | null>(null)
   const [steps, setSteps] = useState('')
+  const [flights, setFlights] = useState('')
   const [bed, setBed] = useState('')
   const [wake, setWake] = useState('')
   const [busy, setBusy] = useState(false)
@@ -56,6 +57,7 @@ export default function EntrySheet({ open, onClose, initialDate }: { open: boole
       if (!alive) return
       setExisting(s ?? null)
       setSteps(s?.steps != null ? String(s.steps) : '')
+      setFlights(s?.flights != null ? String(s.flights) : '')
       setBed(s?.sleep_start ? timeIn(s.sleep_start, tz) : '')
       setWake(s?.sleep_end ? timeIn(s.sleep_end, tz) : '')
       setError(null)
@@ -66,6 +68,7 @@ export default function EntrySheet({ open, onClose, initialDate }: { open: boole
   }, [open, date, user.id, tz])
 
   const stepsNum = steps === '' ? null : Number(steps)
+  const flightsNum = flights === '' ? null : Number(flights)
   const sleep = bed && wake ? sleepInstants(date, bed, wake, tz) : null
   const sleepScore = sleep
     ? scoreSleep({ sleep_start: sleep.start.toISOString(), sleep_end: sleep.end.toISOString(), sleep_minutes: sleep.minutes } as DailyStat, tz)
@@ -76,6 +79,8 @@ export default function EntrySheet({ open, onClose, initialDate }: { open: boole
     setError(null)
     if (stepsNum != null && (!Number.isInteger(stepsNum) || stepsNum < 0 || stepsNum > LIMITS.maxSteps))
       return setError(`Steps must be a whole number between 0 and ${formatNumber(LIMITS.maxSteps)}.`)
+    if (flightsNum != null && (!Number.isInteger(flightsNum) || flightsNum < 0 || flightsNum > LIMITS.maxFlights))
+      return setError(`Flights must be a whole number between 0 and ${LIMITS.maxFlights}.`)
     if ((bed && !wake) || (!bed && wake)) return setError('Add both the time you fell asleep and the time you woke up.')
     if (sleep && (sleep.minutes <= 0 || sleep.minutes > LIMITS.maxSleepMinutes))
       return setError(`Sleep must be between a few minutes and ${LIMITS.maxSleepMinutes / 60} hours.`)
@@ -86,6 +91,7 @@ export default function EntrySheet({ open, onClose, initialDate }: { open: boole
         date,
         source: 'manual',
         ...(stepsNum !== (existing?.steps ?? null) && { steps: stepsNum }),
+        ...(flightsNum !== (existing?.flights ?? null) && { flights: flightsNum }),
         ...(sleep
           ? { sleep_start: sleep.start.toISOString(), sleep_end: sleep.end.toISOString(), sleep_minutes: sleep.minutes }
           : existing?.sleep_start && { sleep_start: null, sleep_end: null, sleep_minutes: null }),
@@ -99,10 +105,10 @@ export default function EntrySheet({ open, onClose, initialDate }: { open: boole
     }
   }
 
-  const synced = [existing?.steps_source, existing?.sleep_source].find((s) => s && s !== 'manual')
+  const synced = [existing?.steps_source, existing?.flights_source, existing?.sleep_source].find((s) => s && s !== 'manual')
 
   return (
-    <Sheet open={open} onClose={onClose} title="Steps & sleep">
+    <Sheet open={open} onClose={onClose} title="Steps, stairs & sleep">
       <form onSubmit={submit}>
         <DatePicker value={date} onChange={setDate} today={today} />
 
@@ -132,6 +138,23 @@ export default function EntrySheet({ open, onClose, initialDate }: { open: boole
             className="display relative mt-3 w-full bg-transparent text-[44px] text-ink outline-none placeholder:text-surface-3"
           />
           <p className="mt-1 text-xs text-muted">Total steps for the whole day.</p>
+        </section>
+
+        <section className="surface-card relative mt-3 animate-rise overflow-hidden rounded-[26px] p-4" style={{ animationDelay: '30ms' }}>
+          <div className="flex items-center justify-between">
+            <h3 className="flex items-center gap-2 text-[15px] font-bold">Flights of stairs</h3>
+            <Stars value={flightStars(flightsNum)} max={MAX_FLIGHT_STARS} />
+          </div>
+          <input
+            inputMode="numeric"
+            pattern="[0-9]*"
+            aria-label="Flights of stairs"
+            placeholder="0"
+            value={flights}
+            onChange={(e) => setFlights(e.target.value.replace(/\D/g, '').slice(0, 3))}
+            className="display relative mt-3 w-full bg-transparent text-[44px] text-ink outline-none placeholder:text-surface-3"
+          />
+          <p className="mt-1 text-xs text-muted">One flight is about 3 metres (one floor) of climbing.</p>
         </section>
 
         <section className="surface-card relative mt-3 animate-rise overflow-hidden rounded-[26px] p-4" style={{ animationDelay: '60ms' }}>

@@ -210,12 +210,13 @@ export function RankBadge({ rank, size = 24 }: { rank: number | null; size?: num
   )
 }
 
-export type Tone ='muted' | 'steps' | 'sleep' | 'star' | 'hobby' | 'brand' | 'danger'
+export type Tone ='muted' | 'steps' | 'stairs' | 'sleep' | 'star' | 'hobby' | 'brand' | 'danger'
 
 export function Chip({ children, tone = 'muted', className }: { children: ReactNode; tone?: Tone; className?: string }) {
   const tones: Record<Tone, string> = {
     muted: 'bg-surface-2 text-muted',
     steps: 'bg-steps-soft text-steps-strong',
+    stairs: 'bg-stairs-soft text-stairs-strong',
     sleep: 'bg-sleep-soft text-sleep-strong',
     star: 'bg-star-soft text-star-strong',
     hobby: 'bg-hobby-soft text-hobby-strong',

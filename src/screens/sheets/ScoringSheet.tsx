@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { BEDTIME_TIERS, SLEEP_DURATION_BONUS, STEP_TIERS, STREAKS, WORKOUT_BONUS } from '../../config/scoring'
+import { BEDTIME_TIERS, FLIGHT_TIERS, SLEEP_DURATION_BONUS, STEP_TIERS, STREAKS, WORKOUT_BONUS } from '../../config/scoring'
 import { Sheet, Stars, rise } from '../../components/ui'
 import { formatNumber } from '../../lib/format'
 
@@ -18,7 +18,12 @@ export default function ScoringSheet({ open, onClose }: { open: boolean; onClose
           <Line key={t.min} label={`${formatNumber(t.min)}+ steps`} stars={t.stars} max={4} />
         ))}
       </Section>
-      <Section i={1} title="Sleep: when you fall asleep">
+      <Section i={1} title="Flights of stairs per day">
+        {FLIGHT_TIERS.map((t) => (
+          <Line key={t.min} label={`${t.min}+ flights`} stars={t.stars} max={4} />
+        ))}
+      </Section>
+      <Section i={2} title="Sleep: when you fall asleep">
         {bedtimeRows.map((r) => (
           <Line key={r.label} label={r.label} stars={r.stars} max={3} />
         ))}
@@ -27,18 +32,18 @@ export default function ScoringSheet({ open, onClose }: { open: boolean; onClose
           {SLEEP_DURATION_BONUS.maxMinutes / 60} hours. The night counts for the day you wake up. No data = 0★, shown as "no data".
         </p>
       </Section>
-      <Section i={2} title="Workouts & hobbies">
+      <Section i={3} title="Workouts & hobbies">
         <p className="text-[13px] text-muted">
           <b className="text-ink">+{WORKOUT_BONUS.stars}★</b> on days with at least one logged session (max once a day).
         </p>
       </Section>
-      <Section i={3} title="Streaks">
+      <Section i={4} title="Streaks">
         <p className="text-[13px] text-muted">
           Steps streak: days in a row with at least {STREAKS.stepsMinStars}★ of steps. Sleep streak: nights in a row with at least {STREAKS.sleepMinStars}★ of sleep.
           Today never breaks a streak while it is still in progress.
         </p>
       </Section>
-      <p className="mt-4 text-center text-xs text-muted">Overall ranking = steps + sleep + hobby stars.</p>
+      <p className="mt-4 text-center text-xs text-muted">Overall ranking = steps + stairs + sleep + hobby stars.</p>
     </Sheet>
   )
 }

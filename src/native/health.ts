@@ -11,7 +11,7 @@ import { addDays, dateIn, todayIn, zonedTimeToInstant } from '../lib/dates'
 export const isAndroidApp = () => Capacitor.getPlatform() === 'android'
 
 const LAST_SYNC = 'wfl:health:lastSync'
-const READ = { read: ['steps', 'sleep'] as ('steps' | 'sleep')[] }
+const READ = { read: ['steps', 'flightsClimbed', 'sleep'] as ('steps' | 'flightsClimbed' | 'sleep')[] }
 
 export const lastHealthSync = () => localStorage.getItem(LAST_SYNC)
 
@@ -48,7 +48,7 @@ export async function syncHealth(userId: string, tz: string, days = 3): Promise<
   const now = new Date()
 
   const existing = new Map((await repo.listStats([userId], fromDate, today)).map((s) => [s.date, s]))
-  const manual = (d: string, field: 'steps_source' | 'sleep_source') => existing.get(d)?.[field] === 'manual'
+  const manual = (d: string, field: 'steps_source' | 'flights_source' | 'sleep_source') => existing.get(d)?.[field] === 'manual'
 
   const { samples: stepBuckets } = await Health.queryAggregated({
     dataType: 'steps',
@@ -57,6 +57,20 @@ export async function syncHealth(userId: string, tz: string, days = 3): Promise<
     bucket: 'day',
     aggregation: 'sum',
   })
+
+  // Health Connect cannot aggregate floors, so sum the raw records per local day.
+  // shortcut: phone + watch records are not de-duplicated; upgrade if someone's flights look doubled.
+  const flightsByDate = new Map<string, number>()
+  const { samples: floors } = await Health.readSamples({
+    dataType: 'flightsClimbed',
+    startDate: start.toISOString(),
+    endDate: now.toISOString(),
+    limit: 1000,
+  }).catch(() => ({ samples: [] as HealthSample[] })) // permission not granted yet: skip flights
+  for (const f of floors) {
+    const date = dateIn(f.startDate, tz)
+    flightsByDate.set(date, (flightsByDate.get(date) ?? 0) + f.value)
+  }
 
   // Sessions that ended in the window; the night belongs to the wake-up date.
   const { samples: sleeps } = await Health.readSamples({
@@ -81,6 +95,13 @@ export async function syncHealth(userId: string, tz: string, days = 3): Promise<
     if (date < fromDate || manual(date, 'steps_source') || steps > LIMITS.maxSteps) continue
     if (existing.get(date)?.steps === steps) continue
     await repo.saveStats({ date, steps, source: 'health_connect' })
+    written++
+  }
+  for (const [date, total] of flightsByDate) {
+    const flights = Math.round(total)
+    if (date < fromDate || manual(date, 'flights_source') || flights > LIMITS.maxFlights) continue
+    if (existing.get(date)?.flights === flights) continue
+    await repo.saveStats({ date, flights, source: 'health_connect' })
     written++
   }
   for (const [date, s] of nights) {

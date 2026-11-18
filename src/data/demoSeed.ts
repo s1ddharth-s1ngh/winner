@@ -11,6 +11,7 @@ interface Persona {
   username: string
   color: string
   steps: [number, number]
+  flights: [number, number]
   /** Mean bedtime as minutes after 18:00 and spread in minutes. null = never tracks sleep. */
   bed: [number, number] | null
   sleepHours: [number, number]
@@ -18,11 +19,11 @@ interface Persona {
 }
 
 const PERSONAS: Persona[] = [
-  { id: 'demo-giulia', username: 'Giulia', color: '#db2777', steps: [8500, 13500], bed: [285, 30], sleepHours: [7.3, 8.6], workout: { type: 'Yoga', perWeek: 2, minutes: [45, 60] } },
-  { id: 'demo-marco', username: 'Marco', color: '#0284c7', steps: [10500, 19000], bed: [390, 50], sleepHours: [5.8, 7.2], workout: { type: 'Gym', perWeek: 3, minutes: [50, 90] } },
-  { id: 'demo-sara', username: 'Sara', color: '#0d9488', steps: [6000, 10500], bed: [320, 30], sleepHours: [7, 8.2], workout: { type: 'Run', perWeek: 1.5, minutes: [25, 50] } },
-  { id: 'demo-luca', username: 'Luca', color: '#d97706', steps: [4000, 9500], bed: null, sleepHours: [0, 0], workout: { type: 'Padel', perWeek: 1, minutes: [60, 90] } },
-  { id: 'demo-elena', username: 'Elena', color: '#7c3aed', steps: [7500, 12500], bed: [335, 40], sleepHours: [6.5, 8], workout: { type: 'Swim', perWeek: 1, minutes: [40, 60] } },
+  { id: 'demo-giulia', username: 'Giulia', flights: [20, 60], color: '#db2777', steps: [8500, 13500], bed: [285, 30], sleepHours: [7.3, 8.6], workout: { type: 'Yoga', perWeek: 2, minutes: [45, 60] } },
+  { id: 'demo-marco', username: 'Marco', flights: [50, 130], color: '#0284c7', steps: [10500, 19000], bed: [390, 50], sleepHours: [5.8, 7.2], workout: { type: 'Gym', perWeek: 3, minutes: [50, 90] } },
+  { id: 'demo-sara', username: 'Sara', flights: [10, 45], color: '#0d9488', steps: [6000, 10500], bed: [320, 30], sleepHours: [7, 8.2], workout: { type: 'Run', perWeek: 1.5, minutes: [25, 50] } },
+  { id: 'demo-luca', username: 'Luca', flights: [5, 30], color: '#d97706', steps: [4000, 9500], bed: null, sleepHours: [0, 0], workout: { type: 'Padel', perWeek: 1, minutes: [60, 90] } },
+  { id: 'demo-elena', username: 'Elena', flights: [30, 90], color: '#7c3aed', steps: [7500, 12500], bed: [335, 40], sleepHours: [6.5, 8], workout: { type: 'Swim', perWeek: 1, minutes: [40, 60] } },
 ]
 
 export const demoPersona = (id: string): Persona => PERSONAS.find((p) => p.id === id)!
@@ -60,7 +61,11 @@ export function generateDay(p: Persona, date: ISODate, now: Date): GeneratedDay 
   if (r() < 0.04) return { stat: null, workout: null }
 
   let steps = Math.round(between(r, p.steps) * (weekend ? 0.9 + r() * 0.4 : 1))
-  if (date === today) steps = Math.round(steps * dayProgress(nowMin))
+  let flights = Math.round(between(r, p.flights))
+  if (date === today) {
+    steps = Math.round(steps * dayProgress(nowMin))
+    flights = Math.round(flights * dayProgress(nowMin))
+  }
 
   let sleep_start: string | null = null
   let sleep_end: string | null = null
@@ -88,6 +93,8 @@ export function generateDay(p: Persona, date: ISODate, now: Date): GeneratedDay 
       date,
       steps,
       steps_source: p.id === 'demo-giulia' ? 'ios_shortcut' : 'health_connect',
+      flights,
+      flights_source: p.id === 'demo-giulia' ? 'ios_shortcut' : 'health_connect',
       sleep_start,
       sleep_end,
       sleep_minutes,
@@ -142,13 +149,13 @@ export function demoHistory(days: number, now = new Date()) {
 
 /** A plausible personal history for the signed-in user (demo button in Settings). */
 export function myDemoHistory(userId: string, tz: string, days: number, now = new Date()) {
-  const me: Persona = { ...PERSONAS[2], id: userId, steps: [6500, 14500], bed: [310, 45], workout: { type: 'Gym', perWeek: 2, minutes: [40, 75] } }
+  const me: Persona = { ...PERSONAS[2], id: userId, steps: [6500, 14500], flights: [15, 100], bed: [310, 45], workout: { type: 'Gym', perWeek: 2, minutes: [40, 75] } }
   const today = dateIn(now, tz)
   const stats: DailyStat[] = []
   const workouts: Workout[] = []
   for (let i = days; i >= 1; i--) {
     const g = generateDay(me, addDays(today, -i), now)
-    if (g.stat) stats.push({ ...g.stat, steps_source: 'manual', sleep_source: g.stat.sleep_start ? 'manual' : null })
+    if (g.stat) stats.push({ ...g.stat, steps_source: 'manual', flights_source: 'manual', sleep_source: g.stat.sleep_start ? 'manual' : null })
     if (g.workout) workouts.push(g.workout)
   }
   return { stats, workouts }
