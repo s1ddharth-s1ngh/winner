@@ -67,20 +67,16 @@ export default function GroupScreen() {
       </div>
       <PageHeader subtitle="Group" title={group.name} />
       <div className="px-4">
-        <Card className="relative animate-rise overflow-hidden p-5 text-white shadow-[var(--shadow-float)]">
-          <div className="absolute inset-0 bg-[image:var(--hero)]" />
-          <div className="absolute -right-12 -bottom-20 size-52 rounded-full border border-white/15" />
-          <div className="absolute -right-2 -bottom-8 size-28 rounded-full border border-white/10" />
-          <div className="absolute -top-10 -left-10 size-40 rounded-full bg-white/10 blur-3xl" />
-          <div className="relative">
+        <Card className="animate-rise bg-hero p-5 text-white">
+          <div>
             <p className="text-[11px] font-semibold tracking-[0.14em] text-white/70 uppercase">Invite code</p>
-            <p className="mt-2 font-mono text-[36px] leading-none font-bold tracking-[0.25em] drop-shadow-[0_2px_12px_rgb(0_0_0/0.25)]">{group.invite_code}</p>
+            <p className="mt-2 font-mono text-[36px] leading-none font-bold tracking-[0.25em]">{group.invite_code}</p>
             <p className="mt-1 text-[13px] text-white/70">Friends enter this code after signing up.</p>
             <div className="mt-5 flex gap-2">
-              <button type="button" onClick={copy} className="inline-flex h-10 items-center gap-2 rounded-full bg-white/15 px-4 text-sm font-semibold ring-1 ring-white/20 backdrop-blur transition active:scale-95">
+              <button type="button" onClick={copy} className="inline-flex h-10 items-center gap-2 rounded-full bg-white/10 px-4 text-sm font-semibold ring-1 ring-white/20 transition-colors hover:bg-white/20">
                 {copied ? <Check className="size-4" /> : <Copy className="size-4" />} {copied ? 'Copied' : 'Copy'}
               </button>
-              <button type="button" onClick={share} className="inline-flex h-10 items-center gap-2 rounded-full bg-white px-4 text-sm font-semibold text-brand transition active:scale-95">
+              <button type="button" onClick={share} className="inline-flex h-10 items-center gap-2 rounded-full bg-white px-4 text-sm font-semibold text-brand transition-colors hover:bg-white/90">
                 <Share2 className="size-4" /> Share invite
               </button>
             </div>

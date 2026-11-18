@@ -97,7 +97,7 @@ export default function StatsScreen() {
 
 function NavButton({ label, disabled, onClick, children }: { label: string; disabled: boolean; onClick: () => void; children: ReactNode }) {
   return (
-    <button type="button" aria-label={label} disabled={disabled} onClick={onClick} className="surface-card grid size-8 place-items-center rounded-full text-ink-2 transition active:scale-90 disabled:opacity-30">
+    <button type="button" aria-label={label} disabled={disabled} onClick={onClick} className="grid size-8 place-items-center rounded-full bg-surface-2 text-ink-2 ring-1 ring-line transition-colors hover:bg-surface-3 disabled:opacity-30">
       {children}
     </button>
   )
@@ -112,25 +112,14 @@ const KPI_TEXT: Record<Tone, string> = {
   brand: 'text-brand',
   danger: 'text-danger',
 }
-const KPI_GLOW: Record<Tone, string> = {
-  muted: 'bg-faint',
-  steps: 'bg-steps',
-  sleep: 'bg-sleep',
-  star: 'bg-star',
-  hobby: 'bg-hobby',
-  brand: 'bg-brand',
-  danger: 'bg-danger',
-}
-
-/** Fitness-style KPI tiles: tinted icon, soft glow, big display number. */
+/** KPI tiles: tinted icon and a big display number. */
 function Kpis({ items }: { items: { label: string; value: ReactNode; icon: LucideIcon; tone?: Tone }[] }) {
   return (
     <div className="mt-5 grid grid-cols-3 gap-2">
       {items.map((k, i) => {
         const tone = k.tone ?? 'muted'
         return (
-          <Card key={k.label} className="relative animate-rise overflow-hidden px-3 pt-3 pb-3.5" style={rise(i)}>
-            <span className={cx('pointer-events-none absolute -top-10 -right-10 size-24 rounded-full opacity-25 blur-2xl', KPI_GLOW[tone])} />
+          <Card key={k.label} className="animate-rise px-3 pt-3 pb-3.5" style={rise(i)}>
             <IconTile icon={k.icon} tone={tone} size={30} />
             <p className={cx('display mt-3 truncate text-[22px]', KPI_TEXT[tone])}>{k.value}</p>
             <p className="mt-1.5 truncate text-[10.5px] font-semibold tracking-wide text-muted uppercase">{k.label}</p>
@@ -363,7 +352,7 @@ function HobbyStats({ days, workouts, span, today }: { days: DayScore[]; workout
                       <span className="font-semibold tabular">{duration(minutes)}</span>
                     </div>
                     <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-surface-2">
-                      <div className="h-full rounded-full bg-[linear-gradient(90deg,var(--star),var(--hobby))] transition-[width] duration-700" style={{ width: `${(minutes / max) * 100}%` }} />
+                      <div className="h-full rounded-full bg-hobby transition-[width] duration-700" style={{ width: `${(minutes / max) * 100}%` }} />
                     </div>
                   </div>
                 </div>

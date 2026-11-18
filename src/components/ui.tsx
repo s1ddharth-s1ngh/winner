@@ -32,10 +32,10 @@ export function Card({ className, children, onClick, style }: { className?: stri
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
 const variants: Record<Variant, string> = {
   primary:
-    'bg-[linear-gradient(120deg,var(--brand),color-mix(in_oklab,var(--brand)_55%,var(--brand-2)))] text-white shadow-[var(--shadow-float)] hover:brightness-110 disabled:shadow-none',
-  secondary: 'bg-surface text-ink ring-1 ring-line hover:bg-surface-2',
+    'bg-brand text-white hover:bg-[color-mix(in_oklab,var(--brand)_88%,black)]',
+  secondary: 'bg-surface-2 text-ink ring-1 ring-line hover:bg-surface-3',
   ghost: 'text-brand hover:bg-brand-soft',
-  danger: 'bg-danger-soft text-danger hover:brightness-95',
+  danger: 'bg-danger text-white hover:bg-[color-mix(in_oklab,var(--danger)_88%,black)]',
 }
 
 /** Every button is a pill (same rule as Telebi's NexSuite). */
@@ -53,7 +53,7 @@ export function Button({
       {...rest}
       disabled={rest.disabled || loading}
       className={cx(
-        'inline-flex h-12 items-center justify-center gap-2 rounded-full px-6 text-[15px] font-semibold transition active:scale-[0.97] disabled:opacity-50',
+        'inline-flex h-12 items-center justify-center gap-2 rounded-full px-6 text-[15px] font-semibold transition-colors disabled:opacity-50',
         variants[variant],
         className,
       )}
@@ -82,14 +82,13 @@ export function IconButton({
       title={label}
       {...rest}
       className={cx(
-        'surface-card relative grid size-10 place-items-center rounded-full text-ink-2 transition hover:text-ink active:scale-90',
+        'relative grid size-10 place-items-center rounded-full bg-surface-2 text-ink-2 ring-1 ring-line transition-colors hover:bg-surface-3 hover:text-ink',
         className,
       )}
     >
       <Icon className="size-[19px]" strokeWidth={2} />
       {badge && (
         <span className="absolute top-1.5 right-1.5 flex size-2.5">
-          <span className="absolute inset-0 animate-ping rounded-full bg-danger opacity-60" />
           <span className="relative size-2.5 rounded-full bg-danger ring-2 ring-surface" />
         </span>
       )}
@@ -153,8 +152,7 @@ export function Avatar({ name, color, size = 40, ring }: { name: string; color: 
         width: size,
         height: size,
         fontSize: size * 0.38,
-        background: `radial-gradient(120% 120% at 25% 15%, color-mix(in oklab, ${color} 80%, white), ${color} 45%, color-mix(in oklab, ${color} 65%, black))`,
-        boxShadow: `inset 0 1px 0 rgb(255 255 255 / 0.25), 0 6px 16px -8px ${color}`,
+        background: color,
       }}
       aria-hidden
     >
@@ -171,7 +169,7 @@ export function Stars({ value, max, size = 14, className }: { value: number; max
         <Star
           key={i}
           style={{ width: size, height: size, animationDelay: `${i * 70}ms` }}
-          className={i < value ? 'animate-pop fill-star text-star drop-shadow-[0_0_6px_color-mix(in_oklab,var(--star)_55%,transparent)]' : 'fill-surface-3 text-surface-3'}
+          className={i < value ? 'animate-pop fill-star text-star' : 'fill-surface-3 text-surface-3'}
           strokeWidth={1.5}
         />
       ))}
@@ -191,16 +189,16 @@ export function StarCount({ value, className }: { value: number; className?: str
 
 // Metal colors look the same in both themes on purpose.
 const MEDAL: Record<number, string> = {
-  1: 'bg-[linear-gradient(135deg,#ffe08a,#f5a524)] text-[#6b3d00]',
-  2: 'bg-[linear-gradient(135deg,#f1f4f9,#a9b5c7)] text-[#3b4658]',
-  3: 'bg-[linear-gradient(135deg,#f8d2ae,#c97a3d)] text-[#5a2e0b]',
+  1: 'bg-[#f5b731] text-[#5c3400]',
+  2: 'bg-[#c5cedb] text-[#2f3a4c]',
+  3: 'bg-[#d9925a] text-[#4a2507]',
 }
 
 /** Rank number, shown as a medal for the top 3. */
 export function RankBadge({ rank, size = 24 }: { rank: number | null; size?: number }) {
   return rank && MEDAL[rank] ? (
     <span
-      className={cx('grid shrink-0 place-items-center rounded-full font-extrabold shadow-[inset_0_1px_0_rgb(255_255_255/0.6),0_4px_10px_-4px_rgb(0_0_0/0.35)]', MEDAL[rank])}
+      className={cx('grid shrink-0 place-items-center rounded-full font-extrabold', MEDAL[rank])}
       style={{ width: size, height: size, fontSize: size * 0.46 }}
     >
       {rank}
@@ -297,9 +295,8 @@ export function PageHeader({ title, subtitle, actions }: { title: ReactNode; sub
 export function EmptyState({ icon: Icon, title, text, action }: { icon: LucideIcon; title: string; text: ReactNode; action?: ReactNode }) {
   return (
     <div className="flex flex-col items-center px-6 py-10 text-center">
-      <span className="relative mb-5 grid size-16 animate-float place-items-center rounded-[22px] bg-brand-soft text-brand">
-        <span className="absolute inset-0 rounded-[22px] bg-brand/20 blur-xl" />
-        <Icon className="relative size-8" />
+      <span className="mb-5 grid size-16 place-items-center rounded-[22px] bg-brand-soft text-brand">
+        <Icon className="size-8" />
       </span>
       <h3 className="text-base font-bold">{title}</h3>
       <p className="mt-1 max-w-xs text-sm text-muted">{text}</p>
@@ -362,7 +359,7 @@ export function Sheet({ open, onClose, title, children }: { open: boolean; onClo
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center" role="dialog" aria-modal aria-label={title}>
       <div className="absolute inset-0 animate-fade-in bg-scrim backdrop-blur-[3px]" onClick={onClose} />
-      <div className="safe-bottom no-scrollbar relative max-h-[92dvh] w-full max-w-md animate-sheet-in overflow-y-auto rounded-t-[32px] bg-bg shadow-[0_-20px_60px_-20px_rgb(0_0_0/0.5)] ring-1 ring-line/60">
+      <div className="safe-bottom no-scrollbar relative max-h-[92dvh] w-full max-w-md animate-sheet-in overflow-y-auto rounded-t-[32px] bg-bg ring-1 ring-line">
         <div className="sticky top-0 z-10 bg-bg/90 px-5 pt-3 pb-3 backdrop-blur-xl">
           <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-surface-3" />
           <div className="flex items-center justify-between">

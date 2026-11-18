@@ -22,7 +22,7 @@ export default function InboxScreen() {
           <IconButton icon={ArrowLeft} label="Back" />
         </Link>
         {items.length > 0 && (
-          <button type="button" onClick={clear} className="surface-card h-9 rounded-full px-4 text-sm font-semibold text-muted transition hover:text-ink active:scale-95">
+          <button type="button" onClick={clear} className="h-9 rounded-full bg-surface-2 px-4 text-sm font-semibold text-muted ring-1 ring-line transition-colors hover:bg-surface-3 hover:text-ink">
             Clear all
           </button>
         )}
@@ -39,7 +39,7 @@ export default function InboxScreen() {
               <div key={i.id} className={cx('flex animate-rise items-center gap-3 px-4 py-3.5', !i.read && 'bg-brand-soft/50')} style={rise(Math.min(n, 8))}>
                 <div className="relative">
                   <Avatar name={i.username} color={i.color} size={42} />
-                  <span className={cx('absolute -right-1 -bottom-1 grid size-5 place-items-center rounded-full text-white ring-2 ring-surface', i.board === 'steps' ? 'bg-[linear-gradient(135deg,var(--steps),var(--steps-strong))]' : 'bg-[linear-gradient(135deg,var(--star),var(--hobby))]')}>
+                  <span className={cx('absolute -right-1 -bottom-1 grid size-5 place-items-center rounded-full text-white ring-2 ring-surface', i.board === 'steps' ? 'bg-steps' : 'bg-star')}>
                     {i.board === 'steps' ? <Footprints className="size-3" /> : <Trophy className="size-3" />}
                   </span>
                 </div>
@@ -50,7 +50,7 @@ export default function InboxScreen() {
                   <p className="text-[13px] text-muted">{i.board === 'steps' ? "Today's steps ranking" : "Today's overall ranking"}</p>
                 </div>
                 <span className="text-xs text-faint">{timeAgo(i.at)}</span>
-                {!i.read && <span className="size-2 rounded-full bg-brand shadow-[0_0_8px_var(--brand)]" />}
+                {!i.read && <span className="size-2 rounded-full bg-brand" />}
               </div>
             ))}
           </Card>

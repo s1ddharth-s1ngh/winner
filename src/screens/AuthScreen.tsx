@@ -4,32 +4,12 @@ import { APP } from '../config/app'
 import { repo } from '../data/repo'
 import { Button, Field, Segmented } from '../components/ui'
 
-/** Decorative night-sky hero: soft orbits, stars and a moon. */
+/** Solid brand header with the app name and what it tracks. */
 function Hero() {
-  const dots = [
-    [12, 22, 2],
-    [28, 12, 1.5],
-    [46, 30, 1],
-    [70, 16, 2],
-    [86, 34, 1.5],
-    [92, 10, 1],
-    [8, 52, 1],
-    [60, 46, 1.2],
-  ]
   return (
-    <div className="relative overflow-hidden bg-[image:var(--hero)] px-6 pt-[max(env(safe-area-inset-top),28px)] pb-16 text-white">
-      <svg className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden>
-        {dots.map(([x, y, r], i) => (
-          <circle key={i} cx={`${x}%`} cy={`${y}%`} r={r} fill="white" opacity={0.7} className="animate-pulse" style={{ animationDelay: `${i * 250}ms` }} />
-        ))}
-      </svg>
-      <div className="pointer-events-none absolute -right-24 -bottom-40 size-[420px] rounded-full border border-white/10" />
-      <div className="pointer-events-none absolute -right-10 -bottom-28 size-[300px] rounded-full border border-white/10" />
-      <div className="pointer-events-none absolute right-8 -bottom-12 size-[170px] rounded-full bg-white/[0.06]" />
-      <div className="pointer-events-none absolute top-[max(env(safe-area-inset-top),28px)] right-7 size-14 rotate-[-20deg] animate-float rounded-full shadow-[inset_-12px_7px_0_0_#ffeab0] drop-shadow-[0_0_18px_rgb(255_214_120/0.6)]" />
-
+    <div className="relative overflow-hidden bg-hero px-6 pt-[max(env(safe-area-inset-top),28px)] pb-16 text-white">
       <div className="relative mt-10 animate-pop">
-        <img src="/pwa-192x192.png" alt="" className="size-16 rounded-[20px] shadow-[0_12px_30px_-6px_rgba(0,0,0,0.45)] ring-1 ring-white/20" />
+        <img src="/pwa-192x192.png" alt="" className="size-16 rounded-[20px] ring-1 ring-white/20" />
         <h1 className="mt-6 text-[38px] leading-[1.02] font-black tracking-[-0.04em]">{APP.name}</h1>
         <p className="mt-3 max-w-[18rem] text-[15px] leading-relaxed text-white/80">{APP.tagline}</p>
         <div className="mt-6 flex flex-wrap gap-2">
@@ -38,7 +18,7 @@ function Hero() {
             { icon: MoonStar, label: 'Sleep' },
             { icon: Trophy, label: 'Friends' },
           ].map(({ icon: Icon, label }) => (
-            <span key={label} className="inline-flex items-center gap-1.5 rounded-full bg-white/12 px-3 py-1.5 text-[13px] font-semibold ring-1 ring-white/15 backdrop-blur">
+            <span key={label} className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-[13px] font-semibold ring-1 ring-white/15">
               <Icon className="size-4" /> {label}
             </span>
           ))}
@@ -73,7 +53,7 @@ export default function AuthScreen() {
   return (
     <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-bg">
       <Hero />
-      <form onSubmit={submit} className="safe-bottom relative -mt-8 flex flex-1 animate-sheet-in flex-col rounded-t-[34px] bg-bg px-6 pt-7 shadow-[0_-20px_40px_-20px_rgb(0_0_0/0.35)]">
+      <form onSubmit={submit} className="safe-bottom relative -mt-8 flex flex-1 animate-sheet-in flex-col rounded-t-[34px] bg-bg px-6 pt-7">
         <Segmented
           value={mode}
           onChange={(m) => (setMode(m), setError(null))}

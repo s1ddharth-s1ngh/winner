@@ -9,11 +9,11 @@ import { addDays, formatDayShort, formatMonth } from '../lib/dates'
 import { formatNumber } from '../lib/format'
 
 const TONE: Record<BadgeTone, string> = {
-  steps: 'bg-[linear-gradient(135deg,#34d399,var(--steps-strong))]',
-  sleep: 'bg-[linear-gradient(135deg,#a78bfa,var(--sleep-strong))]',
-  star: 'bg-[linear-gradient(135deg,#ffd76a,#f59e0b)]',
-  hobby: 'bg-[linear-gradient(135deg,#fdba74,var(--hobby))]',
-  brand: 'bg-[linear-gradient(135deg,#818cf8,var(--brand))]',
+  steps: 'bg-steps',
+  sleep: 'bg-sleep',
+  star: 'bg-star',
+  hobby: 'bg-hobby',
+  brand: 'bg-brand',
 }
 
 export default function ProfileScreen() {
@@ -26,24 +26,19 @@ export default function ProfileScreen() {
 
   return (
     <div className="animate-fade-in">
-      <div className="relative h-48 overflow-hidden rounded-b-[36px] bg-[image:var(--hero)]">
-        <div className="absolute -top-20 left-1/3 size-56 rounded-full bg-white/10 blur-3xl" />
-        <div className="absolute -right-16 -bottom-24 size-64 rounded-full border border-white/10" />
-        <div className="absolute right-10 -bottom-10 size-32 rounded-full bg-white/5" />
+      <div className="relative h-48 overflow-hidden rounded-b-[36px] bg-hero">
         <div className="safe-top absolute top-0 right-4">
           <Link
             to="/settings"
             aria-label="Settings"
-            className="mt-3 grid size-10 place-items-center rounded-full bg-white/15 text-white ring-1 ring-white/25 backdrop-blur transition hover:bg-white/25 active:scale-90"
+            className="mt-3 grid size-10 place-items-center rounded-full bg-white/10 text-white ring-1 ring-white/25 transition-colors hover:bg-white/20"
           >
             <Settings className="size-[19px]" />
           </Link>
         </div>
       </div>
       <div className="relative z-10 -mt-14 flex flex-col items-center px-5 text-center">
-        <span className="rounded-full bg-[linear-gradient(135deg,var(--brand),var(--brand-2))] p-1 shadow-[var(--shadow-float)]">
-          <Avatar name={profile.username} color={profile.avatar_color} size={100} ring />
-        </span>
+        <Avatar name={profile.username} color={profile.avatar_color} size={100} ring />
         <h1 className="mt-3 text-[28px] font-extrabold tracking-[-0.03em]">{profile.username}</h1>
         <p className="text-[13px] text-muted">
           Member since {formatMonth(profile.created_at.slice(0, 10))} · {profile.timezone.replace(/_/g, ' ')}
@@ -74,7 +69,7 @@ export default function ProfileScreen() {
                 <span
                   className={cx(
                     'relative grid size-14 place-items-center rounded-2xl text-white',
-                    b.at ? `${TONE[b.tone]} shadow-[inset_0_1px_0_rgb(255_255_255/0.35),0_10px_22px_-10px_rgb(0_0_0/0.55)]` : 'bg-surface-2 text-faint',
+                    b.at ? TONE[b.tone] : 'bg-surface-2 text-faint',
                   )}
                   title={b.description}
                 >

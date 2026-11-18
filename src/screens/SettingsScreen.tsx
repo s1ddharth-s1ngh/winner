@@ -13,7 +13,7 @@ import {
   PenLine,
   RefreshCw,
   Smartphone,
-  Sparkles,
+  Info,
   Sun,
   Trash2,
 } from 'lucide-react'
@@ -53,7 +53,7 @@ export default function SettingsScreen() {
         <SectionTitle>About</SectionTitle>
         <Card className="divide-y divide-line">
           <Row icon={CircleHelp} tone="star" title="How scoring works" onClick={() => setRules(true)} />
-          <Row icon={Sparkles} tone="brand" title={APP.name} text={`Version ${__APP_VERSION__} · ${repo.kind === 'local' ? 'demo mode' : 'connected'}`} />
+          <Row icon={Info} tone="brand" title={APP.name} text={`Version ${__APP_VERSION__} · ${repo.kind === 'local' ? 'demo mode' : 'connected'}`} />
         </Card>
 
         <Button variant="danger" icon={LogOut} onClick={() => void repo.signOut()} className="mt-6 w-full">
@@ -109,12 +109,12 @@ function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: 
       onClick={() => onChange(!checked)}
       className={cx(
         'relative h-7 w-12 shrink-0 rounded-full transition-colors duration-300',
-        checked ? 'bg-[linear-gradient(120deg,var(--brand),var(--brand-2))] shadow-[0_6px_16px_-6px_var(--brand)]' : 'bg-surface-3',
+        checked ? 'bg-brand' : 'bg-surface-3',
       )}
     >
       <span
         className={cx(
-          'absolute top-0.5 left-0.5 size-6 rounded-full bg-white shadow-[0_2px_6px_rgb(0_0_0/0.25)] transition-transform duration-300 ease-[cubic-bezier(.2,.8,.2,1.2)]',
+          'absolute top-0.5 left-0.5 size-6 rounded-full bg-white ring-1 ring-black/5 transition-transform duration-200 ease-out',
           checked && 'translate-x-5',
         )}
       />

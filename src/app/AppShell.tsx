@@ -37,9 +37,9 @@ export default function AppShell() {
         <Outlet />
       </div>
 
-      {/* Floating glass tab bar. */}
+      {/* Floating tab bar. */}
       <nav className="safe-bottom pointer-events-none fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md px-4">
-        <div className="pointer-events-auto mb-2 grid h-[68px] grid-cols-5 items-center rounded-full bg-[var(--nav-bg)] px-1 shadow-[0_18px_40px_-14px_rgb(0_0_0/0.35),inset_0_1px_0_var(--card-highlight),0_0_0_1px_var(--card-ring)] backdrop-blur-2xl backdrop-saturate-150">
+        <div className="pointer-events-auto mb-2 grid h-[68px] grid-cols-5 items-center rounded-full bg-[var(--nav-bg)] px-1 ring-1 ring-line backdrop-blur-xl">
           {TABS.map((t) =>
             t ? (
               <NavLink
@@ -63,10 +63,9 @@ export default function AppShell() {
                   type="button"
                   aria-label="Add data"
                   onClick={() => setSheet({ kind: 'chooser' })}
-                  className="relative -mt-9 grid size-[60px] place-items-center rounded-full bg-[linear-gradient(135deg,var(--brand),var(--brand-2))] text-white shadow-[var(--shadow-float)] ring-[5px] ring-bg transition active:scale-90"
+                  className="relative -mt-9 grid size-[60px] place-items-center rounded-full bg-brand text-white ring-[5px] ring-bg transition-colors hover:bg-[color-mix(in_oklab,var(--brand)_88%,black)]"
                 >
-                  <span className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_30%_25%,rgb(255_255_255/0.35),transparent_55%)]" />
-                  <Plus className="relative size-7" strokeWidth={2.6} />
+                  <Plus className="size-7" strokeWidth={2.4} />
                 </button>
               </div>
             ),
@@ -84,7 +83,7 @@ export default function AppShell() {
               <Footprints key="f" className="size-5" />,
               <BedDouble key="b" className="size-5" />,
             ]}
-            tone="bg-[linear-gradient(135deg,var(--steps),var(--sleep))]"
+            tone="bg-steps"
           />
           <ChooserOption
             onClick={() => setSheet({ kind: 'workout' })}
@@ -103,8 +102,8 @@ export default function AppShell() {
 
 function ChooserOption({ onClick, title, text, icons, tone }: { onClick: () => void; title: string; text: string; icons: ReactNode[]; tone: string }) {
   return (
-    <button type="button" onClick={onClick} className="surface-card group flex animate-rise items-center gap-4 rounded-[26px] p-4 text-left transition active:scale-[0.98]">
-      <span className={cx('flex h-14 min-w-14 items-center justify-center gap-0.5 rounded-[18px] px-3 text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.3)]', tone)}>{icons}</span>
+    <button type="button" onClick={onClick} className="surface-card group flex animate-rise items-center gap-4 rounded-[26px] p-4 text-left transition-colors hover:bg-surface-2">
+      <span className={cx('flex h-14 min-w-14 items-center justify-center gap-0.5 rounded-[18px] px-3 text-white', tone)}>{icons}</span>
       <span className="flex-1">
         <span className="block font-bold">{title}</span>
         <span className="block text-[13px] text-muted">{text}</span>

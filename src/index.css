@@ -18,7 +18,6 @@
   --scrim: rgb(8 12 24 / 0.45);
 
   --brand: #1e6fff;
-  --brand-2: #7a4dff;
   --brand-soft: #e8efff;
 
   --steps: #10b47a;
@@ -36,18 +35,11 @@
   --danger: #e5484d;
   --danger-soft: #fdecec;
 
-  /* Hero surfaces (Profile, Group, Auth): deep blue → violet. */
-  --hero: radial-gradient(130% 120% at 0% 0%, #3d8bff 0%, #1e5dff 38%, #4b2fd6 78%, #2a1a8f 100%);
-  --night: linear-gradient(140deg, #1b1554 0%, #3a26a8 55%, #6d4dff 100%);
+  /* Solid header surfaces (Profile, Group, Auth, Ranking) and the sleep card. */
+  --hero: #1a56db;
+  --night: #2a2170;
 
-  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 6px 20px -6px rgb(15 23 42 / 0.08);
-  --shadow-float: 0 14px 34px -10px rgb(30 111 255 / 0.55);
-  --card-ring: rgb(15 23 42 / 0.05);
-  --card-highlight: transparent;
-  --nav-bg: rgb(255 255 255 / 0.78);
-  --aurora:
-    radial-gradient(60% 40% at 15% -5%, rgb(30 111 255 / 0.1), transparent 70%),
-    radial-gradient(50% 35% at 100% 0%, rgb(122 77 255 / 0.08), transparent 70%);
+  --nav-bg: rgb(255 255 255 / 0.92);
 
   color-scheme: light;
 }
@@ -65,7 +57,6 @@
   --scrim: rgb(0 0 0 / 0.6);
 
   --brand: #3f86ff;
-  --brand-2: #8c6dff;
   --brand-soft: rgb(63 134 255 / 0.15);
 
   --steps: #22d68f;
@@ -83,18 +74,10 @@
   --danger: #ff5d63;
   --danger-soft: rgb(255 93 99 / 0.14);
 
-  --hero: radial-gradient(130% 120% at 0% 0%, #2a6cff 0%, #1745c9 40%, #35209e 78%, #160d52 100%);
-  --night: linear-gradient(140deg, #120d3a 0%, #2b1d86 55%, #5b3ff0 100%);
+  --hero: #1745c9;
+  --night: #1d1650;
 
-  --shadow-card: 0 12px 32px -14px rgb(0 0 0 / 0.7);
-  --shadow-float: 0 14px 36px -8px rgb(63 134 255 / 0.6);
-  --card-ring: rgb(255 255 255 / 0.06);
-  --card-highlight: rgb(255 255 255 / 0.05);
-  --nav-bg: rgb(12 19 36 / 0.72);
-  --aurora:
-    radial-gradient(70% 45% at 10% -8%, rgb(63 134 255 / 0.22), transparent 70%),
-    radial-gradient(55% 40% at 105% 2%, rgb(140 109 255 / 0.18), transparent 70%),
-    radial-gradient(60% 30% at 50% 110%, rgb(34 214 143 / 0.06), transparent 70%);
+  --nav-bg: rgb(12 19 36 / 0.92);
 
   color-scheme: dark;
 }
@@ -113,7 +96,6 @@
   --color-line: var(--line);
   --color-scrim: var(--scrim);
   --color-brand: var(--brand);
-  --color-brand-2: var(--brand-2);
   --color-brand-soft: var(--brand-soft);
   --color-steps: var(--steps);
   --color-steps-strong: var(--steps-strong);
@@ -130,15 +112,14 @@
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
 
-  --shadow-card: var(--shadow-card);
-  --shadow-float: var(--shadow-float);
+  --color-hero: var(--hero);
+  --color-night: var(--night);
 
   --animate-sheet-in: sheet-in 320ms cubic-bezier(0.2, 0.9, 0.25, 1);
   --animate-fade-in: fade-in 220ms ease-out;
   --animate-pop: pop 380ms cubic-bezier(0.2, 0.8, 0.2, 1.2);
   --animate-rise: rise 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
   --animate-shimmer: shimmer 1.6s linear infinite;
-  --animate-float: float 6s ease-in-out infinite;
 
   @keyframes sheet-in {
     from { transform: translateY(100%); }
@@ -160,10 +141,6 @@
     from { background-position: -200% 0; }
     to { background-position: 200% 0; }
   }
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-6px); }
-  }
 }
 
 @layer base {
@@ -177,15 +154,6 @@
     font-feature-settings: 'cv11', 'ss01', 'ss03';
     overscroll-behavior-y: none;
     transition: background-color 300ms ease, color 300ms ease;
-  }
-  /* Soft colored glow behind every screen; fixed so it stays put while scrolling. */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background: var(--aurora);
   }
   :focus-visible {
     outline: 2px solid var(--brand);
@@ -221,13 +189,10 @@
   }
 }
 
-/* Card surface: hairline ring plus a faint top highlight in dark mode. */
+/* Card surface: flat, with a hairline border drawn as a ring so it takes no layout space. */
 @utility surface-card {
   background: var(--surface);
-  box-shadow:
-    inset 0 1px 0 var(--card-highlight),
-    0 0 0 1px var(--card-ring),
-    var(--shadow-card);
+  box-shadow: 0 0 0 1px var(--line);
 }
 
 /* Big display numbers. */
@@ -236,14 +201,6 @@
   letter-spacing: -0.035em;
   font-variant-numeric: tabular-nums;
   line-height: 1;
-}
-
-/* Text with the brand gradient. */
-@utility text-gradient {
-  background: linear-gradient(120deg, var(--brand), var(--brand-2));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
 }
 
 @media (prefers-reduced-motion: reduce) {

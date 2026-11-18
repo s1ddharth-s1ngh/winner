@@ -87,8 +87,6 @@ function StepsHero({ day, source, onAdd }: { day: DayScore; source: string | nul
   const top = STEP_TIERS.at(-1)!.min
   return (
     <Card className="relative overflow-hidden p-5">
-      <div className="pointer-events-none absolute -top-28 -right-20 size-72 rounded-full bg-steps/20 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-32 -left-24 size-64 rounded-full bg-brand/10 blur-3xl" />
       <div className="relative flex items-center justify-between">
         <Chip tone="steps" className="py-1 text-xs">
           <Footprints className="size-3.5" /> Steps today
@@ -96,7 +94,7 @@ function StepsHero({ day, source, onAdd }: { day: DayScore; source: string | nul
         <Stars value={day.stepsStars} max={MAX_STEP_STARS} size={17} />
       </div>
       <div className="relative mt-3 flex justify-center">
-        <Ring value={steps / GOALS.dailySteps} size={212} stroke={20} from="color-mix(in oklab, var(--steps) 55%, #b9f5dc)" to="var(--steps)">
+        <Ring value={steps / GOALS.dailySteps} size={212} stroke={20} from="var(--steps)" to="var(--steps)">
           <div>
             <div className="display text-[48px]">
               <AnimatedNumber value={steps} format={formatNumber} />
@@ -113,7 +111,7 @@ function StepsHero({ day, source, onAdd }: { day: DayScore; source: string | nul
       <div className="relative mt-5 px-3">
         <div className="relative h-2 rounded-full bg-surface-2">
           <div
-            className="absolute inset-y-0 left-0 rounded-full bg-[linear-gradient(90deg,color-mix(in_oklab,var(--steps)_45%,transparent),var(--steps))] transition-[width] duration-1000"
+            className="absolute inset-y-0 left-0 rounded-full bg-steps transition-[width] duration-1000"
             style={{ width: `${Math.min(1, steps / top) * 100}%` }}
           />
           {STEP_TIERS.map((t) => {
@@ -152,7 +150,7 @@ function StepsHero({ day, source, onAdd }: { day: DayScore; source: string | nul
         <button
           type="button"
           onClick={onAdd}
-          className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-steps px-4 text-[13px] font-bold text-white shadow-[0_10px_24px_-10px_var(--steps)] transition active:scale-95"
+          className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-brand px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[color-mix(in_oklab,var(--brand)_88%,black)]"
         >
           <Plus className="size-4" strokeWidth={2.6} /> Update
         </button>
@@ -164,7 +162,6 @@ function StepsHero({ day, source, onAdd }: { day: DayScore; source: string | nul
 function StreakCard({ icon, tone, value, unit, label }: { icon: typeof Flame; tone: 'steps' | 'sleep'; value: number; unit: string; label: string }) {
   return (
     <Card className="relative overflow-hidden p-4">
-      <div className={cx('pointer-events-none absolute -top-10 -right-10 size-28 rounded-full blur-2xl', tone === 'steps' ? 'bg-hobby/20' : 'bg-sleep/20')} />
       <IconTile icon={icon} tone={tone === 'steps' ? 'hobby' : 'sleep'} size={38} />
       <p className="display mt-3 text-[26px]">
         <AnimatedNumber value={value} />
@@ -174,16 +171,6 @@ function StreakCard({ icon, tone, value, unit, label }: { icon: typeof Flame; to
     </Card>
   )
 }
-
-/** A few twinkling dots for the night card: [x%, y%, radius]. */
-const NIGHT_DOTS = [
-  [8, 18, 1.4],
-  [22, 64, 1],
-  [38, 12, 1.2],
-  [55, 30, 0.9],
-  [64, 70, 1.1],
-  [86, 58, 1],
-]
 
 function SleepCard({ day, onAdd }: { day: DayScore; onAdd: () => void }) {
   const s = day.sleep
@@ -195,30 +182,24 @@ function SleepCard({ day, onAdd }: { day: DayScore; onAdd: () => void }) {
           <p className="font-bold">No sleep data</p>
           <p className="text-[13px] text-muted">No data means 0★ for the night. Add it in seconds.</p>
         </div>
-        <button type="button" onClick={onAdd} className="h-10 shrink-0 rounded-full bg-sleep px-4 text-[13px] font-bold text-white shadow-[0_10px_24px_-10px_var(--sleep)]">
+        <button type="button" onClick={onAdd} className="h-10 shrink-0 rounded-full bg-brand px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[color-mix(in_oklab,var(--brand)_88%,black)]">
           Add
         </button>
       </Card>
     )
   return (
     <Card className="overflow-hidden">
-      <div className="relative overflow-hidden bg-[image:var(--night)] p-5 text-white">
-        <svg className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden>
-          {NIGHT_DOTS.map(([x, y, r], i) => (
-            <circle key={i} cx={`${x}%`} cy={`${y}%`} r={r} fill="white" className="animate-pulse" style={{ animationDelay: `${i * 300}ms` }} opacity={0.6} />
-          ))}
-        </svg>
-        {/* Crescent moon. */}
-        <div className="pointer-events-none absolute top-4 right-5 size-12 rotate-[-20deg] rounded-full shadow-[inset_-10px_6px_0_0_#fff1c2] drop-shadow-[0_0_14px_rgb(255_220_140/0.55)]" />
+      <div className="relative overflow-hidden bg-night p-5 text-white">
+        <MoonStar className="pointer-events-none absolute top-5 right-5 size-7 text-white/40" aria-hidden />
         <span className="relative text-[13px] font-semibold text-white/70">Time asleep</span>
         <p className="display relative mt-2 text-[40px]">{duration(s.minutes)}</p>
         <Stars value={s.stars} max={MAX_SLEEP_STARS} size={16} className="relative mt-3" />
         <div className="relative mt-5 flex items-center gap-3 text-sm">
-          <span className="flex items-center gap-1.5 rounded-full bg-white/12 px-3 py-1.5 font-semibold ring-1 ring-white/15 backdrop-blur">
+          <span className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 font-semibold ring-1 ring-white/15">
             <MoonStar className="size-4" /> {clock(s.bedtime)}
           </span>
-          <span className="h-px flex-1 bg-[linear-gradient(90deg,rgb(255_255_255/0.45),rgb(255_255_255/0.1),rgb(255_255_255/0.45))]" />
-          <span className="flex items-center gap-1.5 rounded-full bg-white/12 px-3 py-1.5 font-semibold ring-1 ring-white/15 backdrop-blur">
+          <span className="h-px flex-1 bg-white/25" />
+          <span className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 font-semibold ring-1 ring-white/15">
             <Sunrise className="size-4" /> {s.wake != null ? clock(s.wake) : '—'}
           </span>
         </div>
@@ -240,14 +221,13 @@ function StarsCard({ day }: { day: DayScore }) {
   const max = parts.reduce((s, p) => s + p.max, 0)
   return (
     <Card className="relative overflow-hidden p-5">
-      <div className="pointer-events-none absolute -top-16 -right-12 size-40 rounded-full bg-star/15 blur-3xl" />
       <div className="relative flex items-end justify-between">
         <p className="display text-[46px]">
           <AnimatedNumber value={day.total} />
           <span className="text-xl font-bold tracking-normal text-faint"> / {max}</span>
         </p>
-        <span className="grid size-12 place-items-center rounded-[16px] bg-[linear-gradient(135deg,color-mix(in_oklab,var(--star)_70%,white),var(--star))] text-white shadow-[0_10px_24px_-10px_var(--star)]">
-          <Star className="size-6 fill-white" />
+        <span className="grid size-12 place-items-center rounded-[16px] bg-star-soft text-star-strong">
+          <Star className="size-6 fill-current" />
         </span>
       </div>
       <div className="relative mt-4 flex h-3 gap-1 overflow-hidden rounded-full bg-surface-2">
@@ -292,7 +272,7 @@ function WeekStrip({ history, today }: { history: DayScore[]; today: ISODate }) 
               <div className="relative h-16 w-3 overflow-hidden rounded-full bg-surface-2">
                 {!future && (
                   <div
-                    className={cx('absolute inset-x-0 bottom-0 rounded-full transition-[height] duration-700', pct >= 1 ? 'bg-[linear-gradient(180deg,var(--star),var(--steps))]' : 'bg-steps')}
+                    className={cx('absolute inset-x-0 bottom-0 rounded-full transition-[height] duration-700', pct >= 1 ? 'bg-star' : 'bg-steps')}
                     style={{ height: `${pct * 100}%` }}
                   />
                 )}
@@ -312,7 +292,7 @@ function WorkoutsToday({ workouts }: { workouts: { id: string; type: string; dur
     <>
       <SectionTitle
         action={
-          <button type="button" onClick={openWorkout} className="inline-flex h-8 items-center gap-1 rounded-full bg-hobby-soft px-3 text-[13px] font-bold text-hobby-strong transition active:scale-95">
+          <button type="button" onClick={openWorkout} className="inline-flex h-8 items-center gap-1 rounded-full bg-surface-2 px-3 text-[13px] font-semibold text-ink-2 ring-1 ring-line transition-colors hover:bg-surface-3">
             <Plus className="size-4" strokeWidth={2.6} /> Log
           </button>
         }

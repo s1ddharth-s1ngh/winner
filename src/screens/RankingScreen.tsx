@@ -1,4 +1,4 @@
-import { BedDouble, ChevronDown, CircleHelp, Crown, Footprints, Sparkles, UserPlus } from 'lucide-react'
+import { BedDouble, ChevronDown, CircleHelp, Crown, Footprints, Trophy, UserPlus } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { useGroupData, useToday } from '../app/hooks'
@@ -12,7 +12,7 @@ import ScoringSheet from './sheets/ScoringSheet'
 const BOARDS: { value: Board; label: ReactNode }[] = [
   { value: 'steps', label: <><Footprints className="size-4" /> Steps</> },
   { value: 'sleep', label: <><BedDouble className="size-4" /> Sleep</> },
-  { value: 'overall', label: <><Sparkles className="size-4" /> Overall</> },
+  { value: 'overall', label: <><Trophy className="size-4" /> Overall</> },
 ]
 const PERIODS: { value: Period; label: string }[] = [
   { value: 'today', label: 'Today' },
@@ -151,18 +151,15 @@ function Podium({ rows, board, me }: { rows: Row[]; board: Board; me: string }) 
   const height = { 1: 'h-28', 2: 'h-20', 3: 'h-14' } as Record<number, string>
   const delay = { 1: 2, 2: 1, 3: 0 } as Record<number, number>
   return (
-    <div className="relative mt-5 overflow-hidden rounded-[30px] bg-[image:var(--hero)] px-3 pt-10 text-white shadow-[var(--shadow-float)]">
-      <div className="pointer-events-none absolute top-6 left-1/2 size-48 -translate-x-1/2 rounded-full bg-[#ffd76a]/25 blur-3xl" />
-      <div className="pointer-events-none absolute -right-16 -bottom-24 size-60 rounded-full border border-white/10" />
-      <div className="pointer-events-none absolute -left-20 -top-20 size-52 rounded-full border border-white/10" />
+    <div className="relative mt-5 overflow-hidden rounded-[30px] bg-hero px-3 pt-10 text-white">
       <div className="relative grid grid-cols-3 items-end gap-2">
         {order.map((r) => {
           const rank = r.rank ?? 3
           return (
             <div key={r.profile.id} style={rise(delay[rank])} className="flex animate-rise flex-col items-center">
               <div className="relative">
-                {rank === 1 && <Crown className="absolute -top-7 left-1/2 size-7 -translate-x-1/2 animate-float fill-[#ffd76a] text-[#ffd76a] drop-shadow-[0_0_10px_rgb(255_215_106/0.7)]" />}
-                <span className={cx('block rounded-full p-[3px]', rank === 1 ? 'bg-[linear-gradient(135deg,#ffe8a3,#f5a524)]' : 'bg-white/25')}>
+                {rank === 1 && <Crown className="absolute -top-7 left-1/2 size-7 -translate-x-1/2 fill-[#f5b731] text-[#f5b731]" />}
+                <span className={cx('block rounded-full p-[3px]', rank === 1 ? 'bg-[#f5b731]' : 'bg-white/25')}>
                   <Avatar name={r.profile.username} color={r.profile.avatar_color} size={rank === 1 ? 70 : 56} />
                 </span>
                 <span className="absolute -bottom-2 left-1/2 -translate-x-1/2">
@@ -173,7 +170,7 @@ function Podium({ rows, board, me }: { rows: Row[]; board: Board; me: string }) 
               <p className="text-base font-extrabold">{board === 'steps' ? <span className="tabular">{compact(r.steps)}</span> : value(r, board)}</p>
               <div
                 className={cx(
-                  'mt-2.5 w-full rounded-t-[18px] bg-[linear-gradient(180deg,rgb(255_255_255/0.22),rgb(255_255_255/0.04))] shadow-[inset_0_1px_0_rgb(255_255_255/0.35)] backdrop-blur',
+                  'mt-2.5 w-full rounded-t-[18px] bg-white/15',
                   height[rank],
                 )}
               >

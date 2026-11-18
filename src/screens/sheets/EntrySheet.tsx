@@ -116,7 +116,6 @@ export default function EntrySheet({ open, onClose, initialDate }: { open: boole
         )}
 
         <section className="surface-card relative mt-5 animate-rise overflow-hidden rounded-[26px] p-4">
-          <span className="pointer-events-none absolute -top-16 -right-16 size-40 rounded-full bg-steps opacity-15 blur-3xl" />
           <div className="flex items-center justify-between">
             <h3 className="flex items-center gap-2 text-[15px] font-bold">
               <IconTile icon={Footprints} tone="steps" size={32} />
@@ -137,7 +136,6 @@ export default function EntrySheet({ open, onClose, initialDate }: { open: boole
         </section>
 
         <section className="surface-card relative mt-3 animate-rise overflow-hidden rounded-[26px] p-4" style={{ animationDelay: '60ms' }}>
-          <span className="pointer-events-none absolute -top-16 -right-16 size-40 rounded-full bg-sleep opacity-15 blur-3xl" />
           <div className="flex items-center justify-between">
             <h3 className="flex items-center gap-2 text-[15px] font-bold">
               <IconTile icon={BedDouble} tone="sleep" size={32} />

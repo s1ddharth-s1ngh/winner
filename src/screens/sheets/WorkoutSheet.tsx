@@ -60,10 +60,10 @@ export default function WorkoutSheet({ open, onClose }: { open: boolean; onClose
                 onClick={() => setType(t)}
                 aria-pressed={type === t}
                 className={cx(
-                  'flex flex-col items-center gap-1.5 rounded-[20px] py-3 text-[12px] font-semibold transition active:scale-95',
+                  'flex flex-col items-center gap-1.5 rounded-[20px] py-3 text-[12px] font-semibold transition-colors',
                   type === t
-                    ? 'bg-[linear-gradient(135deg,var(--star),var(--hobby))] text-white shadow-[0_10px_24px_-10px_var(--hobby),inset_0_1px_0_rgb(255_255_255/0.3)]'
-                    : 'surface-card text-ink-2',
+                    ? 'bg-brand text-white'
+                    : 'bg-surface-2 text-ink-2 ring-1 ring-line',
                 )}
               >
                 <Icon className="size-5" />
@@ -82,7 +82,7 @@ export default function WorkoutSheet({ open, onClose }: { open: boolean; onClose
               key={m}
               type="button"
               onClick={() => setMinutes(m)}
-              className={cx('h-10 min-w-14 rounded-full px-3 text-sm font-semibold transition', minutes === m ? 'bg-ink text-bg' : 'surface-card text-ink-2')}
+              className={cx('h-10 min-w-14 rounded-full px-3 text-sm font-semibold transition', minutes === m ? 'bg-ink text-bg' : 'bg-surface-2 text-ink-2 ring-1 ring-line')}
             >
               {duration(m)}
             </button>
@@ -116,7 +116,7 @@ export default function WorkoutSheet({ open, onClose }: { open: boolean; onClose
           <Chip tone="hobby">+{WORKOUT_BONUS.stars}★</Chip> on days with at least one session.
         </p>
         {error && <p className="mt-4 rounded-[20px] bg-danger-soft px-4 py-3 text-sm font-medium text-danger">{error}</p>}
-        <Button type="submit" loading={busy} className="mt-5 w-full !bg-[linear-gradient(120deg,var(--star),var(--hobby))] !shadow-[0_14px_34px_-10px_var(--hobby)]">
+        <Button type="submit" loading={busy} className="mt-5 w-full">
           Log {type.toLowerCase()}
         </Button>
       </form>

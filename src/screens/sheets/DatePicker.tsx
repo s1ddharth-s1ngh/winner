@@ -6,7 +6,7 @@ import { cx } from '../../components/ui'
 export function DatePicker({ value, onChange, today }: { value: ISODate; onChange: (d: ISODate) => void; today: ISODate }) {
   const yesterday = addDays(today, -1)
   const chip = (active: boolean) =>
-    cx('h-10 rounded-full px-4 text-sm font-semibold transition', active ? 'bg-ink text-bg shadow-[0_8px_20px_-10px_var(--ink)]' : 'surface-card text-ink-2')
+    cx('h-10 rounded-full px-4 text-sm font-semibold transition', active ? 'bg-ink text-bg' : 'bg-surface-2 text-ink-2 ring-1 ring-line')
   const other = value !== today && value !== yesterday
   return (
     <div className="flex items-center gap-2">

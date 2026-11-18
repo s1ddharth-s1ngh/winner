@@ -154,7 +154,7 @@ export function SleepChart({ nights, target, height = 220 }: { nights: Night[]; 
   const y = (rank: number) => ((rank - lo) / span) * 100
   const ticks: number[] = []
   for (let r = lo; r <= hi; r += span > 14 * 60 ? 180 : 120) ticks.push(r)
-  const tone = (s: number) => (s >= 4 ? 'from-sleep to-sleep-strong' : s >= 3 ? 'from-sleep/80 to-sleep' : s >= 2 ? 'from-sleep/45 to-sleep/70' : 'from-star/70 to-hobby/80')
+  const tone = (s: number) => (s >= 4 ? 'bg-sleep' : s >= 3 ? 'bg-sleep/80' : s >= 2 ? 'bg-sleep/50' : 'bg-star')
   const dense = nights.length > 14
   return (
     <div className="flex gap-2">
@@ -178,7 +178,7 @@ export function SleepChart({ nights, target, height = 220 }: { nights: Night[]; 
               <div key={n.key} className="relative flex-1" title={n.bedtime != null ? `${n.label}: ${clock(n.bedtime)} → ${clock(n.bedtime + (n.minutes ?? 0))}` : `${n.label}: no data`}>
                 {n.bedtime != null && n.minutes != null ? (
                   <div
-                    className={cx('absolute inset-x-0 rounded-full bg-gradient-to-b', tone(n.stars), n.active && 'ring-2 ring-ink/80 ring-offset-2 ring-offset-surface')}
+                    className={cx('absolute inset-x-0 rounded-full', tone(n.stars), n.active && 'ring-2 ring-ink/80 ring-offset-2 ring-offset-surface')}
                     style={{ top: `${y(bedtimeRank(n.bedtime))}%`, height: `${(n.minutes / span) * 100}%` }}
                   />
                 ) : (

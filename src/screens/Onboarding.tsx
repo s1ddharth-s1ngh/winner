@@ -1,4 +1,4 @@
-import { ArrowRight, Check, Hash, Plus, Sparkles, Users } from 'lucide-react'
+import { ArrowRight, Check, Hash, Plus, Users } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { AVATAR_COLORS } from '../config/app'
 import { repo } from '../data/repo'
@@ -49,7 +49,7 @@ export default function Onboarding() {
     <div className="safe-top safe-bottom mx-auto flex min-h-dvh max-w-md flex-col px-5">
       <div className="mt-4 flex gap-1.5">
         {['profile', 'group'].map((s, i) => (
-          <span key={s} className={cx('h-1.5 flex-1 rounded-full transition', i <= (step === 'profile' ? 0 : 1) ? 'bg-[linear-gradient(90deg,var(--brand),var(--brand-2))]' : 'bg-surface-3')} />
+          <span key={s} className={cx('h-1.5 flex-1 rounded-full transition', i <= (step === 'profile' ? 0 : 1) ? 'bg-brand' : 'bg-surface-3')} />
         ))}
       </div>
 
@@ -60,13 +60,7 @@ export default function Onboarding() {
           <p className="mt-1 text-[15px] text-muted">This is how your friends will see you in the rankings.</p>
 
           <div className="mt-8 flex justify-center">
-            <div className="relative">
-              <span className="absolute inset-0 scale-125 rounded-full blur-2xl" style={{ background: color, opacity: 0.35 }} />
-              <Avatar name={username || '?'} color={color} size={104} />
-              <span className="absolute -right-1 -bottom-1 grid size-8 place-items-center rounded-full bg-star text-white ring-4 ring-bg">
-                <Sparkles className="size-4" />
-              </span>
-            </div>
+            <Avatar name={username || '?'} color={color} size={104} />
           </div>
 
           <div className="mt-6 flex flex-wrap justify-center gap-2.5">
@@ -150,7 +144,7 @@ export default function Onboarding() {
               onClick={() => void run('demo', () => repo.joinGroup(DEMO_GROUP_CODE))()}
               className="mx-auto mt-6 mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand"
             >
-              <Sparkles className="size-4" /> Try the demo group with sample friends
+              <Users className="size-4" /> Try the demo group with sample friends
             </button>
           )}
         </div>
