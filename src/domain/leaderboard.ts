@@ -28,6 +28,7 @@ export interface Row {
   rank: number | null
   steps: number
   stepsStars: number
+  flightsStars: number
   sleepStars: number
   /** Nights with sleep data / nights elapsed in the period. */
   sleepNights: number
@@ -55,6 +56,7 @@ export function summarize(m: MemberData, range: Range, today: ISODate): Row {
     rank: null,
     steps: days.reduce((s, d) => s + (d.steps ?? 0), 0),
     stepsStars: days.reduce((s, d) => s + d.stepsStars, 0),
+    flightsStars: days.reduce((s, d) => s + d.flightsStars, 0),
     sleepStars: days.reduce((s, d) => s + d.sleepStars, 0),
     sleepNights: slept.length,
     nights: days.length,
@@ -73,7 +75,7 @@ const hasData = (r: Row, board: Board) =>
     ? r.days.some((d) => d.steps != null)
     : board === 'sleep'
       ? r.sleepNights > 0
-      : r.days.some((d) => d.steps != null || d.sleep != null || d.workouts > 0)
+      : r.days.some((d) => d.steps != null || d.flights != null || d.sleep != null || d.workouts > 0)
 
 export const boardValue = (r: Row, board: Board) =>
   board === 'steps' ? r.steps : board === 'sleep' ? r.sleepStars : r.totalStars

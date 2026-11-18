@@ -1,6 +1,7 @@
 import {
   BEDTIME_DAY_START,
   BEDTIME_TIERS,
+  FLIGHT_TIERS,
   SLEEP_DURATION_BONUS,
   STEP_TIERS,
   STREAKS,
@@ -24,6 +25,8 @@ export interface DayScore {
   date: ISODate
   steps: number | null
   stepsStars: number
+  flights: number | null
+  flightsStars: number
   /** null = no sleep data for the night that ended on this date. */
   sleep: SleepScore | null
   sleepStars: number
@@ -44,12 +47,15 @@ const DAY_START = toMinutes(BEDTIME_DAY_START)
 export const bedtimeRank = (minutesOfDay: number) => (minutesOfDay - DAY_START + 1440) % 1440
 export const fromBedtimeRank = (rank: number) => (Math.round(rank) + DAY_START) % 1440
 
-export function stepStars(steps: number | null): number {
-  if (steps == null) return 0
+function tierStars(value: number | null, tiers: readonly { min: number; stars: number }[]): number {
+  if (value == null) return 0
   let stars = 0
-  for (const tier of STEP_TIERS) if (steps >= tier.min) stars = tier.stars
+  for (const tier of tiers) if (value >= tier.min) stars = tier.stars
   return stars
 }
+
+export const stepStars = (steps: number | null) => tierStars(steps, STEP_TIERS)
+export const flightStars = (flights: number | null) => tierStars(flights, FLIGHT_TIERS)
 
 export function bedtimeStars(minutesOfDay: number): number {
   const rank = bedtimeRank(minutesOfDay)
@@ -86,6 +92,8 @@ export function scoreSleep(stat: DailyStat | undefined, tz: string): SleepScore 
 export function scoreDay(date: ISODate, stat: DailyStat | undefined, workouts: Workout[], tz: string): DayScore {
   const steps = stat?.steps ?? null
   const stepsStars = stepStars(steps)
+  const flights = stat?.flights ?? null
+  const flightsStars = flightStars(flights)
   const sleep = scoreSleep(stat, tz)
   const sleepStars = sleep?.stars ?? 0
   const dayWorkouts = workouts.filter((w) => w.date === date)
@@ -94,12 +102,14 @@ export function scoreDay(date: ISODate, stat: DailyStat | undefined, workouts: W
     date,
     steps,
     stepsStars,
+    flights,
+    flightsStars,
     sleep,
     sleepStars,
     workouts: dayWorkouts.length,
     workoutMinutes: dayWorkouts.reduce((s, w) => s + w.duration_min, 0),
     workoutStars,
-    total: stepsStars + sleepStars + workoutStars,
+    total: stepsStars + flightsStars + sleepStars + workoutStars,
   }
 }
 

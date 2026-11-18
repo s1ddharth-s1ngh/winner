@@ -6,6 +6,7 @@ import type { ISODate } from '../lib/dates'
 import EntrySheet from '../screens/sheets/EntrySheet'
 import WorkoutSheet from '../screens/sheets/WorkoutSheet'
 import { useOvertakeWatcher } from './inbox'
+import PendingInvite from './PendingInvite'
 import { useSession } from './session'
 import { useHealthAutoSync } from '../native/health'
 
@@ -36,6 +37,7 @@ export default function AppShell() {
       <div className="mx-auto min-h-dvh max-w-md pb-28">
         <Outlet />
       </div>
+      <PendingInvite />
 
       {/* Flat tab bar: hairline on top, outlined icons, the active tab in the accent color. */}
       <nav className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-line bg-[var(--nav-bg)]">

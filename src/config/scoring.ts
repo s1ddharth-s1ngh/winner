@@ -9,6 +9,14 @@ export const STEP_TIERS = [
   { min: 28_000, stars: 4 },
 ] as const
 
+/** Stars for daily flights of stairs climbed. Highest matching tier wins. */
+export const FLIGHT_TIERS = [
+  { min: 30, stars: 1 },
+  { min: 60, stars: 2 },
+  { min: 90, stars: 3 },
+  { min: 120, stars: 4 },
+] as const
+
 /** Stars for the time you fall asleep (local time). First tier whose `until` is not passed wins; later = 0★. */
 export const BEDTIME_TIERS = [
   { until: '23:00', stars: 3 },
@@ -32,17 +40,18 @@ export const WORKOUT_BONUS = { stars: 1 } as const
 export const STREAKS = { stepsMinStars: 1, sleepMinStars: 2 } as const
 
 /** Personal targets shown in the UI (rings, chart goal lines). */
-export const GOALS = { dailySteps: 25_000, bedtime: '23:00', sleepMinutes: 8 * 60 } as const
+export const GOALS = { dailySteps: 25_000, dailyFlights: 120, bedtime: '23:00', sleepMinutes: 8 * 60 } as const
 
 /** Leaderboard notifications ("X passed you"). */
 export const NOTIFICATIONS = { maxPerDay: 5 } as const
 
 /** Input validation shared by manual entry and the ingest endpoint. */
-export const LIMITS = { maxSteps: 100_000, maxSleepMinutes: 16 * 60 } as const
+export const LIMITS = { maxSteps: 100_000, maxFlights: 500, maxSleepMinutes: 16 * 60 } as const
 
 export const MAX_STEP_STARS = Math.max(...STEP_TIERS.map((t) => t.stars))
+export const MAX_FLIGHT_STARS = Math.max(...FLIGHT_TIERS.map((t) => t.stars))
 export const MAX_SLEEP_STARS = Math.max(...BEDTIME_TIERS.map((t) => t.stars)) + SLEEP_DURATION_BONUS.stars
-export const MAX_DAY_STARS = MAX_STEP_STARS + MAX_SLEEP_STARS + WORKOUT_BONUS.stars
+export const MAX_DAY_STARS = MAX_STEP_STARS + MAX_FLIGHT_STARS + MAX_SLEEP_STARS + WORKOUT_BONUS.stars
 
 /** Workout / hobby types for the log. Add or remove freely. */
 export const WORKOUT_TYPES = [

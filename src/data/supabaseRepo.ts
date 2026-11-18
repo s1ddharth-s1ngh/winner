@@ -112,6 +112,10 @@ export function createSupabaseRepo(url: string, key: string): Repo {
         row.steps = input.steps
         row.steps_source = input.steps == null ? null : input.source
       }
+      if (input.flights !== undefined) {
+        row.flights = input.flights
+        row.flights_source = input.flights == null ? null : input.source
+      }
       if (input.sleep_start !== undefined || input.sleep_end !== undefined || input.sleep_minutes !== undefined) {
         if (input.sleep_start !== undefined) row.sleep_start = input.sleep_start
         if (input.sleep_end !== undefined) row.sleep_end = input.sleep_end

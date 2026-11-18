@@ -25,6 +25,8 @@ export function applyStatsInput(prev: DailyStat | null, userId: string, input: S
         date: input.date,
         steps: null,
         steps_source: null,
+        flights: null,
+        flights_source: null,
         sleep_start: null,
         sleep_end: null,
         sleep_minutes: null,
@@ -34,6 +36,10 @@ export function applyStatsInput(prev: DailyStat | null, userId: string, input: S
   if (input.steps !== undefined) {
     next.steps = input.steps
     next.steps_source = input.steps == null ? null : input.source
+  }
+  if (input.flights !== undefined) {
+    next.flights = input.flights
+    next.flights_source = input.flights == null ? null : input.source
   }
   if (input.sleep_start !== undefined || input.sleep_end !== undefined || input.sleep_minutes !== undefined) {
     if (input.sleep_start !== undefined) next.sleep_start = input.sleep_start

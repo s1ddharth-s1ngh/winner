@@ -3,8 +3,10 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App'
 import { initTheme } from './app/theme'
+import { capturePendingJoin } from './lib/invite'
 
 initTheme()
+capturePendingJoin()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

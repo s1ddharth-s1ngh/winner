@@ -2,6 +2,7 @@ import { ArrowRight, Eye, EyeOff, Footprints, Lock, MoonStar, Trophy, User } fro
 import { useState, type FormEvent } from 'react'
 import { APP } from '../config/app'
 import { repo } from '../data/repo'
+import { pendingJoin } from '../lib/invite'
 import { Button, Field, Segmented } from '../components/ui'
 
 // shortcut: Supabase Auth needs an email, so a username maps to a fake address (no password reset). Switch to real emails if that is ever needed.
@@ -67,6 +68,11 @@ export default function AuthScreen() {
             { value: 'up', label: 'Create account' },
           ]}
         />
+        {pendingJoin() && (
+          <p className="mt-5 rounded-[20px] bg-brand-soft px-4 py-3 text-sm font-medium text-ink-2">
+            You're invited to join a group. Sign in or create an account to continue.
+          </p>
+        )}
         <div className="mt-6 space-y-4">
           <Field
             label="Username"

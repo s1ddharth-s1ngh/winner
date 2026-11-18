@@ -2,6 +2,7 @@
 
 export const LIMITS = {
   maxSteps: 100_000,
+  maxFlights: 500,
   maxSleepMinutes: 16 * 60,
   /** How far back a steps date / wake-up time may be. */
   maxAgeDays: 7,
@@ -13,13 +14,17 @@ export interface StepsWrite {
   date: string
   steps: number
 }
+export interface FlightsWrite {
+  date: string
+  flights: number
+}
 export interface SleepWrite {
   date: string
   start: string
   end: string
   minutes: number
 }
-export type Validated = { ok: true; steps?: StepsWrite; sleep?: SleepWrite } | { ok: false; error: string }
+export type Validated = { ok: true; steps?: StepsWrite; flights?: FlightsWrite; sleep?: SleepWrite } | { ok: false; error: string }
 
 export function dateIn(instant: Date, tz: string): string {
   const p = Object.fromEntries(
@@ -50,15 +55,24 @@ export function validate(body: unknown, tz: string, now: Date): Validated {
   const b = body as Record<string, unknown>
   const today = dateIn(now, tz)
   const oldest = dateIn(new Date(now.getTime() - LIMITS.maxAgeDays * DAY), tz)
-  const out: { ok: true; steps?: StepsWrite; sleep?: SleepWrite } = { ok: true }
+  const out: { ok: true; steps?: StepsWrite; flights?: FlightsWrite; sleep?: SleepWrite } = { ok: true }
 
-  if (b.steps !== undefined && b.steps !== null && b.steps !== '') {
-    const steps = toNumber(b.steps)
-    if (steps == null || steps < 0 || steps > LIMITS.maxSteps) return { ok: false, error: `steps must be a number between 0 and ${LIMITS.maxSteps}.` }
+  const has = (v: unknown) => v !== undefined && v !== null && v !== ''
+  if (has(b.steps) || has(b.flights)) {
+    // Steps and flights are daily totals for the same `date`.
     const date = b.date === undefined ? today : b.date
     if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return { ok: false, error: 'date must look like YYYY-MM-DD.' }
     if (date > today || date < oldest) return { ok: false, error: `date must be within the last ${LIMITS.maxAgeDays} days.` }
-    out.steps = { date, steps: Math.round(steps) }
+    if (has(b.steps)) {
+      const steps = toNumber(b.steps)
+      if (steps == null || steps < 0 || steps > LIMITS.maxSteps) return { ok: false, error: `steps must be a number between 0 and ${LIMITS.maxSteps}.` }
+      out.steps = { date, steps: Math.round(steps) }
+    }
+    if (has(b.flights)) {
+      const flights = toNumber(b.flights)
+      if (flights == null || flights < 0 || flights > LIMITS.maxFlights) return { ok: false, error: `flights must be a number between 0 and ${LIMITS.maxFlights}.` }
+      out.flights = { date, flights: Math.round(flights) }
+    }
   }
 
   const hasStart = b.sleep_start !== undefined && b.sleep_start !== ''
@@ -79,6 +93,6 @@ export function validate(body: unknown, tz: string, now: Date): Validated {
     out.sleep = { date: dateIn(end, tz), start: start.toISOString(), end: end.toISOString(), minutes }
   }
 
-  if (!out.steps && !out.sleep) return { ok: false, error: 'Send steps and/or sleep_start + sleep_end.' }
+  if (!out.steps && !out.flights && !out.sleep) return { ok: false, error: 'Send steps, flights and/or sleep_start + sleep_end.' }
   return out
 }

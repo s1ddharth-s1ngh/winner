@@ -33,6 +33,8 @@ export interface DailyStat {
   date: ISODate
   steps: number | null
   steps_source: Source | null
+  flights: number | null
+  flights_source: Source | null
   sleep_start: string | null
   sleep_end: string | null
   sleep_minutes: number | null
@@ -44,6 +46,7 @@ export interface DailyStat {
 export interface StatsInput {
   date: ISODate
   steps?: number | null
+  flights?: number | null
   sleep_start?: string | null
   sleep_end?: string | null
   sleep_minutes?: number | null

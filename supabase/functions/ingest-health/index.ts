@@ -1,6 +1,6 @@
 // POST /functions/v1/ingest-health
 // Called by the iOS Shortcut. Auth: "Authorization: Bearer wfl_<64 hex>" personal token (stored hashed).
-// Body: { "steps": 9488, "sleep_start": ISO8601, "sleep_end": ISO8601, "sleep_minutes"?: 455, "date"?: "YYYY-MM-DD" }
+// Body: { "steps": 9488, "flights"?: 12, "sleep_start": ISO8601, "sleep_end": ISO8601, "sleep_minutes"?: 455, "date"?: "YYYY-MM-DD" }
 // Idempotent: re-sending the same data just rewrites the same row. Manual entries are never overwritten.
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { validate } from './validate.ts'
@@ -39,14 +39,14 @@ Deno.serve(async (req) => {
   const v = validate(body, profile?.timezone ?? 'Europe/Rome', new Date())
   if (!v.ok) return json(422, { error: v.error })
 
-  const dates = [...new Set([v.steps?.date, v.sleep?.date].filter((d): d is string => !!d))]
+  const dates = [...new Set([v.steps?.date, v.flights?.date, v.sleep?.date].filter((d): d is string => !!d))]
   const { data: existing, error: readError } = await sb
     .from('daily_stats')
-    .select('date, steps_source, sleep_source')
+    .select('date, steps_source, flights_source, sleep_source')
     .eq('user_id', tok.user_id)
     .in('date', dates)
   if (readError) return json(500, { error: 'Could not read existing data.' })
-  const manual = (date: string, field: 'steps_source' | 'sleep_source') =>
+  const manual = (date: string, field: 'steps_source' | 'flights_source' | 'sleep_source') =>
     existing?.find((r) => r.date === date)?.[field] === 'manual'
 
   const saved: Record<string, unknown> = {}
@@ -59,6 +59,13 @@ Deno.serve(async (req) => {
       else {
         Object.assign(row, { steps: v.steps.steps, steps_source: 'ios_shortcut' })
         saved.steps = v.steps
+      }
+    }
+    if (v.flights?.date === date) {
+      if (manual(date, 'flights_source')) skipped.push('flights (entered by hand)')
+      else {
+        Object.assign(row, { flights: v.flights.flights, flights_source: 'ios_shortcut' })
+        saved.flights = v.flights
       }
     }
     if (v.sleep?.date === date) {

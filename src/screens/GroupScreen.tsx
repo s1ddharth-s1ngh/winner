@@ -8,6 +8,7 @@ import { useToast } from '../components/toast'
 import { APP } from '../config/app'
 import { repo } from '../data/repo'
 import { formatDayShort } from '../lib/dates'
+import { inviteUrl } from '../lib/invite'
 
 export default function GroupScreen() {
   const { user, group, groups, selectGroup, refresh } = useSession()
@@ -20,7 +21,8 @@ export default function GroupScreen() {
   const [error, setError] = useState<string | null>(null)
 
   if (!group) return null
-  const inviteText = `Join my group "${group.name}" on ${APP.name}! Invite code: ${group.invite_code}\n${location.origin}`
+  const inviteText = `Join my group "${group.name}" on ${APP.name}! Invite code: ${group.invite_code}`
+  const link = inviteUrl(group.invite_code)
 
   const copy = async () => {
     await navigator.clipboard.writeText(group.invite_code)
@@ -28,10 +30,10 @@ export default function GroupScreen() {
     setTimeout(() => setCopied(false), 1500)
   }
   const share = async () => {
-    if (navigator.share) await navigator.share({ title: APP.name, text: inviteText }).catch(() => {})
+    if (navigator.share) await navigator.share({ title: APP.name, text: inviteText, url: link }).catch(() => {})
     else {
-      await navigator.clipboard.writeText(inviteText)
-      toast('Invite copied')
+      await navigator.clipboard.writeText(`${inviteText}\n${link}`)
+      toast('Invite link copied')
     }
   }
   const submit = async (e: FormEvent) => {
@@ -67,11 +69,12 @@ export default function GroupScreen() {
       </div>
       <PageHeader subtitle="Group" title={group.name} />
       <div className="px-4">
-        <Card className="animate-rise bg-hero p-5 text-white">
+        {/* Plain div: Card's surface-card background would override bg-hero. */}
+        <div className="animate-rise rounded-[26px] bg-hero p-5 text-white">
           <div>
             <p className="text-[11px] font-semibold tracking-[0.14em] text-white/70 uppercase">Invite code</p>
             <p className="mt-2 font-mono text-[36px] leading-none font-bold tracking-[0.25em]">{group.invite_code}</p>
-            <p className="mt-1 text-[13px] text-white/70">Friends enter this code after signing up.</p>
+            <p className="mt-1 text-[13px] text-white/70">Share the link, or friends enter this code after signing up.</p>
             <div className="mt-5 flex gap-2">
               <button type="button" onClick={copy} className="inline-flex h-10 items-center gap-2 rounded-full bg-white/10 px-4 text-sm font-semibold ring-1 ring-white/20 transition-colors hover:bg-white/20">
                 {copied ? <Check className="size-4" /> : <Copy className="size-4" />} {copied ? 'Copied' : 'Copy'}
@@ -81,7 +84,7 @@ export default function GroupScreen() {
               </button>
             </div>
           </div>
-        </Card>
+        </div>
 
         <SectionTitle>{members.data ? `${members.data.length} members` : 'Members'}</SectionTitle>
         <Card className="animate-rise divide-y divide-line" style={rise(1)}>

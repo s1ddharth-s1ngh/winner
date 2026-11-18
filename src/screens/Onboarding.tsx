@@ -6,6 +6,7 @@ import { DEMO_GROUP_CODE } from '../data/demoSeed'
 import { useSession } from '../app/session'
 import { Avatar, Button, Card, Field, cx, rise } from '../components/ui'
 import { TimezoneSelect } from '../components/TimezoneSelect'
+import { clearPendingJoin, pendingJoin } from '../lib/invite'
 
 /** Shown after sign-up until the user belongs to a group. */
 export default function Onboarding() {
@@ -15,7 +16,7 @@ export default function Onboarding() {
   const [color, setColor] = useState(profile.avatar_color)
   const [timezone, setTimezone] = useState(profile.timezone)
   const [groupName, setGroupName] = useState('')
-  const [code, setCode] = useState('')
+  const [code, setCode] = useState(pendingJoin() ?? '')
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -110,11 +111,11 @@ export default function Onboarding() {
           </Card>
 
           <Card style={rise(1)} className="mt-4 animate-rise p-5">
-            <form onSubmit={run('join', () => repo.joinGroup(code))}>
+            <form onSubmit={run('join', () => repo.joinGroup(code).then(clearPendingJoin))}>
               <div className="mb-4 flex items-center gap-3">
                 <div>
                   <h2 className="font-bold">Join with a code</h2>
-                  <p className="text-[13px] text-muted">Ask a friend for their 6-character code.</p>
+                  <p className="text-[13px] text-muted">{pendingJoin() ? 'Code from your invite link. Tap Join.' : 'Ask a friend for their 6-character code.'}</p>
                 </div>
               </div>
               <Field
