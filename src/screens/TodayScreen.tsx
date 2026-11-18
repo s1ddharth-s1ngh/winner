@@ -1,12 +1,11 @@
-import { Bell, BedDouble, ChevronRight, Dumbbell, Flame, Footprints, MoonStar, Plus, Star, Sunrise, Trash2, Trophy } from 'lucide-react'
+import { Bell, ChevronRight, Footprints, MoonStar, Plus, Star, Sunrise, Trash2, Trophy } from 'lucide-react'
 import { Link } from 'react-router'
 import { useGroupData, useMyData, useToday } from '../app/hooks'
 import { useInbox } from '../app/inbox'
 import { useSession } from '../app/session'
 import { useSheets } from '../app/AppShell'
 import { Ring } from '../components/charts'
-import { AnimatedNumber, Avatar, Card, Chip, IconButton, IconTile, PageHeader, RankBadge, SectionTitle, Skeleton, StarCount, Stars, cx, rise } from '../components/ui'
-import { workoutIcon } from '../components/workoutIcons'
+import { AnimatedNumber, Avatar, Card, Chip, IconButton, PageHeader, RankBadge, SectionTitle, Skeleton, StarCount, Stars, cx, rise } from '../components/ui'
 import { GOALS, MAX_SLEEP_STARS, MAX_STEP_STARS, STEP_TIERS, WORKOUT_BONUS } from '../config/scoring'
 import { repo } from '../data/repo'
 import { buildLeaderboard, periodRange } from '../domain/leaderboard'
@@ -54,8 +53,8 @@ export default function TodayScreen() {
         <div className="mt-3 grid grid-cols-2 gap-3">
           {my.data ? (
             <>
-              <StreakCard icon={Flame} tone="steps" value={currentStreak(my.data.history, qualifiesSteps)} unit="day" label="Steps streak" />
-              <StreakCard icon={MoonStar} tone="sleep" value={currentStreak(my.data.history, qualifiesSleep)} unit="night" label="Sleep streak" />
+              <StreakCard value={currentStreak(my.data.history, qualifiesSteps)} unit="day" label="Steps streak" />
+              <StreakCard value={currentStreak(my.data.history, qualifiesSleep)} unit="night" label="Sleep streak" />
             </>
           ) : (
             <>
@@ -159,11 +158,10 @@ function StepsHero({ day, source, onAdd }: { day: DayScore; source: string | nul
   )
 }
 
-function StreakCard({ icon, tone, value, unit, label }: { icon: typeof Flame; tone: 'steps' | 'sleep'; value: number; unit: string; label: string }) {
+function StreakCard({ value, unit, label }: { value: number; unit: string; label: string }) {
   return (
     <Card className="relative overflow-hidden p-4">
-      <IconTile icon={icon} tone={tone === 'steps' ? 'hobby' : 'sleep'} size={38} />
-      <p className="display mt-3 text-[26px]">
+      <p className="display text-[26px]">
         <AnimatedNumber value={value} />
         <span className="ml-1 text-sm font-semibold tracking-normal text-muted">{value === 1 ? unit : `${unit}s`}</span>
       </p>
@@ -177,7 +175,6 @@ function SleepCard({ day, onAdd }: { day: DayScore; onAdd: () => void }) {
   if (!s)
     return (
       <Card className="flex items-center gap-4 p-5">
-        <IconTile icon={BedDouble} tone="sleep" size={48} />
         <div className="min-w-0 flex-1">
           <p className="font-bold">No sleep data</p>
           <p className="text-[13px] text-muted">No data means 0★ for the night. Add it in seconds.</p>
@@ -226,9 +223,6 @@ function StarsCard({ day }: { day: DayScore }) {
           <AnimatedNumber value={day.total} />
           <span className="text-xl font-bold tracking-normal text-faint"> / {max}</span>
         </p>
-        <span className="grid size-12 place-items-center rounded-[16px] bg-star-soft text-star-strong">
-          <Star className="size-6 fill-current" />
-        </span>
       </div>
       <div className="relative mt-4 flex h-3 gap-1 overflow-hidden rounded-full bg-surface-2">
         {parts.map((p) => (
@@ -301,7 +295,6 @@ function WorkoutsToday({ workouts }: { workouts: { id: string; type: string; dur
       </SectionTitle>
       {workouts.length === 0 ? (
         <Card onClick={openWorkout} className="flex items-center gap-4 p-4">
-          <IconTile icon={Dumbbell} tone="hobby" size={44} />
           <div className="flex-1">
             <p className="text-[15px] font-semibold">Nothing logged today</p>
             <p className="text-[13px] text-muted">One session = +{WORKOUT_BONUS.stars}★ for the day</p>
@@ -311,10 +304,8 @@ function WorkoutsToday({ workouts }: { workouts: { id: string; type: string; dur
       ) : (
         <Card className="divide-y divide-line overflow-hidden">
           {workouts.map((w) => {
-            const Icon = workoutIcon(w.type)
             return (
               <div key={w.id} className="flex items-center gap-3 p-4">
-                <IconTile icon={Icon} tone="hobby" />
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold">{w.type}</p>
                   <p className="truncate text-[13px] text-muted">{w.note ?? duration(w.duration_min)}</p>

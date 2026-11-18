@@ -1,8 +1,8 @@
-import { ChevronRight, Lock, Settings, Users } from 'lucide-react'
+import { ChevronRight, Lock, Settings } from 'lucide-react'
 import { Link } from 'react-router'
 import { useMyData, useToday } from '../app/hooks'
 import { useSession } from '../app/session'
-import { Avatar, Card, IconTile, SectionTitle, Skeleton, cx, rise } from '../components/ui'
+import { Avatar, Card, SectionTitle, Skeleton, cx, rise } from '../components/ui'
 import { BADGES, type BadgeTone } from '../config/badges'
 import { longestStreak, qualifiesSleep, qualifiesSteps } from '../domain/scoring'
 import { addDays, formatDayShort, formatMonth } from '../lib/dates'
@@ -95,7 +95,6 @@ export default function ProfileScreen() {
         <SectionTitle>Groups</SectionTitle>
         <Card className="divide-y divide-line overflow-hidden">
           <Link to="/groups" className="flex items-center gap-3 p-4">
-            <IconTile icon={Users} tone="brand" />
             <span className="flex-1">
               <span className="block font-semibold">Your groups</span>
               <span className="block text-[13px] text-muted">{groups.map((g) => g.name).join(', ')}</span>
@@ -103,7 +102,6 @@ export default function ProfileScreen() {
             <ChevronRight className="size-5 text-faint" />
           </Link>
           <Link to="/settings" className="flex items-center gap-3 p-4">
-            <IconTile icon={Settings} tone="muted" />
             <span className="flex-1">
               <span className="block font-semibold">Settings</span>
               <span className="block text-[13px] text-muted">Profile, data sources, notifications</span>

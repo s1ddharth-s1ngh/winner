@@ -1,4 +1,4 @@
-import { ArrowLeft, BellRing, Footprints, Trophy } from 'lucide-react'
+import { ArrowLeft, Footprints, Trophy } from 'lucide-react'
 import { useEffect } from 'react'
 import { Link } from 'react-router'
 import { useInbox } from '../app/inbox'
@@ -31,7 +31,7 @@ export default function InboxScreen() {
       <div className="px-4">
         {items.length === 0 ? (
           <Card className="animate-rise">
-            <EmptyState icon={BellRing} title="All quiet" text="You'll see it here when a friend passes you in today's steps or overall ranking." />
+            <EmptyState title="All quiet" text="You'll see it here when a friend passes you in today's steps or overall ranking." />
           </Card>
         ) : (
           <Card className="divide-y divide-line overflow-hidden">

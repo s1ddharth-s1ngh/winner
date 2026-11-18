@@ -229,24 +229,6 @@ export function Chip({ children, tone = 'muted', className }: { children: ReactN
   )
 }
 
-/** Rounded square holding an icon, tinted by tone. */
-export function IconTile({ icon: Icon, tone = 'brand', size = 40, className }: { icon: LucideIcon; tone?: Tone; size?: number; className?: string }) {
-  const tones: Record<Tone, string> = {
-    muted: 'bg-surface-2 text-ink-2',
-    steps: 'bg-steps-soft text-steps-strong',
-    sleep: 'bg-sleep-soft text-sleep-strong',
-    star: 'bg-star-soft text-star-strong',
-    hobby: 'bg-hobby-soft text-hobby-strong',
-    brand: 'bg-brand-soft text-brand',
-    danger: 'bg-danger-soft text-danger',
-  }
-  return (
-    <span className={cx('grid shrink-0 place-items-center rounded-[14px]', tones[tone], className)} style={{ width: size, height: size }}>
-      <Icon style={{ width: size * 0.48, height: size * 0.48 }} strokeWidth={2.1} />
-    </span>
-  )
-}
-
 export function Field({
   label,
   hint,
@@ -292,12 +274,9 @@ export function PageHeader({ title, subtitle, actions }: { title: ReactNode; sub
   )
 }
 
-export function EmptyState({ icon: Icon, title, text, action }: { icon: LucideIcon; title: string; text: ReactNode; action?: ReactNode }) {
+export function EmptyState({ title, text, action }: { title: string; text: ReactNode; action?: ReactNode }) {
   return (
     <div className="flex flex-col items-center px-6 py-10 text-center">
-      <span className="mb-5 grid size-16 place-items-center rounded-[22px] bg-brand-soft text-brand">
-        <Icon className="size-8" />
-      </span>
       <h3 className="text-base font-bold">{title}</h3>
       <p className="mt-1 max-w-xs text-sm text-muted">{text}</p>
       {action && <div className="mt-5">{action}</div>}

@@ -1,4 +1,4 @@
-import { BedDouble, Footprints, Info, Sunrise, Trash2 } from 'lucide-react'
+import { BedDouble, Info, Sunrise, Trash2 } from 'lucide-react'
 import { useEffect, useState, type FormEvent } from 'react'
 import { LIMITS, MAX_SLEEP_STARS, MAX_STEP_STARS } from '../../config/scoring'
 import { repo } from '../../data/repo'
@@ -8,7 +8,7 @@ import { addDays, timeIn, zonedTimeToInstant, type ISODate } from '../../lib/dat
 import { duration, formatNumber } from '../../lib/format'
 import { useSession } from '../../app/session'
 import { useToday } from '../../app/hooks'
-import { Button, Chip, IconTile, Sheet, Stars, cx } from '../../components/ui'
+import { Button, Chip, Sheet, Stars, cx } from '../../components/ui'
 import { useToast } from '../../components/toast'
 import { DatePicker } from './DatePicker'
 
@@ -118,7 +118,6 @@ export default function EntrySheet({ open, onClose, initialDate }: { open: boole
         <section className="surface-card relative mt-5 animate-rise overflow-hidden rounded-[26px] p-4">
           <div className="flex items-center justify-between">
             <h3 className="flex items-center gap-2 text-[15px] font-bold">
-              <IconTile icon={Footprints} tone="steps" size={32} />
               Steps
             </h3>
             <Stars value={stepStars(stepsNum)} max={MAX_STEP_STARS} />
@@ -138,7 +137,6 @@ export default function EntrySheet({ open, onClose, initialDate }: { open: boole
         <section className="surface-card relative mt-3 animate-rise overflow-hidden rounded-[26px] p-4" style={{ animationDelay: '60ms' }}>
           <div className="flex items-center justify-between">
             <h3 className="flex items-center gap-2 text-[15px] font-bold">
-              <IconTile icon={BedDouble} tone="sleep" size={32} />
               Last night's sleep
             </h3>
             <Stars value={sleepScore?.stars ?? 0} max={MAX_SLEEP_STARS} />

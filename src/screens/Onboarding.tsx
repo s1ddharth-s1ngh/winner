@@ -1,10 +1,10 @@
-import { ArrowRight, Check, Hash, Plus, Users } from 'lucide-react'
+import { ArrowRight, Check, Hash, Users } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { AVATAR_COLORS } from '../config/app'
 import { repo } from '../data/repo'
 import { DEMO_GROUP_CODE } from '../data/demoSeed'
 import { useSession } from '../app/session'
-import { Avatar, Button, Card, Field, IconTile, cx, rise } from '../components/ui'
+import { Avatar, Button, Card, Field, cx, rise } from '../components/ui'
 import { TimezoneSelect } from '../components/TimezoneSelect'
 
 /** Shown after sign-up until the user belongs to a group. */
@@ -97,7 +97,6 @@ export default function Onboarding() {
           <Card className="mt-7 animate-rise p-5">
             <form onSubmit={run('create', () => repo.createGroup(groupName))}>
               <div className="mb-4 flex items-center gap-3">
-<IconTile icon={Plus} tone="brand" size={44} />
                 <div>
                   <h2 className="font-bold">Create a group</h2>
                   <p className="text-[13px] text-muted">You'll get an invite code to share.</p>
@@ -113,7 +112,6 @@ export default function Onboarding() {
           <Card style={rise(1)} className="mt-4 animate-rise p-5">
             <form onSubmit={run('join', () => repo.joinGroup(code))}>
               <div className="mb-4 flex items-center gap-3">
-<IconTile icon={Users} tone="steps" size={44} />
                 <div>
                   <h2 className="font-bold">Join with a code</h2>
                   <p className="text-[13px] text-muted">Ask a friend for their 6-character code.</p>

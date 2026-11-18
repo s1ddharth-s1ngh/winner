@@ -1,19 +1,12 @@
 import {
-  Apple,
   ArrowLeft,
-  Bell,
   Check,
-  CircleHelp,
   Copy,
-  Database,
   KeyRound,
   LogOut,
   MonitorSmartphone,
   Moon,
-  PenLine,
   RefreshCw,
-  Smartphone,
-  Info,
   Sun,
   Trash2,
 } from 'lucide-react'
@@ -23,7 +16,7 @@ import { useLive } from '../app/hooks'
 import { usePrefs } from '../app/inbox'
 import { useSession } from '../app/session'
 import { useTheme, type ThemePref } from '../app/theme'
-import { Avatar, Button, Card, Chip, Field, IconButton, IconTile, PageHeader, SectionTitle, Segmented, cx, rise, type Tone } from '../components/ui'
+import { Avatar, Button, Card, Chip, Field, IconButton, PageHeader, SectionTitle, Segmented, cx, rise } from '../components/ui'
 import { useToast } from '../components/toast'
 import { TimezoneSelect } from '../components/TimezoneSelect'
 import { APP, AVATAR_COLORS } from '../config/app'
@@ -52,8 +45,8 @@ export default function SettingsScreen() {
 
         <SectionTitle>About</SectionTitle>
         <Card className="divide-y divide-line">
-          <Row icon={CircleHelp} tone="star" title="How scoring works" onClick={() => setRules(true)} />
-          <Row icon={Info} tone="brand" title={APP.name} text={`Version ${__APP_VERSION__} · ${repo.kind === 'local' ? 'demo mode' : 'connected'}`} />
+          <Row title="How scoring works" onClick={() => setRules(true)} />
+          <Row title={APP.name} text={`Version ${__APP_VERSION__} · ${repo.kind === 'local' ? 'demo mode' : 'connected'}`} />
         </Card>
 
         <Button variant="danger" icon={LogOut} onClick={() => void repo.signOut()} className="mt-6 w-full">
@@ -66,15 +59,11 @@ export default function SettingsScreen() {
 }
 
 function Row({
-  icon,
-  tone = 'muted',
   title,
   text,
   onClick,
   right,
 }: {
-  icon: typeof Bell
-  tone?: Tone
   title: string
   text?: ReactNode
   onClick?: () => void
@@ -82,7 +71,6 @@ function Row({
 }) {
   const body = (
     <>
-      <IconTile icon={icon} tone={tone} size={36} />
       <span className="min-w-0 flex-1">
         <span className="block text-[15px] font-semibold">{title}</span>
         {text && <span className="block text-[13px] text-muted">{text}</span>}
@@ -192,7 +180,6 @@ function Appearance() {
       <SectionTitle>Appearance</SectionTitle>
       <Card className="animate-rise p-4" style={rise(1)}>
         <div className="mb-4 flex items-center gap-3">
-          <IconTile icon={theme === 'dark' ? Moon : Sun} tone={theme === 'dark' ? 'sleep' : 'star'} size={36} />
           <span className="min-w-0 flex-1">
             <span className="block text-[15px] font-semibold">Theme</span>
             <span className="block text-[13px] text-muted">{pref === 'system' ? `Follows your device · now ${theme}` : `Always ${theme}`}</span>
@@ -213,7 +200,7 @@ function DataSources() {
         <AndroidCard />
         <ShortcutCard />
         <Card className="animate-rise" style={rise(3)}>
-          <Row icon={PenLine} tone="brand" title="Manual entry" text="Always available from the + button." right={<Chip tone="steps">On</Chip>} />
+          <Row title="Manual entry" text="Always available from the + button." right={<Chip tone="steps">On</Chip>} />
         </Card>
       </div>
     </>
@@ -249,7 +236,6 @@ function AndroidCard() {
   return (
     <Card className="animate-rise p-4" style={rise(1)}>
       <div className="flex items-center gap-3">
-        <IconTile icon={Smartphone} tone="steps" size={36} />
         <div className="flex-1">
           <p className="text-[15px] font-semibold">Android · Health Connect</p>
           <p className="text-[13px] text-muted">Steps and sleep from your phone, Garmin, Samsung, Fitbit…</p>
@@ -301,7 +287,6 @@ function ShortcutCard() {
   return (
     <Card className="animate-rise p-4" style={rise(2)}>
       <div className="flex items-center gap-3">
-        <IconTile icon={Apple} tone="sleep" size={36} />
         <div className="flex-1">
           <p className="text-[15px] font-semibold">iPhone · Shortcuts</p>
           <p className="text-[13px] text-muted">An automation sends Apple Health steps and sleep with a personal token.</p>
@@ -385,12 +370,10 @@ function Notifications() {
     <>
       <SectionTitle>Notifications</SectionTitle>
       <Card className="animate-rise divide-y divide-line">
-        <Row icon={Bell} tone="steps" title="Passed in today's steps" text="When a friend moves above you" right={<Toggle label="Steps overtakes" checked={prefs.steps} onChange={(v) => setPrefs({ ...prefs, steps: v })} />} />
-        <Row icon={Bell} tone="star" title="Passed in the overall ranking" text="Steps + sleep + hobby stars" right={<Toggle label="Overall overtakes" checked={prefs.overall} onChange={(v) => setPrefs({ ...prefs, overall: v })} />} />
+        <Row title="Passed in today's steps" text="When a friend moves above you" right={<Toggle label="Steps overtakes" checked={prefs.steps} onChange={(v) => setPrefs({ ...prefs, steps: v })} />} />
+        <Row title="Passed in the overall ranking" text="Steps + sleep + hobby stars" right={<Toggle label="Overall overtakes" checked={prefs.overall} onChange={(v) => setPrefs({ ...prefs, overall: v })} />} />
         {supported && (
           <Row
-            icon={Smartphone}
-            tone="brand"
             title="Phone notifications"
             text="On iPhone, add the app to the Home Screen first."
             right={<Toggle label="Phone notifications" checked={prefs.system} onChange={(v) => void toggleSystem(v)} />}
@@ -409,8 +392,6 @@ function DemoTools() {
       <SectionTitle>Demo</SectionTitle>
       <Card className="divide-y divide-line">
         <Row
-          icon={Database}
-          tone="brand"
           title="Fill my history"
           text="Adds 90 days of sample data (existing days are kept)."
           onClick={async () => {
@@ -422,8 +403,6 @@ function DemoTools() {
           right={busy ? <span className="size-5 animate-spin rounded-full border-2 border-brand border-t-transparent" /> : undefined}
         />
         <Row
-          icon={Trash2}
-          tone="danger"
           title="Reset demo"
           text="Deletes every local account and its data."
           onClick={() => confirm('Delete all local demo data on this device?') && repo.demo!.reset()}
