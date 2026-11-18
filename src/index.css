@@ -161,9 +161,11 @@
     overscroll-behavior-y: none;
     transition: background-color 300ms ease, color 300ms ease;
   }
-  :focus-visible {
-    outline: 2px solid var(--brand);
-    outline-offset: 2px;
+  /* Owner request: no focus outline anywhere in the app. */
+  *,
+  *:focus,
+  *:focus-visible {
+    outline: none;
   }
   input,
   select,
