@@ -1,13 +1,13 @@
 // POST /functions/v1/garmin — Garmin Connect Personal API sync.
 //
 // From the app (Authorization: Bearer <Supabase user JWT>), body { action }:
-//   "connect"    { api_key }  checks the key with Garmin, stores it encrypted, imports the last 7 days
+//   "connect"    { api_key }  checks the key with Garmin, stores it encrypted, imports today
 //   "sync"                    imports the last 7 days
 //   "disconnect"              deletes the stored key
 // From pg_cron (header x-cron-secret: Vault secret "garmin_cron_secret"): imports the last 3 days for every linked user.
 //
 // Secret: GARMIN_ENC_KEY (random string, 32+ chars). The plain API key never leaves this function.
-// Manual entries are never overwritten, same rule as ingest-health.
+// Days before the connection day are never imported. Manual entries are never overwritten (as in ingest-health).
 import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2'
 import { dateIn } from '../ingest-health/validate.ts'
 import { decrypt, encrypt } from './crypto.ts'
@@ -53,12 +53,15 @@ async function garminToken(apiKey: string): Promise<string> {
 }
 
 // shortcut: a new token on every sync (token valid 24 h), cache it encrypted if Garmin starts rate limiting.
-async function importDays(sb: SupabaseClient, userId: string, apiKey: string, days: number) {
+async function importDays(sb: SupabaseClient, userId: string, apiKey: string, days: number, connectedAt: string) {
   const { data: profile } = await sb.from('profiles').select('timezone').eq('id', userId).single()
   const tz = profile?.timezone ?? 'Europe/Rome'
   const now = new Date()
   const to = dateIn(now, tz)
-  const from = dateIn(new Date(now.getTime() - (days - 1) * DAY), tz)
+  // Never import days before the day Garmin was connected: history stays out of the app.
+  const windowStart = dateIn(new Date(now.getTime() - (days - 1) * DAY), tz)
+  const connectedDay = dateIn(new Date(connectedAt), tz)
+  const from = windowStart > connectedDay ? windowStart : connectedDay
 
   const token = await garminToken(apiKey)
   const get = async (path: string) =>
@@ -70,9 +73,11 @@ async function importDays(sb: SupabaseClient, userId: string, apiKey: string, da
     get(`/sleep-service/sleep/dailySleepSummariesByDate?${range}`),
     get(`/activitylist-service/activities/search/activities?${range}&limit=100`),
   ])
-  const dayRows = mapDailies(dailies)
-  const sleepRows = mapSleep(sleeps, tz)
-  const workoutRows = mapActivities(activities)
+  // The wake-up date of a night can differ from Garmin's calendarDate, so filter after mapping too.
+  const inRange = (r: { date: string }) => r.date >= from && r.date <= to
+  const dayRows = mapDailies(dailies).filter(inRange)
+  const sleepRows = mapSleep(sleeps, tz).filter(inRange)
+  const workoutRows = mapActivities(activities).filter(inRange)
 
   const dates = [...new Set([...dayRows.map((d) => d.date), ...sleepRows.map((s) => s.date)])]
   const { data: existing, error: readError } = await sb
@@ -109,9 +114,10 @@ async function importDays(sb: SupabaseClient, userId: string, apiKey: string, da
 /** Runs one import and records the outcome on the link row (shown in Settings). */
 async function syncUser(sb: SupabaseClient, encKey: string, userId: string, days: number) {
   const { data: secret } = await sb.from('garmin_secrets').select('key_ciphertext').eq('user_id', userId).maybeSingle()
-  if (!secret) throw new GarminError('Garmin is not connected.')
+  const { data: link } = await sb.from('garmin_links').select('connected_at').eq('user_id', userId).maybeSingle()
+  if (!secret || !link) throw new GarminError('Garmin is not connected.')
   try {
-    const result = await importDays(sb, userId, await decrypt(secret.key_ciphertext, userId, encKey), days)
+    const result = await importDays(sb, userId, await decrypt(secret.key_ciphertext, userId, encKey), days, link.connected_at)
     await sb.from('garmin_links').update({ last_sync_at: new Date().toISOString(), last_error: null }).eq('user_id', userId)
     return result
   } catch (e) {

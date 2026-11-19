@@ -361,7 +361,16 @@ export function Sheet({ open, onClose, title, children }: { open: boolean; onClo
           <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-surface-3" />
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold tracking-tight">{title}</h2>
-            <IconButton icon={X} label="Close" onClick={onClose} className="size-9" />
+            <IconButton
+              icon={X}
+              label="Close"
+              onClick={onClose}
+              // X tilts on hover, squeezes on press, spins away while the sheet exits.
+              className={cx(
+                'size-9 [&>svg]:transition-transform [&>svg]:duration-300 [&>svg]:ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:[&>svg]:rotate-90 active:[&>svg]:scale-75',
+                closing && '[&>svg]:rotate-180 [&>svg]:scale-50',
+              )}
+            />
           </div>
         </div>
         <div className="px-5 pb-5">{children}</div>
