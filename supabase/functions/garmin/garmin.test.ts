@@ -63,8 +63,9 @@ describe('activities', () => {
     expect(workoutType('strength_training')).toBe('Gym')
     expect(workoutType('stair_climbing')).toBe('Gym')
     expect(workoutType('indoor_climbing')).toBe('Climbing')
-    expect(workoutType('soccer')).toBe('Football')
-    expect(workoutType('padel')).toBe('Padel')
+    expect(workoutType('soccer')).toBe('Other')
+    expect(workoutType('meditation')).toBe('Meditation')
+    expect(workoutType('resort_skiing_snowboarding')).toBe('Ski')
     expect(workoutType('golf')).toBe('Other')
   })
   it('builds idempotent workout rows', () => {

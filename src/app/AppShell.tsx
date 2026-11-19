@@ -93,7 +93,7 @@ export default function AppShell() {
           <ChooserOption
             onClick={() => setSheet({ kind: 'workout', fromChooser: true })}
             title="Workout or hobby"
-            text="Gym, run, padel… with how long it took"
+            text="Gym, run, yoga… with how long it took"
             icons={[<Activity key="d" className="size-5" />]}
             tone="bg-hobby"
           />

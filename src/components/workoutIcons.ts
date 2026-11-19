@@ -1,4 +1,4 @@
-import { Activity, Bike, Dumbbell, Flower2, Footprints, Goal, MountainSnow, PersonStanding, Volleyball, WavesLadder, Zap, type LucideIcon } from 'lucide-react'
+import { Activity, Bike, Brain, Dumbbell, Flower2, Footprints, Goal, MountainSnow, PersonStanding, Snowflake, Volleyball, WavesLadder, Zap, type LucideIcon } from 'lucide-react'
 
 const ICONS: Record<string, LucideIcon> = {
   Gym: Dumbbell,
@@ -7,8 +7,10 @@ const ICONS: Record<string, LucideIcon> = {
   Cycling: Bike,
   Swim: WavesLadder,
   Yoga: Flower2,
+  Meditation: Brain,
+  Ski: Snowflake,
   Football: Goal,
-  Padel: Volleyball,
+  Padel: Volleyball, // Football/Padel: no longer offered, kept for older logs
   Tennis: Volleyball,
   Dance: PersonStanding,
   Climbing: MountainSnow,
