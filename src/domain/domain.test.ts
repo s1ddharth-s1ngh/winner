@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { BADGES } from '../config/badges'
 import { addDays, dateIn, minutesOfDayIn, startOfWeek, zonedTimeToInstant } from '../lib/dates'
+import { compareHistories } from './compare'
 import { buildLeaderboard, periodRange } from './leaderboard'
 import { findOvertakes } from './overtakes'
 import {
@@ -191,5 +192,32 @@ describe('overtakes', () => {
     expect(findOvertakes({ me: 1, a: 2, b: 3 }, { a: 1, me: 2, b: 3 }, 'me')).toEqual(['a'])
     expect(findOvertakes({ me: 2, a: 1 }, { a: 1, me: 2 }, 'me')).toEqual([])
     expect(findOvertakes({ me: 1, a: null }, { a: 1, me: 2 }, 'me')).toEqual(['a'])
+  })
+})
+
+describe('compareHistories', () => {
+  it('counts completed days won, win streaks and best values', () => {
+    const today = '2026-11-19'
+    const from = '2026-11-14'
+    const a = buildHistory(
+      [stat('2026-11-14', 5000), stat('2026-11-15', 9000), stat('2026-11-16', 9000), stat('2026-11-18', 12000), stat(today, 100)],
+      [], TZ, from, today,
+    )
+    const b = buildHistory(
+      [stat('2026-11-14', 6000), stat('2026-11-15', 1000), stat('2026-11-16', 9000), stat('2026-11-17', 300), stat(today, 99_999)],
+      [], TZ, from, today,
+    )
+    const c = compareHistories(a, b, today)
+    // 14 b, 15 a, 16 tie, 17 b (a has no data), 18 a; today never counts.
+    expect(c.winners.map((w) => w.winner)).toEqual(['b', 'a', null, 'b', 'a'])
+    expect([c.a.daysWon, c.b.daysWon]).toEqual([2, 2])
+    expect([c.a.longestWinStreak, c.b.longestWinStreak]).toEqual([1, 1])
+    expect(c.a.stepsToday).toBe(100)
+    expect(c.a.stepsYesterday).toBe(12000)
+    expect(c.b.stepsYesterday).toBeNull()
+    expect(c.a.bestDay).toBe(12000)
+    // Week of Mon 16th: 9000 + 12000 + 100 beats 5000 + 9000 of the week before.
+    expect(c.a.bestWeek).toBe(21100)
+    expect(c.a.avgSleep7).toBeNull()
   })
 })
