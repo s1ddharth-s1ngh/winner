@@ -1,8 +1,8 @@
 // Supabase backend. Active when VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY are set.
 // Schema + RLS: supabase/migrations. Group create/join go through security-definer RPCs.
-import { createClient, type AuthError, type PostgrestError } from '@supabase/supabase-js'
+import { createClient, FunctionsHttpError, type AuthError, type PostgrestError } from '@supabase/supabase-js'
 import { browserTimezone } from '../lib/dates'
-import type { ApiToken, DailyStat, Group, Member, Profile, StatsInput, Workout } from '../domain/types'
+import type { ApiToken, DailyStat, GarminLink, Group, Member, Profile, StatsInput, Workout } from '../domain/types'
 import { randomToken, sha256 } from './shared'
 import type { ProfileInput, Repo, WorkoutInput } from './repo'
 
@@ -34,6 +34,13 @@ export function createSupabaseRepo(url: string, key: string): Repo {
     const { data } = await sb.auth.getSession()
     if (!data.session) throw new Error('Not signed in')
     return data.session.user.id
+  }
+  /** Calls the `garmin` edge function; its JSON `error` becomes the thrown message. */
+  const garmin = async (body: Record<string, unknown>) => {
+    const { error } = await sb.functions.invoke('garmin', { body })
+    if (!error) return
+    const detail = error instanceof FunctionsHttpError ? await error.context.json().catch(() => null) : null
+    throw new Error(detail?.error ?? 'Could not reach the server. Try again.')
   }
 
   return {
@@ -162,6 +169,24 @@ export function createSupabaseRepo(url: string, key: string): Repo {
 
     async revokeToken(id) {
       check(await sb.from('api_tokens').delete().eq('id', id))
+    },
+
+    async getGarmin() {
+      return check(
+        await sb.from('garmin_links').select('key_hint, connected_at, last_sync_at, last_error').maybeSingle(),
+      ) as GarminLink | null
+    },
+
+    async connectGarmin(apiKey) {
+      await garmin({ action: 'connect', api_key: apiKey })
+    },
+
+    async syncGarmin() {
+      await garmin({ action: 'sync' })
+    },
+
+    async disconnectGarmin() {
+      await garmin({ action: 'disconnect' })
     },
 
     subscribe(cb) {

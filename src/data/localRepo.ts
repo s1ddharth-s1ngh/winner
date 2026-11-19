@@ -255,6 +255,18 @@ export function createLocalRepo(): Repo {
       save(db)
     },
 
+    // Garmin needs the server: the API key must never be stored in the browser.
+    async getGarmin() {
+      return null
+    },
+    async connectGarmin() {
+      throw new Error('Garmin works only with the server, not in demo mode.')
+    },
+    async syncGarmin() {
+      throw new Error('Garmin works only with the server, not in demo mode.')
+    },
+    async disconnectGarmin() {},
+
     subscribe(cb) {
       listeners.add(cb)
       return () => listeners.delete(cb)

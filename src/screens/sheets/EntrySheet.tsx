@@ -12,7 +12,7 @@ import { Button, Chip, Sheet, Stars, cx } from '../../components/ui'
 import { useToast } from '../../components/toast'
 import { DatePicker } from './DatePicker'
 
-const SOURCE_LABEL = { health_connect: 'Health Connect', ios_shortcut: 'iPhone Shortcut', manual: 'manual entry' } as const
+const SOURCE_LABEL = { health_connect: 'Health Connect', ios_shortcut: 'iPhone Shortcut', garmin: 'Garmin', manual: 'manual entry' } as const
 
 const isFuture = (d: Date) => d.getTime() > Date.now() + 5 * 60_000
 

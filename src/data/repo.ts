@@ -1,5 +1,5 @@
 import type { ISODate } from '../lib/dates'
-import type { ApiToken, DailyStat, Group, Member, Profile, StatsInput, Workout } from '../domain/types'
+import type { ApiToken, DailyStat, GarminLink, Group, Member, Profile, StatsInput, Workout } from '../domain/types'
 import { createLocalRepo } from './localRepo'
 import { createSupabaseRepo } from './supabaseRepo'
 
@@ -42,6 +42,13 @@ export interface Repo {
   /** Returns the plain token once; only its hash is stored. */
   createToken(label: string): Promise<string>
   revokeToken(id: string): Promise<void>
+
+  getGarmin(): Promise<GarminLink | null>
+  /** Checks the key with Garmin, stores it encrypted on the server and imports the last 30 days. */
+  connectGarmin(apiKey: string): Promise<void>
+  /** Imports the last 7 days now (the server also syncs on a schedule). */
+  syncGarmin(): Promise<void>
+  disconnectGarmin(): Promise<void>
 
   /** Fires on any data change (own writes, other tabs, realtime). Returns unsubscribe. */
   subscribe(cb: () => void): () => void

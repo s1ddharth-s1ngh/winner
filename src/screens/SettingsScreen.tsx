@@ -197,13 +197,114 @@ function DataSources() {
       <SectionTitle>Data sources</SectionTitle>
       <p className="-mt-1 mb-3 px-1 text-[13px] text-muted">Sync automatically, enter data by hand, or both. Manual entries are never overwritten by a sync.</p>
       <div className="space-y-3">
+        <GarminCard />
         <AndroidCard />
         <ShortcutCard />
-        <Card className="animate-rise" style={rise(3)}>
+        <Card className="animate-rise" style={rise(4)}>
           <Row title="Manual entry" text="Always available from the + button." right={<Chip tone="steps">On</Chip>} />
         </Card>
       </div>
     </>
+  )
+}
+
+const GARMIN_KEY_PAGE = 'https://connect.garmin.com/app/settings/personalApiToken'
+
+function GarminCard() {
+  const toast = useToast()
+  const [version, setVersion] = useState(0)
+  const link = useLive(() => repo.getGarmin(), [version])
+  const [apiKey, setApiKey] = useState('')
+  const [busy, setBusy] = useState(false)
+  const connected = !!link.data
+
+  const run = async (action: () => Promise<void>, done: string) => {
+    setBusy(true)
+    try {
+      await action()
+      setApiKey('')
+      toast(done)
+    } catch (e) {
+      toast((e as Error).message, 'error')
+    } finally {
+      setBusy(false)
+      setVersion((v) => v + 1)
+    }
+  }
+  const disconnect = () =>
+    confirm('Disconnect Garmin? Your key is deleted from our server. Data already synced stays.') &&
+    void run(() => repo.disconnectGarmin(), 'Garmin disconnected')
+
+  return (
+    <Card className="animate-rise p-4" style={rise(1)}>
+      <div className="flex items-center gap-3">
+        <div className="flex-1">
+          <p className="text-[15px] font-semibold">Garmin Connect</p>
+          <p className="text-[13px] text-muted">Steps, floors, sleep and activities straight from your Garmin watch.</p>
+        </div>
+        {connected && <Chip tone="steps">Connected</Chip>}
+      </div>
+
+      {repo.kind === 'local' ? (
+        <p className="mt-3 rounded-[18px] bg-surface-2 px-3.5 py-2.5 text-[13px] text-muted">Available once the server is connected.</p>
+      ) : connected ? (
+        <>
+          <p className="mt-3 text-[13px] text-ink-2">
+            Key ••••{link.data!.key_hint} · syncs automatically every few hours.
+          </p>
+          {link.data!.last_error && <p className="mt-2 text-[13px] text-danger">{link.data!.last_error}</p>}
+          <div className="mt-4 flex items-center gap-2">
+            <Button onClick={() => void run(() => repo.syncGarmin(), 'Garmin synced')} loading={busy} icon={RefreshCw} className="h-10 flex-1 text-sm">
+              Sync now
+            </Button>
+            <Button variant="secondary" onClick={disconnect} disabled={busy} className="h-10 text-sm">
+              Disconnect
+            </Button>
+          </div>
+          {link.data!.last_sync_at && <p className="mt-2 text-xs text-faint">Last sync {timeAgo(link.data!.last_sync_at)}</p>}
+        </>
+      ) : (
+        <>
+          <ol className="mt-4 space-y-1.5 text-[13px] text-ink-2">
+            {[
+              <>
+                Open the{' '}
+                <a href={GARMIN_KEY_PAGE} target="_blank" rel="noreferrer" className="font-semibold text-brand underline">
+                  Garmin Personal API Key page
+                </a>{' '}
+                and sign in.
+              </>,
+              'Tap Create Key, accept the terms, pick an expiry and copy the key.',
+              'Paste it here. It is checked with Garmin, then stored encrypted on our server.',
+            ].map((t, i) => (
+              <li key={i} className="flex gap-2">
+                <span className="grid size-5 shrink-0 place-items-center rounded-full bg-steps-soft text-[11px] font-bold text-steps-strong">{i + 1}</span>
+                <span>{t}</span>
+              </li>
+            ))}
+          </ol>
+          <Field
+            label="Garmin API key"
+            type="password"
+            autoComplete="off"
+            spellCheck={false}
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+            icon={KeyRound}
+            hint="Nobody can read it back, not even you. Delete it any time here or on Garmin Connect."
+            className="mt-4"
+          />
+          <Button
+            onClick={() => void run(() => repo.connectGarmin(apiKey), 'Garmin connected')}
+            loading={busy}
+            disabled={apiKey.trim().length < 8}
+            className="mt-3 h-10 w-full text-sm"
+          >
+            Connect Garmin
+          </Button>
+        </>
+      )}
+    </Card>
   )
 }
 
@@ -234,7 +335,7 @@ function AndroidCard() {
 
   const last = lastHealthSync()
   return (
-    <Card className="animate-rise p-4" style={rise(1)}>
+    <Card className="animate-rise p-4" style={rise(2)}>
       <div className="flex items-center gap-3">
         <div className="flex-1">
           <p className="text-[15px] font-semibold">Android · Health Connect</p>
@@ -285,7 +386,7 @@ function ShortcutCard() {
   const copy = (text: string, what: string) => void navigator.clipboard.writeText(text).then(() => toast(`${what} copied`))
 
   return (
-    <Card className="animate-rise p-4" style={rise(2)}>
+    <Card className="animate-rise p-4" style={rise(3)}>
       <div className="flex items-center gap-3">
         <div className="flex-1">
           <p className="text-[15px] font-semibold">iPhone · Shortcuts</p>

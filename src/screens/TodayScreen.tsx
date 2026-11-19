@@ -15,7 +15,7 @@ import { currentStreak, qualifiesSleep, qualifiesSteps, type DayScore } from '..
 import { addDays, clock, formatWeekdayLetter, minutesOfDayIn, startOfWeek, timeAgo, type ISODate } from '../lib/dates'
 import { compact, duration, formatNumber, greeting } from '../lib/format'
 
-const SOURCE = { health_connect: 'Health Connect', ios_shortcut: 'iPhone Shortcut', manual: 'Manual' } as const
+const SOURCE = { health_connect: 'Health Connect', ios_shortcut: 'iPhone Shortcut', garmin: 'Garmin', manual: 'Manual' } as const
 
 export default function TodayScreen() {
   const { profile, group } = useSession()

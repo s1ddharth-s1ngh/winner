@@ -428,3 +428,7 @@ enabled = true
 [functions.ingest-health]
 # Authenticated with a personal API token, not a Supabase JWT.
 verify_jwt = false
+
+[functions.garmin]
+# Checks the Supabase user JWT itself, so pg_cron can call it with x-cron-secret instead.
+verify_jwt = false

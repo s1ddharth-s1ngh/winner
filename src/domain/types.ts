@@ -1,6 +1,6 @@
 import type { ISODate } from '../lib/dates'
 
-export type Source = 'health_connect' | 'ios_shortcut' | 'manual'
+export type Source = 'health_connect' | 'ios_shortcut' | 'garmin' | 'manual'
 
 export interface Profile {
   id: string
@@ -71,4 +71,12 @@ export interface ApiToken {
   label: string
   created_at: string
   last_used_at: string | null
+}
+
+/** Garmin Connect link status. The API key itself stays encrypted on the server. */
+export interface GarminLink {
+  key_hint: string
+  connected_at: string
+  last_sync_at: string | null
+  last_error: string | null
 }

@@ -86,6 +86,20 @@ await as(A, () => q(`insert into public.api_tokens (label, token_hash) values ('
 check('B cannot read A tokens', (await as(B, () => q(`select * from public.api_tokens`))).rows.length === 0)
 check('A reads own token', (await as(A, () => q(`select * from public.api_tokens`))).rows.length === 1)
 
+await q(`insert into public.garmin_links (user_id, key_hint) values ($1, 'abcd')`, [A])
+await q(`insert into public.garmin_secrets (user_id, key_ciphertext) values ($1, 'iv.ct')`, [A])
+check('A reads own Garmin link', (await as(A, () => q(`select * from public.garmin_links`))).rows.length === 1)
+check('B cannot read A Garmin link', (await as(B, () => q(`select * from public.garmin_links`))).rows.length === 0)
+check('A cannot read own Garmin secret', (await as(A, () => q(`select * from public.garmin_secrets`))).rows.length === 0)
+err = null
+try { await as(A, () => q(`insert into public.garmin_links (user_id, key_hint) values ($1, 'x')`, [B])) } catch (e) { err = e.message }
+check('clients cannot write Garmin links', !!err)
+check('A cannot change own Garmin link', (await as(A, () => q(`update public.garmin_links set last_error = null`))).affectedRows === 0)
+await as(A, () => q(`insert into public.workouts (date, type, duration_min, external_id) values ('2026-11-14','Run',30,'garmin:1')`))
+err = null
+try { await as(A, () => q(`insert into public.workouts (date, type, duration_min, external_id) values ('2026-11-14','Run',30,'garmin:1')`)) } catch (e) { err = e.message }
+check('Garmin activity stored once', !!err)
+
 await as(B, () => q(`delete from public.group_members where user_id = $1`, [B]))
 check('after leaving, B no longer sees A stats', (await as(B, () => q(`select * from public.daily_stats`))).rows.length === 0)
 
