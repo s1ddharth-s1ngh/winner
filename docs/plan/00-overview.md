@@ -12,6 +12,7 @@ so it can be switched on as soon as the Supabase project exists.
 | [phase-3-game.md](phase-3-game.md) | Stars, rankings, streaks, badges | done |
 | [phase-4-notifications.md](phase-4-notifications.md) | "X passed you" | in-app + phone notifications done; closed-app push needs Supabase |
 | [phase-5-extras.md](phase-5-extras.md) | Workouts, stats and charts, polish | done (incl. dark theme) |
+| [phase-6-chat.md](phase-6-chat.md) | Group chat + direct messages | done in demo + DB tests; migration not yet applied to Supabase |
 
 ## Key decisions
 

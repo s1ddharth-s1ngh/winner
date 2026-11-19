@@ -1,7 +1,7 @@
 // POST /functions/v1/garmin — Garmin Connect Personal API sync.
 //
 // From the app (Authorization: Bearer <Supabase user JWT>), body { action }:
-//   "connect"    { api_key }  checks the key with Garmin, stores it encrypted, imports the last 30 days
+//   "connect"    { api_key }  checks the key with Garmin, stores it encrypted, imports the last 7 days
 //   "sync"                    imports the last 7 days
 //   "disconnect"              deletes the stored key
 // From pg_cron (header x-cron-secret: Vault secret "garmin_cron_secret"): imports the last 3 days for every linked user.
@@ -16,7 +16,7 @@ import { mapActivities, mapDailies, mapSleep } from './map.ts'
 // shortcut: global server only (not personal.connectapi.garmin.cn), add a region setting if a friend is in China.
 const GARMIN = 'https://personal.connectapi.garmin.com'
 const DAY = 86_400_000
-const DAYS = { connect: 30, sync: 7, cron: 3 } as const
+const DAYS = { connect: 7, sync: 7, cron: 3 } as const
 
 const CORS = {
   'access-control-allow-origin': '*',

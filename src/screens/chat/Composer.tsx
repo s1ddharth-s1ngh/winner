@@ -28,6 +28,8 @@ export default function Composer({
   const [query, setQuery] = useState<string | null>(null)
   const picked = useRef(new Map(initial?.picked))
   const ref = useRef<HTMLTextAreaElement>(null)
+  // Where the caret goes after a mention is picked, applied right after the render.
+  const caret = useRef<number | null>(null)
 
   // Grow with the text, up to about six lines.
   useLayoutEffect(() => {
@@ -35,6 +37,11 @@ export default function Composer({
     if (!el) return
     el.style.height = 'auto'
     el.style.height = `${Math.min(el.scrollHeight, 150)}px`
+    if (caret.current !== null) {
+      el.focus()
+      el.setSelectionRange(caret.current, caret.current)
+      caret.current = null
+    }
   }, [text])
 
   const matches = query === null ? [] : people.filter((p) => p.username.toLowerCase().includes(query.toLowerCase())).slice(0, 5)
@@ -44,12 +51,9 @@ export default function Composer({
     if (!el) return
     const before = text.slice(0, el.selectionStart).replace(/@([^\s@]{0,20})$/, `@${p.username} `)
     picked.current.set(p.username, p.id)
+    caret.current = before.length
     setText(before + text.slice(el.selectionStart))
     setQuery(null)
-    requestAnimationFrame(() => {
-      el.focus()
-      el.setSelectionRange(before.length, before.length)
-    })
   }
 
   const submit = async () => {

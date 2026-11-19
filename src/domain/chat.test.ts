@@ -37,6 +37,6 @@ describe('chat mentions', () => {
   })
 
   it('ignores malformed tags', () => {
-    expect(splitMentions('@[x](u:not-a-uuid)')).toEqual(['@[x](u:not-a-uuid)'])
+    expect(splitMentions('@[x](u:bad id)')).toEqual(['@[x](u:bad id)'])
   })
 })

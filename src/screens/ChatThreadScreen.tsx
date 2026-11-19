@@ -226,7 +226,7 @@ export default function ChatThreadScreen() {
                       m.sending && 'opacity-60',
                     )}
                   >
-                    {m.reply_to && (
+                    {m.reply_to && !m.deleted_at && (
                       <span className={cx('mb-1 block border-l-2 pl-2 text-[13px]', mine ? 'border-white/60 text-white/80' : 'border-brand text-muted')}>
                         {quoted ? (
                           <>

@@ -1,4 +1,4 @@
-import { Bell, ChevronRight, Dumbbell, Footprints, MessageCircle, MoonStar, Plus, Star, Sunrise, Trash2, TrendingUp, Trophy } from 'lucide-react'
+import { Activity, Bell, ChevronRight, Footprints, MessageCircle, MoonStar, Plus, Star, Sunrise, Trash2, TrendingUp, Trophy } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { useChat } from '../app/chat'
@@ -314,7 +314,7 @@ function HobbyHero({ day, workouts, today, onAdd }: { day: DayScore; workouts: W
     <Card className="relative flex h-full flex-col overflow-hidden p-5">
       <div className="flex items-center justify-between">
         <Chip tone="hobby" className="py-1 text-xs">
-          <Dumbbell className="size-3.5" /> Hobbies this week
+          <Activity className="size-3.5" /> Hobbies this week
         </Chip>
         <Stars value={day.workoutStars} max={WORKOUT_BONUS.stars} size={17} />
       </div>

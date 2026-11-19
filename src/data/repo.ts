@@ -56,7 +56,7 @@ export interface Repo {
   revokeToken(id: string): Promise<void>
 
   getGarmin(): Promise<GarminLink | null>
-  /** Checks the key with Garmin, stores it encrypted on the server and imports the last 30 days. */
+  /** Checks the key with Garmin, stores it encrypted on the server and imports the last 7 days. */
   connectGarmin(apiKey: string): Promise<void>
   /** Imports the last 7 days now (the server also syncs on a schedule). */
   syncGarmin(): Promise<void>

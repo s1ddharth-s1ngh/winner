@@ -1,7 +1,8 @@
 // Chat message text. A mention is stored in the body as @[name](u:<uuid>) and drawn as a pill.
 // While typing, the composer shows plain "@name"; tags are added only when sending.
 
-const TAG = /@\[([^\]\n]{1,40})\]\(u:([0-9a-f-]{36})\)/g
+// Ids are uuids on the server; demo friends have ids like "demo-giulia".
+const TAG = /@\[([^\]\n]{1,40})\]\(u:([\w-]{1,64})\)/g
 
 export type TextPart = string | { name: string; id: string }
 

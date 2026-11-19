@@ -11,7 +11,7 @@ Documentazione Garmin: <https://developer.garmin.com/gc-developer-program/person
 1. In Garmin Connect crei una chiave (scade dopo 30, 90, 180 giorni o 1 anno).
 2. Nell'app: **Impostazioni → Data sources → Garmin Connect**, incolli la chiave e premi **Connect Garmin**.
 3. Il server (edge function `garmin`) prova la chiave con Garmin. Se funziona, la salva **cifrata** (AES-256-GCM)
-   nella tabella `garmin_secrets`, poi importa gli ultimi 30 giorni.
+   nella tabella `garmin_secrets`, poi importa gli ultimi 7 giorni.
 
 Sicurezza:
 - La chiave non resta mai nel telefono o nel browser e nessuno può rileggerla, nemmeno tu: l'app vede solo le ultime 4 cifre.
