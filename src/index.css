@@ -91,6 +91,22 @@
   color-scheme: dark;
 }
 
+/* Custom accent: the user's cover color (set by setAccent in src/app/theme.ts) recolors the accent everywhere. */
+:root[data-accent] {
+  --brand: var(--accent);
+  --brand-soft: color-mix(in oklab, var(--accent) 12%, white);
+  --steps: var(--brand);
+  --steps-strong: color-mix(in oklab, var(--accent) 78%, black);
+  --steps-soft: var(--brand-soft);
+  --hero: var(--accent);
+}
+
+:root[data-theme='dark'][data-accent] {
+  --brand: color-mix(in oklab, var(--accent) 88%, white);
+  --brand-soft: color-mix(in oklab, var(--accent) 15%, transparent);
+  --steps-strong: color-mix(in oklab, var(--accent) 60%, white);
+}
+
 @theme inline {
   --font-sans: 'Manrope Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
 

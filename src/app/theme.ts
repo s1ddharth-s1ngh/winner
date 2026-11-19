@@ -38,6 +38,22 @@ export function setThemePref(pref: ThemePref) {
   apply()
 }
 
+const ACCENT_KEY = 'wfl:accent'
+
+/** The user's cover color doubles as the app accent (brand, steps, headers); null = default pink. */
+export function setAccent(color: string | null) {
+  const root = document.documentElement
+  if (color) {
+    root.dataset.accent = ''
+    root.style.setProperty('--accent', color)
+    localStorage.setItem(ACCENT_KEY, color)
+  } else {
+    delete root.dataset.accent
+    root.style.removeProperty('--accent')
+    localStorage.removeItem(ACCENT_KEY)
+  }
+}
+
 const subscribe = (l: () => void) => (listeners.add(l), () => void listeners.delete(l))
 
 /** Current preference and the theme actually shown. */

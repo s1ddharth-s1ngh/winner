@@ -14,6 +14,12 @@
         else if (t !== 'dark') t = 'light'
         document.documentElement.dataset.theme = t
         document.querySelector('meta[name="theme-color"]').content = t === 'dark' ? '#000000' : '#f7f7f8'
+        // Accent color (mirrors setAccent in src/app/theme.ts).
+        var a = localStorage.getItem('wfl:accent')
+        if (a) {
+          document.documentElement.dataset.accent = ''
+          document.documentElement.style.setProperty('--accent', a)
+        }
       } catch (e) {}
     </script>
     <meta name="mobile-web-app-capable" content="yes" />

@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 import { repo, type AuthUser } from '../data/repo'
 import type { Group, Profile } from '../domain/types'
+import { setAccent } from './theme'
 
 export interface Session {
   user: AuthUser
@@ -46,6 +47,12 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     void load()
     return repo.onAuthChange(() => void load())
   }, [load])
+
+  // Signed out falls back to the default accent; while loading keep the cached one from index.html.
+  const accent = state.status === 'ready' ? state.session.profile.cover_color : state.status === 'signed-out' ? null : undefined
+  useEffect(() => {
+    if (accent !== undefined) setAccent(accent)
+  }, [accent])
 
   return <Ctx.Provider value={state}>{children}</Ctx.Provider>
 }

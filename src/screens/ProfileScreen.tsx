@@ -5,7 +5,7 @@ import { useMyData, useToday } from '../app/hooks'
 import { useSession } from '../app/session'
 import { useToast } from '../components/toast'
 import { Avatar, Button, Card, SectionTitle, Sheet, Skeleton, cx, rise } from '../components/ui'
-import { AVATAR_COLORS } from '../config/app'
+import { AVATAR_COLORS, DEFAULT_ACCENT } from '../config/app'
 import { BADGES, type BadgeTone } from '../config/badges'
 import { repo, type ProfileInput } from '../data/repo'
 import { toJpeg } from '../lib/image'
@@ -34,7 +34,7 @@ export default function ProfileScreen() {
     <div className="animate-fade-in">
       <div
         className="relative h-48 overflow-hidden rounded-b-[36px] bg-hero bg-cover bg-center"
-        style={{ backgroundColor: profile.cover_color ?? undefined, backgroundImage: profile.cover_url ? `url("${profile.cover_url}")` : undefined }}
+        style={{ backgroundImage: profile.cover_url ? `url("${profile.cover_url}")` : undefined }}
       >
         <div className="safe-top absolute top-0 right-4 flex gap-2">
           <button type="button" aria-label="Customize profile" onClick={() => setEditing(true)} className={HERO_BTN}>
@@ -133,6 +133,15 @@ const HERO_BTN =
   'mt-3 grid size-10 place-items-center rounded-full bg-black/20 text-white ring-1 ring-white/25 backdrop-blur-md transition-colors hover:bg-black/30'
 
 function CustomizeSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+  return (
+    <Sheet open={open} onClose={onClose} title="Customize profile">
+      <CustomizeFields />
+    </Sheet>
+  )
+}
+
+/** Profile photo, cover color (also the app accent) and cover photo. Saves on every change. Used here and in Settings. */
+export function CustomizeFields() {
   const { profile, refresh } = useSession()
   const toast = useToast()
   const [busy, setBusy] = useState<string | null>(null)
@@ -170,7 +179,7 @@ function CustomizeSheet({ open, onClose }: { open: boolean; onClose: () => void 
   const coverColors = [null, ...AVATAR_COLORS]
 
   return (
-    <Sheet open={open} onClose={onClose} title="Customize profile">
+    <>
       <input
         ref={fileInput}
         type="file"
@@ -200,7 +209,8 @@ function CustomizeSheet({ open, onClose }: { open: boolean; onClose: () => void 
         )}
       </div>
 
-      <p className="mt-6 mb-3 text-[13px] font-semibold tracking-wide text-muted uppercase">Cover</p>
+      <p className="mt-6 text-[13px] font-semibold tracking-wide text-muted uppercase">Cover & app color</p>
+      <p className="mt-1 mb-3 text-[13px] text-muted">The color you pick themes the whole app.</p>
       <div className="flex flex-wrap gap-2.5">
         {coverColors.map((c) => {
           const selected = !profile.cover_url && profile.cover_color === c
@@ -208,13 +218,13 @@ function CustomizeSheet({ open, onClose }: { open: boolean; onClose: () => void 
             <button
               key={c ?? 'default'}
               type="button"
-              aria-label={c ? `Cover color ${c}` : 'Default cover color'}
+              aria-label={c ? `Color ${c}` : 'Default color'}
               aria-pressed={selected}
               disabled={busy != null}
               // Picking a color replaces the cover photo.
               onClick={() => save('color', async () => ({ cover_color: c, cover_url: null }))}
-              className={cx('grid size-9 place-items-center rounded-full bg-hero transition active:scale-90', selected && 'ring-2 ring-offset-2 ring-offset-bg')}
-              style={{ backgroundColor: c ?? undefined, ['--tw-ring-color' as string]: c ?? 'var(--hero)' }}
+              className={cx('grid size-9 place-items-center rounded-full transition active:scale-90', selected && 'ring-2 ring-offset-2 ring-offset-bg')}
+              style={{ backgroundColor: c ?? DEFAULT_ACCENT, ['--tw-ring-color' as string]: c ?? DEFAULT_ACCENT }}
             >
               {selected && <Check className="size-4 text-white" strokeWidth={3} />}
             </button>
@@ -236,6 +246,6 @@ function CustomizeSheet({ open, onClose }: { open: boolean; onClose: () => void 
           />
         )}
       </div>
-    </Sheet>
+    </>
   )
 }

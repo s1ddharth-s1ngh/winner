@@ -1,6 +1,5 @@
 import {
   ArrowLeft,
-  Check,
   Copy,
   KeyRound,
   LogOut,
@@ -16,13 +15,14 @@ import { useLive } from '../app/hooks'
 import { usePrefs } from '../app/inbox'
 import { useSession } from '../app/session'
 import { useTheme, type ThemePref } from '../app/theme'
-import { Avatar, Button, Card, Chip, Field, IconButton, PageHeader, SectionTitle, Segmented, cx, rise } from '../components/ui'
+import { Button, Card, Chip, Field, IconButton, PageHeader, SectionTitle, Segmented, cx, rise } from '../components/ui'
 import { useToast } from '../components/toast'
 import { TimezoneSelect } from '../components/TimezoneSelect'
-import { APP, AVATAR_COLORS } from '../config/app'
+import { APP } from '../config/app'
 import { repo } from '../data/repo'
 import { timeAgo } from '../lib/dates'
 import { connectHealth, healthStatus, isAndroidApp, lastHealthSync, openHealthSettings, syncHealth } from '../native/health'
+import { CustomizeFields } from './ProfileScreen'
 import ScoringSheet from './sheets/ScoringSheet'
 
 export default function SettingsScreen() {
@@ -114,15 +114,14 @@ function ProfileSection({ onSaved }: { onSaved: () => Promise<void> }) {
   const { profile } = useSession()
   const toast = useToast()
   const [username, setUsername] = useState(profile.username)
-  const [color, setColor] = useState(profile.avatar_color)
   const [timezone, setTimezone] = useState(profile.timezone)
   const [busy, setBusy] = useState(false)
-  const dirty = username !== profile.username || color !== profile.avatar_color || timezone !== profile.timezone
+  const dirty = username !== profile.username || timezone !== profile.timezone
 
   const save = async () => {
     setBusy(true)
     try {
-      await repo.saveProfile({ username: username.trim(), avatar_color: color, timezone })
+      await repo.saveProfile({ username: username.trim(), timezone })
       await onSaved()
       toast('Profile saved')
     } catch (e) {
@@ -136,24 +135,8 @@ function ProfileSection({ onSaved }: { onSaved: () => Promise<void> }) {
     <>
       <SectionTitle>Profile</SectionTitle>
       <Card className="animate-rise p-4">
-        <div className="flex items-center gap-4">
-          <Avatar name={username || '?'} color={color} src={profile.avatar_url} size={56} />
-          <div className="flex gap-2">
-            {AVATAR_COLORS.map((c) => (
-              <button
-                key={c}
-                type="button"
-                aria-label={`Color ${c}`}
-                onClick={() => setColor(c)}
-                className={cx('grid size-7 place-items-center rounded-full transition active:scale-90', color === c && 'ring-2 ring-offset-2 ring-offset-surface')}
-                style={{ background: c, ['--tw-ring-color' as string]: c }}
-              >
-                {color === c && <Check className="size-3.5 text-white" strokeWidth={3} />}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="mt-4 space-y-4">
+        <CustomizeFields />
+        <div className="mt-6 space-y-4">
           <Field label="Username" maxLength={20} value={username} onChange={(e) => setUsername(e.target.value)} />
           <TimezoneSelect value={timezone} onChange={setTimezone} />
         </div>
