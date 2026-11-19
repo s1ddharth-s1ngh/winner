@@ -100,8 +100,77 @@ err = null
 try { await as(A, () => q(`insert into public.workouts (date, type, duration_min, external_id) values ('2026-11-14','Run',30,'garmin:1')`)) } catch (e) { err = e.message }
 check('Garmin activity stored once', !!err)
 
+// --- Chat ---------------------------------------------------------------------------------------
+const chats = async (uid) => (await as(uid, () => q(`select public.chat_list() as l`))).rows[0].l
+const uuids = (ids) => `{${ids.join(',')}}`
+const send = async (uid, conv, body, mentions = [], reply = null) =>
+  (await as(uid, () => q(`select public.chat_send($1, $2, $3::uuid[], $4) as id`, [conv, body, uuids(mentions), reply]))).rows[0].id
+const fails_ = async (fn) => { try { await fn(); return null } catch (e) { return e.message } }
+const msg = async (id) => (await q(`select * from public.chat_messages where id = $1`, [id])).rows[0]
+
+check('chat: no group, no chats', (await chats(C)).length === 0)
+const listA = await chats(A)
+const groupChat = listA[0]?.id
+check('chat: group chat created with both members', listA.length === 1 && listA[0].kind === 'group' && listA[0].members.length === 2)
+
+const m1 = await send(A, groupChat, `Hi @[bob](u:${B})`, [B, C, A])
+check('chat: mentions keep only other members', JSON.stringify((await msg(m1)).mentions) === JSON.stringify([B]))
+const listB = await chats(B)
+check('chat: B has 1 unread with 1 mention', listB[0].unread === 1 && listB[0].unread_mentions === 1)
+check('chat: own message is not unread', (await chats(A))[0].unread === 0)
+check('chat: C cannot read group messages', (await as(C, () => q(`select * from public.chat_messages`))).rows.length === 0)
+check('chat: C cannot write into group chat', (await fails_(() => send(C, groupChat, 'hi')))?.includes('Chat not found'))
+check('chat: empty message rejected', (await fails_(() => send(A, groupChat, '   ')))?.includes('empty'))
+
+await as(C, () => q(`select * from public.create_group('Night Owls')`))
+check('chat: another group chat stays hidden', (await chats(A)).length === 1 && (await chats(C)).length === 1)
+
+const dm = (await as(A, () => q(`select public.chat_open_direct($1) as id`, [B]))).rows[0].id
+const dm2 = (await as(B, () => q(`select public.chat_open_direct($1) as id`, [A]))).rows[0].id
+check('chat: one direct chat per pair, either order', dm && dm === dm2)
+check('chat: no direct with a non group mate', (await fails_(() => as(A, () => q(`select public.chat_open_direct($1)`, [C]))))?.includes('friends from your groups'))
+const d1 = await send(A, dm, 'psst', [C])
+check('chat: direct mention of non member dropped', (await msg(d1)).mentions.length === 0)
+check('chat: C cannot read the direct', (await as(C, () => q(`select * from public.chat_messages where conversation_id = $1`, [dm]))).rows.length === 0)
+
+check('chat: B cannot edit A message', (await fails_(() => as(B, () => q(`select public.chat_edit($1, 'x')`, [m1]))))?.includes('own messages'))
+await as(A, () => q(`select public.chat_edit($1, 'Hi all')`, [m1]))
+check('chat: A edits own message', (await msg(m1)).body === 'Hi all' && (await msg(m1)).edited_at !== null)
+check('chat: B cannot delete A message', (await fails_(() => as(B, () => q(`select public.chat_delete($1)`, [m1]))))?.includes('own messages'))
+check('chat: B cannot delete A direct message', (await fails_(() => as(B, () => q(`select public.chat_delete($1)`, [d1]))))?.includes('own messages'))
+const mB = await send(B, groupChat, 'oops')
+await as(A, () => q(`select public.chat_delete($1)`, [mB]))
+check('chat: group owner deletes B message, emptied', (await msg(mB)).body === '' && (await msg(mB)).deleted_at !== null)
+
+await as(B, () => q(`select public.chat_react($1, '👍')`, [m1]))
+check('chat: reaction added', JSON.stringify((await msg(m1)).reactions) === JSON.stringify({ '👍': [B] }))
+await as(B, () => q(`select public.chat_react($1, '👍')`, [m1]))
+check('chat: second tap removes reaction', JSON.stringify((await msg(m1)).reactions) === '{}')
+
+const r1 = await send(A, groupChat, 'reply', [], d1)
+check('chat: reply to another chat dropped', (await msg(r1)).reply_to === null)
+
+const readMark = async () => (await q(`select read_until from public.chat_members where conversation_id = $1 and user_id = $2`, [groupChat, B])).rows[0].read_until
+await as(B, () => q(`select public.chat_mark_read($1, now())`, [groupChat]))
+const mark = await readMark()
+await as(B, () => q(`select public.chat_mark_read($1, '2000-01-01')`, [groupChat]))
+check('chat: read mark never goes back', (await readMark()).getTime() === mark.getTime())
+await as(B, () => q(`select public.chat_mark_read($1, '2999-01-01')`, [groupChat]))
+check('chat: read mark never passes now', (await readMark()) <= new Date())
+
+check('chat: direct insert blocked', !!(await fails_(() => as(A, () => q(`insert into public.chat_messages (conversation_id, body) values ($1, 'x')`, [groupChat])))))
+check('chat: direct update blocked', (await as(A, () => q(`update public.chat_messages set body = 'x'`))).affectedRows === 0)
+check('chat: realtime on messages and members',
+  (await q(`select count(*)::int as n from pg_publication_tables where pubname = 'supabase_realtime' and tablename in ('chat_messages', 'chat_members')`)).rows[0].n === 2)
+
 await as(B, () => q(`delete from public.group_members where user_id = $1`, [B]))
 check('after leaving, B no longer sees A stats', (await as(B, () => q(`select * from public.daily_stats`))).rows.length === 0)
+const afterLeave = await chats(B)
+check('chat: after leaving, B keeps only the direct', afterLeave.length === 1 && afterLeave[0].kind === 'direct')
+check('chat: after leaving, B cannot read group messages', (await as(B, () => q(`select * from public.chat_messages where conversation_id = $1`, [groupChat]))).rows.length === 0)
+await as(B, () => q(`select * from public.join_group($1)`, [code]))
+check('chat: rejoining brings the group chat back', (await chats(B)).length === 2)
+await as(B, () => q(`delete from public.group_members where user_id = $1`, [B]))
 
 const before = (await q(`select updated_at from public.daily_stats where user_id=$1`, [A])).rows[0].updated_at
 await new Promise(r => setTimeout(r, 20))

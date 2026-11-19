@@ -80,3 +80,39 @@ export interface GarminLink {
   last_sync_at: string | null
   last_error: string | null
 }
+
+export interface ChatMessage {
+  id: string
+  conversation_id: string
+  /** Null once the author's account is deleted. */
+  author_id: string | null
+  /** Mentions are tagged in the text as @[name](u:<uuid>) (see domain/chat.ts). */
+  body: string
+  mentions: string[]
+  reply_to: string | null
+  /** Emoji → ids of the people who reacted. */
+  reactions: Record<string, string[]>
+  edited_at: string | null
+  created_at: string
+  /** Deleted messages stay, emptied. */
+  deleted_at: string | null
+  /** Optimistic copy, not yet confirmed. */
+  sending?: boolean
+}
+
+/** One row of the chat list: a group chat (everyone in the group) or a direct chat. */
+export interface ChatSummary {
+  id: string
+  kind: 'group' | 'direct'
+  group_id: string | null
+  /** My read mark. */
+  read_until: string
+  last_message_at: string
+  members: { user_id: string; read_until: string }[]
+  last: { id: string; author_id: string | null; body: string; deleted: boolean; created_at: string } | null
+  unread: number
+  unread_mentions: number
+}
+
+/** A new or changed message, or "something else changed, reload". */
+export type ChatEvent = { type: 'message'; message: ChatMessage; inserted: boolean } | { type: 'refresh' }

@@ -31,6 +31,7 @@ export default function RankingScreen() {
   const rows = data ? buildLeaderboard(data.data, board, range, today) : null
   const podium = rows && rows.filter((r) => r.rank != null).length >= 3 ? rows.slice(0, 3) : null
   const rest = rows ? (podium ? rows.slice(3) : rows) : []
+  const max = rows ? Math.max(0, ...rows.map((r) => metric(r, board))) : 0
 
   return (
     <div className="animate-fade-in">
@@ -72,7 +73,7 @@ export default function RankingScreen() {
             {podium && <Podium key={`${board}-${period}`} rows={podium} board={board} me={user.id} />}
             <Card className={cx('divide-y divide-line overflow-hidden', podium ? 'mt-4' : 'mt-5')}>
               {rest.map((r, i) => (
-                <RankRow key={`${board}-${period}-${r.profile.id}`} index={i} row={r} board={board} period={period} me={r.profile.id === user.id} />
+                <RankRow key={`${board}-${period}-${r.profile.id}`} index={i} row={r} board={board} period={period} max={max} me={r.profile.id === user.id} />
               ))}
               <Link to="/groups" className="flex items-center gap-3 px-4 py-3.5 text-[15px] font-semibold text-brand">
                 <span className="grid size-10 place-items-center rounded-full border-2 border-dashed border-brand/40">
@@ -102,9 +103,12 @@ const value = (r: Row, board: Board) =>
     <StarCount value={board === 'sleep' ? r.sleepStars : r.totalStars} />
   )
 
+const metric = (r: Row, board: Board) => (board === 'steps' ? r.steps : board === 'sleep' ? r.sleepStars : r.totalStars)
+const BAR: Record<Board, string> = { steps: 'bg-steps', sleep: 'bg-sleep', overall: 'bg-star' }
+
 function subline(r: Row, board: Board, period: Period) {
   if (board === 'steps') {
-    if (r.rank == null) return 'No update yet'
+    if (r.rank == null) return 'No steps yet'
     if (period === 'today') return r.updatedAt ? `Updated ${timeAgo(r.updatedAt)}` : ''
     return `${compact(r.steps / r.nights)} / day · ${r.stepsStars}★`
   }
@@ -117,17 +121,21 @@ function subline(r: Row, board: Board, period: Period) {
   return null
 }
 
-function RankRow({ row: r, board, period, me, index }: { row: Row; board: Board; period: Period; me: boolean; index: number }) {
+function RankRow({ row: r, board, period, max, me, index }: { row: Row; board: Board; period: Period; max: number; me: boolean; index: number }) {
   const sub = subline(r, board, period)
+  const ranked = r.rank != null
+  const share = ranked && max > 0 ? metric(r, board) / max : 0
   return (
     <Link
       to={me ? '/stats' : `/compare/${r.profile.id}`}
       style={rise(index)}
-      className={cx('relative flex animate-rise items-center gap-3 px-4 py-3 transition-colors hover:bg-surface-2', me && 'bg-brand-soft/60')}
+      className={cx('relative flex animate-rise items-center gap-3 px-4 py-3.5 transition-colors hover:bg-surface-2', me && 'bg-brand-soft/60')}
     >
       {me && <span className="absolute inset-y-2 left-0 w-1 rounded-r-full bg-brand" />}
       <RankBadge rank={r.rank} size={26} />
-      <Avatar name={r.profile.username} color={r.profile.avatar_color} src={r.profile.avatar_url} size={40} />
+      <span className={cx(!ranked && 'opacity-50 grayscale')}>
+        <Avatar name={r.profile.username} color={r.profile.avatar_color} src={r.profile.avatar_url} size={40} />
+      </span>
       <div className="min-w-0 flex-1">
         <p className="truncate text-[15px] font-semibold">
           {r.profile.username}
@@ -144,8 +152,18 @@ function RankRow({ row: r, board, period, me, index }: { row: Row; board: Board;
             </>
           )}
         </div>
+        {share > 0 && (
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-2">
+            <div className={cx('h-full rounded-full transition-[width] duration-700', BAR[board])} style={{ width: `${Math.max(4, share * 100)}%` }} />
+          </div>
+        )}
       </div>
-      <span className="text-[17px] font-bold">{r.rank == null && board === 'steps' ? <span className="text-[13px] font-medium text-faint">No steps yet</span> : value(r, board)}</span>
+      {(ranked || board !== 'steps') && (
+        <span className="text-right text-[17px] font-bold">
+          {value(r, board)}
+          {board === 'steps' && <span className="block text-[11px] font-medium text-faint">steps</span>}
+        </span>
+      )}
     </Link>
   )
 }

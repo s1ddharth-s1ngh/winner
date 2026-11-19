@@ -204,8 +204,8 @@ export function RankBadge({ rank, size = 24 }: { rank: number | null; size?: num
       {rank}
     </span>
   ) : (
-    <span className="shrink-0 text-center text-sm font-bold text-muted tabular" style={{ width: size }}>
-      {rank}
+    <span className={cx('shrink-0 text-center text-sm font-bold tabular', rank ? 'text-muted' : 'text-faint')} style={{ width: size }}>
+      {rank ?? '–'}
     </span>
   )
 }
