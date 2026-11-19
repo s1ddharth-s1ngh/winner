@@ -2,7 +2,7 @@
 // Schema + RLS: supabase/migrations. Group create/join go through security-definer RPCs.
 import { createClient, FunctionsHttpError, type AuthError, type PostgrestError } from '@supabase/supabase-js'
 import { browserTimezone } from '../lib/dates'
-import type { ApiToken, DailyStat, GarminLink, Group, Member, Profile, StatsInput, Workout } from '../domain/types'
+import type { ApiToken, ChatMessage, ChatSummary, DailyStat, GarminLink, Group, Member, Profile, StatsInput, Workout } from '../domain/types'
 import { randomToken, sha256 } from './shared'
 import type { ProfileInput, Repo, WorkoutInput } from './repo'
 
@@ -193,6 +193,57 @@ export function createSupabaseRepo(url: string, key: string): Repo {
       const channel = sb.channel(`changes-${crypto.randomUUID()}`)
       for (const table of ['daily_stats', 'workouts', 'group_members', 'profiles'])
         channel.on('postgres_changes', { event: '*', schema: 'public', table }, cb)
+      channel.subscribe()
+      return () => void sb.removeChannel(channel)
+    },
+
+    // Chat tables are read directly (RLS) and written only through the chat_* RPCs.
+    async listChats() {
+      return check(await sb.rpc('chat_list')) as ChatSummary[]
+    },
+
+    async listMessages(conversationId, limit) {
+      const rows = check(
+        await sb.from('chat_messages').select('*').eq('conversation_id', conversationId).order('created_at', { ascending: false }).limit(limit),
+      ) as ChatMessage[]
+      return rows.reverse()
+    },
+
+    async openDirect(userId) {
+      return check(await sb.rpc('chat_open_direct', { p_user: userId })) as string
+    },
+
+    async sendMessage(conversationId, body, mentions, replyTo) {
+      check(await sb.rpc('chat_send', { p_conversation: conversationId, p_body: body, p_mentions: mentions, p_reply_to: replyTo }))
+    },
+
+    async editMessage(messageId, body, mentions) {
+      check(await sb.rpc('chat_edit', { p_message: messageId, p_body: body, p_mentions: mentions }))
+    },
+
+    async deleteMessage(messageId) {
+      check(await sb.rpc('chat_delete', { p_message: messageId }))
+    },
+
+    async react(messageId, emoji) {
+      check(await sb.rpc('chat_react', { p_message: messageId, p_emoji: emoji }))
+    },
+
+    async markRead(conversationId, until) {
+      check(await sb.rpc('chat_mark_read', { p_conversation: conversationId, p_until: until }))
+    },
+
+    // RLS applies to realtime too: each client only gets rows of its own chats.
+    subscribeChat(cb) {
+      const channel = sb
+        .channel(`chat-${crypto.randomUUID()}`)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, (p) =>
+          cb({ type: 'message', message: p.new as ChatMessage, inserted: true }),
+        )
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'chat_messages' }, (p) =>
+          cb({ type: 'message', message: p.new as ChatMessage, inserted: false }),
+        )
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_members' }, () => cb({ type: 'refresh' }))
       channel.subscribe()
       return () => void sb.removeChannel(channel)
     },

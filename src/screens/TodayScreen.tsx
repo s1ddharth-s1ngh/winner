@@ -399,8 +399,8 @@ function WeekStrip({ history, today }: { history: DayScore[]; today: ISODate }) 
   const todayIdx = days.indexOf(today)
   // Scale to the best day (min 4★) so a quiet week still has some shape.
   const max = Math.max(4, ...totals)
-  // Chart space is a 100×100 viewBox: 28 units of headroom for the today pill, line sits in 28..92.
-  const pts = totals.map((v, i) => ({ x: ((i + 0.5) / 7) * 100, y: 92 - (v / max) * 64 }))
+  // Chart space is a 100×100 viewBox: 20 units of headroom for the star labels, line sits in 20..92.
+  const pts = totals.map((v, i) => ({ x: ((i + 0.5) / 7) * 100, y: 92 - (v / max) * 72 }))
   const past = pts.slice(0, todayIdx + 1)
   // Smooth curve with horizontal tangents: never overshoots below zero or above the max.
   const line = past.reduce((p, pt, i) => {
@@ -415,7 +415,7 @@ function WeekStrip({ history, today }: { history: DayScore[]; today: ISODate }) 
     <>
       <SectionTitle action={<StarCount value={weekTotal} className="text-sm text-muted" />}>This week</SectionTitle>
       <Card className="overflow-hidden px-2 pt-3 pb-3">
-        <div className="relative h-32">
+        <div className="relative h-40">
           <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 size-full overflow-visible" aria-hidden>
             <defs>
               <linearGradient id="week-area" x1="0" y1="0" x2="0" y2="1">
@@ -423,7 +423,7 @@ function WeekStrip({ history, today }: { history: DayScore[]; today: ISODate }) 
                 <stop offset="1" stopColor="var(--brand)" stopOpacity="0" />
               </linearGradient>
             </defs>
-            {[28, 60, 92].map((y) => (
+            {[20, 56, 92].map((y) => (
               <line key={y} x1="0" x2="100" y1={y} y2={y} stroke="var(--line)" strokeDasharray="2 3" vectorEffect="non-scaling-stroke" />
             ))}
             {t && <line x1={t.x} x2={t.x} y1={t.y} y2="100" stroke="var(--brand)" strokeOpacity="0.35" strokeDasharray="3 3" vectorEffect="non-scaling-stroke" />}
@@ -443,13 +443,24 @@ function WeekStrip({ history, today }: { history: DayScore[]; today: ISODate }) 
               />
             ),
           )}
+          {pts.map((p, i) =>
+            i < todayIdx ? (
+              <span
+                key={`v${i}`}
+                className={cx('absolute -translate-x-1/2 text-[15px] leading-none font-extrabold tabular', totals[i] > 0 ? 'text-ink' : 'text-faint')}
+                style={{ left: `${p.x}%`, top: `calc(${p.y}% - 26px)` }}
+              >
+                {totals[i]}★
+              </span>
+            ) : null,
+          )}
           {t && (
             <>
               <span className="absolute size-7 -translate-1/2 animate-ping rounded-full motion-reduce:hidden bg-brand/25" style={{ left: `${t.x}%`, top: `${t.y}%` }} />
               <span className="absolute size-3.5 -translate-1/2 rounded-full bg-brand ring-4 ring-brand/20" style={{ left: `${t.x}%`, top: `${t.y}%` }} />
               <span
-                className="absolute -translate-x-1/2 rounded-full bg-ink px-2 py-0.5 text-[11px] font-bold whitespace-nowrap text-bg tabular shadow-sm"
-                style={{ left: `clamp(24px, ${t.x}%, calc(100% - 24px))`, top: `calc(${t.y}% - 30px)` }}
+                className="absolute -translate-x-1/2 rounded-full bg-ink px-2 py-0.5 text-[15px] font-extrabold whitespace-nowrap text-bg tabular shadow-sm"
+                style={{ left: `clamp(24px, ${t.x}%, calc(100% - 24px))`, top: `calc(${t.y}% - 36px)` }}
               >
                 {totals[todayIdx]}★
               </span>
@@ -458,12 +469,9 @@ function WeekStrip({ history, today }: { history: DayScore[]; today: ISODate }) 
         </div>
         <div className="mt-1 grid grid-cols-7">
           {days.map((d, i) => (
-            <div key={d} className="flex flex-col items-center gap-0.5">
-              <span className={cx('text-[11px] font-bold', i === todayIdx ? 'text-brand' : 'text-faint')}>{formatWeekdayLetter(d)}</span>
-              <span className={cx('text-[10px] font-semibold tabular', i > todayIdx ? 'text-line' : i === todayIdx ? 'text-brand' : totals[i] > 0 ? 'text-muted' : 'text-faint')}>
-                {i > todayIdx ? '·' : i === todayIdx ? 'today' : `${totals[i]}★`}
-              </span>
-            </div>
+            <span key={d} className={cx('text-center text-[11px] font-bold', i === todayIdx ? 'text-brand' : 'text-faint')}>
+              {formatWeekdayLetter(d)}
+            </span>
           ))}
         </div>
       </Card>

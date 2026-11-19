@@ -3,7 +3,7 @@
 // so their "today" keeps moving while the app is open.
 import { AVATAR_COLORS } from '../config/app'
 import { browserTimezone, eachDay } from '../lib/dates'
-import type { ApiToken, DailyStat, Group, Member, Profile, StatsInput, Workout } from '../domain/types'
+import type { ApiToken, ChatEvent, ChatMessage, ChatSummary, DailyStat, Group, Member, Profile, StatsInput, Workout } from '../domain/types'
 import { applyStatsInput, inviteCode, randomToken, sha256 } from './shared'
 import { DEMO_GROUP_CODE, demoGroup, demoPersona as personaOf, demoProfiles, generateDay, myDemoHistory } from './demoSeed'
 import type { AuthUser, ProfileInput, Repo, WorkoutInput } from './repo'
@@ -16,6 +16,10 @@ interface DB {
   stats: DailyStat[]
   workouts: Workout[]
   tokens: (ApiToken & { user_id: string; token_hash: string })[]
+  // Chat. A group chat's id is the group id; direct chats are stored.
+  directs: { id: string; members: string[]; created_at: string }[]
+  chatReads: { conversation_id: string; user_id: string; read_until: string }[]
+  messages: ChatMessage[]
 }
 
 const KEY = 'wfl:db:v1'
@@ -23,12 +27,25 @@ const SESSION = 'wfl:session'
 const DEMO_ID = demoGroup().id
 const PERSONAS = demoProfiles()
 
-const empty = (): DB => ({ users: [], profiles: [], groups: [], members: [], stats: [], workouts: [], tokens: [] })
+const empty = (): DB => ({
+  users: [],
+  profiles: [],
+  groups: [],
+  members: [],
+  stats: [],
+  workouts: [],
+  tokens: [],
+  directs: [],
+  chatReads: [],
+  messages: [],
+})
 
 export function createLocalRepo(): Repo {
   const listeners = new Set<() => void>()
   const authListeners = new Set<() => void>()
+  const chatListeners = new Set<(e: ChatEvent) => void>()
   const emit = () => listeners.forEach((l) => l())
+  const chatEmit = (e: ChatEvent) => chatListeners.forEach((l) => l(e))
 
   const load = (): DB => {
     try {
@@ -49,7 +66,10 @@ export function createLocalRepo(): Repo {
 
   // Other tabs write → refresh this one.
   window.addEventListener('storage', (e) => {
-    if (e.key === KEY) emit()
+    if (e.key === KEY) {
+      emit()
+      chatEmit({ type: 'refresh' })
+    }
     if (e.key === SESSION) authListeners.forEach((l) => l())
   })
 
@@ -57,6 +77,50 @@ export function createLocalRepo(): Repo {
   setInterval(() => listeners.size && emit(), 30_000)
 
   const profileOf = (db: DB, id: string) => db.profiles.find((p) => p.id === id) ?? PERSONAS.find((p) => p.id === id)
+
+  const myGroups = (db: DB) => {
+    const id = me()
+    const mine = new Set(db.members.filter((m) => m.user_id === id).map((m) => m.group_id))
+    return [...db.groups, demoGroup()].filter((g) => mine.has(g.id))
+  }
+
+  // Chat: same rules as the chat_* RPCs in supabase/migrations/20261119150000_chat.sql.
+  const groupMemberIds = (db: DB, groupId: string) => [
+    ...db.members.filter((m) => m.group_id === groupId).map((m) => m.user_id),
+    ...(groupId === DEMO_ID ? PERSONAS.map((p) => p.id) : []),
+  ]
+  const chatMemberIds = (db: DB, conv: string) => db.directs.find((d) => d.id === conv)?.members ?? groupMemberIds(db, conv)
+  const readUntil = (db: DB, conv: string, user: string) =>
+    db.chatReads.find((r) => r.conversation_id === conv && r.user_id === user)?.read_until ??
+    db.directs.find((d) => d.id === conv)?.created_at ??
+    db.members.find((m) => m.group_id === conv && m.user_id === user)?.joined_at ??
+    new Date().toISOString()
+  const setRead = (db: DB, conv: string, user: string, until: string) => {
+    const r = db.chatReads.find((x) => x.conversation_id === conv && x.user_id === user)
+    if (!r) db.chatReads.push({ conversation_id: conv, user_id: user, read_until: until })
+    else if (r.read_until < until) r.read_until = until
+  }
+  const seeChat = (db: DB, conv: string) => {
+    if (!chatMemberIds(db, conv).includes(me())) throw new Error('Chat not found.')
+  }
+  const ownMessage = (db: DB, id: string) => {
+    const m = db.messages.find((x) => x.id === id && !x.deleted_at)
+    if (!m || !chatMemberIds(db, m.conversation_id).includes(me())) throw new Error('Message not found.')
+    return m
+  }
+  const checkBody = (body: string) => {
+    if (!body.trim()) throw new Error('The message is empty.')
+    if (body.trim().length > 4000) throw new Error('The message is too long (4000 characters max).')
+  }
+  const cleanMentions = (db: DB, conv: string, ids: string[]) => {
+    const members = chatMemberIds(db, conv)
+    return [...new Set(ids)].filter((id) => id !== me() && members.includes(id))
+  }
+  // Chat writes skip `emit()`: a message must not reload every screen.
+  const saveChat = (db: DB, e: ChatEvent) => {
+    localStorage.setItem(KEY, JSON.stringify(db))
+    chatEmit(e)
+  }
 
   return {
     kind: 'local',
@@ -131,10 +195,7 @@ export function createLocalRepo(): Repo {
     },
 
     async listGroups() {
-      const db = load()
-      const id = me()
-      const mine = new Set(db.members.filter((m) => m.user_id === id).map((m) => m.group_id))
-      return [...db.groups, demoGroup()].filter((g) => mine.has(g.id))
+      return myGroups(load())
     },
 
     async createGroup(name) {
@@ -270,6 +331,116 @@ export function createLocalRepo(): Repo {
     subscribe(cb) {
       listeners.add(cb)
       return () => listeners.delete(cb)
+    },
+
+    async listChats() {
+      const db = load()
+      const id = me()
+      const groups = myGroups(db).map((g) => ({ id: g.id, kind: 'group' as const, group_id: g.id, created_at: g.created_at }))
+      const directs = db.directs.filter((d) => d.members.includes(id)).map((d) => ({ id: d.id, kind: 'direct' as const, group_id: null, created_at: d.created_at }))
+      return [...groups, ...directs]
+        .map((c): ChatSummary => {
+          const msgs = db.messages.filter((m) => m.conversation_id === c.id)
+          const last = msgs.at(-1)
+          const mine = readUntil(db, c.id, id)
+          const unread = msgs.filter((m) => m.created_at > mine && m.author_id !== id && !m.deleted_at)
+          return {
+            ...c,
+            read_until: mine,
+            last_message_at: last?.created_at ?? c.created_at,
+            members: chatMemberIds(db, c.id).map((u) => ({ user_id: u, read_until: readUntil(db, c.id, u) })),
+            last: last ? { id: last.id, author_id: last.author_id, body: last.body.slice(0, 240), deleted: !!last.deleted_at, created_at: last.created_at } : null,
+            unread: unread.length,
+            unread_mentions: unread.filter((m) => m.mentions.includes(id)).length,
+          }
+        })
+        .sort((a, b) => b.last_message_at.localeCompare(a.last_message_at))
+    },
+
+    async listMessages(conversationId, limit) {
+      const db = load()
+      seeChat(db, conversationId)
+      return db.messages.filter((m) => m.conversation_id === conversationId).slice(-limit)
+    },
+
+    async openDirect(userId) {
+      const db = load()
+      const id = me()
+      const mates = new Set(myGroups(db).flatMap((g) => groupMemberIds(db, g.id)))
+      if (userId === id || !mates.has(userId)) throw new Error('You can only message friends from your groups.')
+      const pair = [id, userId].sort()
+      let d = db.directs.find((x) => x.members.join() === pair.join())
+      if (!d) {
+        d = { id: crypto.randomUUID(), members: pair, created_at: new Date().toISOString() }
+        db.directs.push(d)
+        saveChat(db, { type: 'refresh' })
+      }
+      return d.id
+    },
+
+    async sendMessage(conversationId, body, mentions, replyTo) {
+      const db = load()
+      seeChat(db, conversationId)
+      checkBody(body)
+      const now = new Date().toISOString()
+      const message: ChatMessage = {
+        id: crypto.randomUUID(),
+        conversation_id: conversationId,
+        author_id: me(),
+        body: body.trim(),
+        mentions: cleanMentions(db, conversationId, mentions),
+        reply_to: db.messages.some((m) => m.id === replyTo && m.conversation_id === conversationId) ? replyTo : null,
+        reactions: {},
+        edited_at: null,
+        created_at: now,
+        deleted_at: null,
+      }
+      db.messages.push(message)
+      setRead(db, conversationId, me(), now)
+      saveChat(db, { type: 'message', message, inserted: true })
+    },
+
+    async editMessage(messageId, body, mentions) {
+      const db = load()
+      const m = ownMessage(db, messageId)
+      if (m.author_id !== me()) throw new Error('You can only edit your own messages.')
+      checkBody(body)
+      Object.assign(m, { body: body.trim(), mentions: cleanMentions(db, m.conversation_id, mentions), edited_at: new Date().toISOString() })
+      saveChat(db, { type: 'message', message: m, inserted: false })
+    },
+
+    async deleteMessage(messageId) {
+      const db = load()
+      const m = ownMessage(db, messageId)
+      const owner = db.members.some((x) => x.group_id === m.conversation_id && x.user_id === me() && x.role === 'owner')
+      if (m.author_id !== me() && !owner) throw new Error('You can only delete your own messages.')
+      Object.assign(m, { body: '', mentions: [], reactions: {}, deleted_at: new Date().toISOString() })
+      saveChat(db, { type: 'message', message: m, inserted: false })
+    },
+
+    async react(messageId, emoji) {
+      const db = load()
+      const m = ownMessage(db, messageId)
+      const list = m.reactions[emoji] ?? []
+      if (!list.includes(me()) && !m.reactions[emoji] && Object.keys(m.reactions).length >= 12)
+        throw new Error('Too many different reactions on this message.')
+      const next = list.includes(me()) ? list.filter((u) => u !== me()) : [...list, me()]
+      if (next.length) m.reactions[emoji] = next
+      else delete m.reactions[emoji]
+      saveChat(db, { type: 'message', message: m, inserted: false })
+    },
+
+    async markRead(conversationId, until) {
+      const db = load()
+      if (!chatMemberIds(db, conversationId).includes(me())) return
+      const now = new Date().toISOString()
+      setRead(db, conversationId, me(), until < now ? until : now)
+      saveChat(db, { type: 'refresh' })
+    },
+
+    subscribeChat(cb) {
+      chatListeners.add(cb)
+      return () => chatListeners.delete(cb)
     },
 
     demo: {

@@ -1,5 +1,17 @@
 import type { ISODate } from '../lib/dates'
-import type { ApiToken, DailyStat, GarminLink, Group, Member, Profile, StatsInput, Workout } from '../domain/types'
+import type {
+  ApiToken,
+  ChatEvent,
+  ChatMessage,
+  ChatSummary,
+  DailyStat,
+  GarminLink,
+  Group,
+  Member,
+  Profile,
+  StatsInput,
+  Workout,
+} from '../domain/types'
 import { createLocalRepo } from './localRepo'
 import { createSupabaseRepo } from './supabaseRepo'
 
@@ -52,6 +64,22 @@ export interface Repo {
 
   /** Fires on any data change (own writes, other tabs, realtime). Returns unsubscribe. */
   subscribe(cb: () => void): () => void
+
+  /** My chats, newest first, with unread counts. */
+  listChats(): Promise<ChatSummary[]>
+  /** The last `limit` messages of a chat, oldest first. */
+  listMessages(conversationId: string, limit: number): Promise<ChatMessage[]>
+  /** Finds or creates the direct chat with a group mate. Returns its id. */
+  openDirect(userId: string): Promise<string>
+  sendMessage(conversationId: string, body: string, mentions: string[], replyTo: string | null): Promise<void>
+  editMessage(messageId: string, body: string, mentions: string[]): Promise<void>
+  deleteMessage(messageId: string): Promise<void>
+  /** Toggle: adds my reaction, or removes it if already there. */
+  react(messageId: string, emoji: string): Promise<void>
+  /** Moves my read mark forward to `until` (the last message shown). */
+  markRead(conversationId: string, until: string): Promise<void>
+  /** Chat changes only (separate from `subscribe`, so a message does not reload every screen). */
+  subscribeChat(cb: (e: ChatEvent) => void): () => void
 
   /** Demo-only helpers (local backend). */
   demo?: {
