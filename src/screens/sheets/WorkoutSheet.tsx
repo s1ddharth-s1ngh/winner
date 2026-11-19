@@ -10,7 +10,7 @@ import { DatePicker } from './DatePicker'
 
 const PRESETS = [15, 30, 45, 60, 90, 120]
 
-export default function WorkoutSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+export default function WorkoutSheet({ open, onClose, onSaved }: { open: boolean; onClose: () => void; onSaved: () => void }) {
   const today = useToday()
   const toast = useToast()
   const [date, setDate] = useState(today)
@@ -36,7 +36,7 @@ export default function WorkoutSheet({ open, onClose }: { open: boolean; onClose
     try {
       await repo.addWorkout({ date, type, duration_min: minutes, note: note.trim() || null })
       toast(`${type} logged`)
-      onClose()
+      onSaved()
     } catch (err) {
       setError((err as Error).message)
     } finally {

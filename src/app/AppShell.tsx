@@ -10,7 +10,8 @@ import PendingInvite from './PendingInvite'
 import { useSession } from './session'
 import { useHealthAutoSync } from '../native/health'
 
-type SheetState = null | { kind: 'chooser' } | { kind: 'entry'; date?: ISODate } | { kind: 'workout' }
+// fromChooser: opened from the "Add" chooser, so closing without saving goes back to it.
+type SheetState = null | { kind: 'chooser' } | { kind: 'entry'; date?: ISODate; fromChooser?: boolean } | { kind: 'workout'; fromChooser?: boolean }
 
 const Ctx = createContext<{ openEntry(date?: ISODate): void; openWorkout(): void }>({ openEntry() {}, openWorkout() {} })
 export const useSheets = () => useContext(Ctx)
@@ -26,6 +27,7 @@ const TABS = [
 export default function AppShell() {
   const [sheet, setSheet] = useState<SheetState>(null)
   const close = useCallback(() => setSheet(null), [])
+  const back = useCallback(() => setSheet((s) => (s && 'fromChooser' in s && s.fromChooser ? { kind: 'chooser' } : null)), [])
   const { user, profile } = useSession()
   useOvertakeWatcher()
   useHealthAutoSync(user.id, profile.timezone)
@@ -79,7 +81,7 @@ export default function AppShell() {
       <Sheet open={sheet?.kind === 'chooser'} onClose={close} title="Add">
         <div className="grid gap-3">
           <ChooserOption
-            onClick={() => setSheet({ kind: 'entry' })}
+            onClick={() => setSheet({ kind: 'entry', fromChooser: true })}
             title="Steps & sleep"
             text="Log today's steps or last night's sleep"
             icons={[
@@ -89,7 +91,7 @@ export default function AppShell() {
             tone="bg-steps"
           />
           <ChooserOption
-            onClick={() => setSheet({ kind: 'workout' })}
+            onClick={() => setSheet({ kind: 'workout', fromChooser: true })}
             title="Workout or hobby"
             text="Gym, run, padel… with how long it took"
             icons={[<Activity key="d" className="size-5" />]}
@@ -97,8 +99,8 @@ export default function AppShell() {
           />
         </div>
       </Sheet>
-      <EntrySheet open={sheet?.kind === 'entry'} onClose={close} initialDate={sheet?.kind === 'entry' ? sheet.date : undefined} />
-      <WorkoutSheet open={sheet?.kind === 'workout'} onClose={close} />
+      <EntrySheet open={sheet?.kind === 'entry'} onClose={back} onSaved={close} initialDate={sheet?.kind === 'entry' ? sheet.date : undefined} />
+      <WorkoutSheet open={sheet?.kind === 'workout'} onClose={back} onSaved={close} />
     </Ctx.Provider>
   )
 }

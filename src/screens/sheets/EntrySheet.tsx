@@ -29,7 +29,7 @@ function sleepInstants(date: ISODate, bed: string, wake: string, tz: string) {
   return { start, end, minutes: Math.round((end.getTime() - start.getTime()) / 60_000) }
 }
 
-export default function EntrySheet({ open, onClose, initialDate }: { open: boolean; onClose: () => void; initialDate?: ISODate }) {
+export default function EntrySheet({ open, onClose, onSaved, initialDate }: { open: boolean; onClose: () => void; onSaved: () => void; initialDate?: ISODate }) {
   const { user, profile } = useSession()
   const today = useToday()
   const toast = useToast()
@@ -97,7 +97,7 @@ export default function EntrySheet({ open, onClose, initialDate }: { open: boole
           : existing?.sleep_start && { sleep_start: null, sleep_end: null, sleep_minutes: null }),
       })
       toast('Saved')
-      onClose()
+      onSaved()
     } catch (err) {
       setError((err as Error).message)
     } finally {
