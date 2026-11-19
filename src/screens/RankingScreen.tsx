@@ -127,7 +127,7 @@ function RankRow({ row: r, board, period, max, me, index }: { row: Row; board: B
   const share = ranked && max > 0 ? metric(r, board) / max : 0
   return (
     <Link
-      to={me ? '/stats' : `/compare/${r.profile.id}`}
+      to={me ? '/stats' : `/friend/${r.profile.id}`}
       style={rise(index)}
       className={cx('relative flex animate-rise items-center gap-3 px-4 py-3.5 transition-colors hover:bg-surface-2', me && 'bg-brand-soft/60')}
     >
@@ -179,7 +179,7 @@ function Podium({ rows, board, me }: { rows: Row[]; board: Board; me: string }) 
         {order.map((r) => {
           const rank = r.rank ?? 3
           return (
-            <Link key={r.profile.id} to={r.profile.id === me ? '/stats' : `/compare/${r.profile.id}`} style={rise(delay[rank])} className="flex animate-rise flex-col items-center">
+            <Link key={r.profile.id} to={r.profile.id === me ? '/stats' : `/friend/${r.profile.id}`} style={rise(delay[rank])} className="flex animate-rise flex-col items-center">
               <div className="relative">
                 {rank === 1 && <Crown className="absolute -top-7 left-1/2 size-7 -translate-x-1/2 fill-[#f5b731] text-[#f5b731]" />}
                 <span className={cx('block rounded-full p-[3px]', rank === 1 ? 'bg-[#f5b731]' : 'bg-white/25')}>

@@ -54,7 +54,7 @@ const SECTIONS: { title: string; lines: Line[] }[] = [
   },
 ]
 
-export default function CompareScreen() {
+export default function FriendScreen() {
   const { userId } = useParams()
   const { user, profile, group } = useSession()
   const today = useToday()
@@ -79,7 +79,7 @@ export default function CompareScreen() {
       <div className="safe-top px-4 pt-3">
         <IconButton icon={ArrowLeft} label="Back" onClick={() => navigate(-1)} />
       </div>
-      <PageHeader subtitle={group?.name} title={them ? `You vs ${them.username}` : 'Compare'} />
+      <PageHeader subtitle={group?.name} title={them?.username ?? ' '} />
 
       <div className="px-4">
         {error && <p className="text-center text-sm text-danger">{error}</p>}
@@ -92,7 +92,7 @@ export default function CompareScreen() {
           <>
             <Card className="flex items-center justify-around px-4 py-5">
               <Face p={profile} label="You" />
-              <span className="text-lg font-black text-faint">VS</span>
+              <span className="text-lg font-black text-faint">&amp;</span>
               <Face p={data.them} label={data.them.username} />
             </Card>
 

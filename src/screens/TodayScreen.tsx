@@ -1,6 +1,7 @@
-import { Bell, ChevronRight, Dumbbell, Footprints, MoonStar, Plus, Star, Sunrise, Trash2, TrendingUp, Trophy } from 'lucide-react'
+import { Bell, ChevronRight, Dumbbell, Footprints, MessageCircle, MoonStar, Plus, Star, Sunrise, Trash2, TrendingUp, Trophy } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
+import { useChat } from '../app/chat'
 import { useGroupData, useMyData, useToday } from '../app/hooks'
 import { useInbox } from '../app/inbox'
 import { useSession } from '../app/session'
@@ -21,7 +22,8 @@ export default function TodayScreen() {
   const { profile, group } = useSession()
   const today = useToday()
   const { unread } = useInbox()
-  const my = useMyData(addDays(today, -59), today)
+  const { unread: chatUnread } = useChat()
+  const my =useMyData(addDays(today, -59), today)
   const day = my.data?.history.at(-1)
   const stat = my.data?.stats.find((s) => s.date === today)
   const { openEntry, openWorkout } = useSheets()
@@ -35,6 +37,9 @@ export default function TodayScreen() {
         title={`${greeting(Math.floor(minutesOfDayIn(new Date(), profile.timezone) / 60))} ${profile.username}`}
         actions={
           <>
+            <Link to="/chat">
+              <IconButton icon={MessageCircle} label="Chats" badge={chatUnread > 0} />
+            </Link>
             <Link to="/inbox">
               <IconButton icon={Bell} label="Notifications" badge={unread > 0} />
             </Link>
@@ -550,7 +555,7 @@ function MiniRanking({ today }: { today: ISODate }) {
           : shown.map((r, i) => (
               <Link
                 key={r.profile.id}
-                to={r.profile.id === user.id ? '/stats' : `/compare/${r.profile.id}`}
+                to={r.profile.id === user.id ? '/stats' : `/friend/${r.profile.id}`}
                 style={rise(i)}
                 className={cx('flex animate-rise items-center gap-3 px-4 py-3 transition-colors hover:bg-surface-2', r.profile.id === user.id && 'bg-brand-soft/60')}
               >
