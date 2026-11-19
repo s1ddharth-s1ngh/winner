@@ -46,7 +46,7 @@ export default function WorkoutSheet({ open, onClose, onSaved }: { open: boolean
 
   return (
     <Sheet open={open} onClose={onClose} title="Workout or hobby">
-      <form onSubmit={submit}>
+      <form onSubmit={submit} className="theme-hobby">
         <DatePicker value={date} onChange={setDate} today={today} />
 
         <h3 className="mt-6 mb-2.5 text-[13px] font-semibold text-ink-2">Activity</h3>

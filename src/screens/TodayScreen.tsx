@@ -400,7 +400,9 @@ function HobbyHero({ day, workouts, today, onAdd }: { day: DayScore; workouts: W
             `Nothing logged today. One session = +${WORKOUT_BONUS.stars}★.`
           )}
         </p>
-        <UpdateButton onClick={onAdd} />
+        <div className="theme-hobby shrink-0">
+          <UpdateButton onClick={onAdd} />
+        </div>
       </div>
     </Card>
   )

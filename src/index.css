@@ -107,6 +107,12 @@
   --steps-strong: color-mix(in oklab, var(--accent) 60%, white);
 }
 
+/* Hobby surfaces keep their orange identity whatever accent the user picked. */
+.theme-hobby {
+  --brand: var(--hobby);
+  --brand-soft: var(--hobby-soft);
+}
+
 @theme inline {
   --font-sans: 'Manrope Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
 
