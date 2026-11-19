@@ -104,20 +104,23 @@ export function BarChart({
             {goalLabel && <span className="absolute -top-5 right-0 rounded bg-bg px-1 text-[10px] font-semibold text-muted">{goalLabel}</span>}
           </div>
         )}
-        <div className={cx('absolute inset-0 flex items-end', dense ? 'gap-[3px]' : 'gap-2')}>
+        <div className={cx('absolute inset-0 flex items-end border-b border-line', dense ? 'gap-[3px]' : 'gap-2')}>
           {bars.map((b) => (
-            <div key={b.key} className="group relative flex h-full flex-1 flex-col justify-end" title={b.value != null ? `${b.label}: ${format(b.value)}` : `${b.label}: no data`}>
+            <div key={b.key} className="group relative flex h-full flex-1 flex-col items-center justify-end" title={b.value != null ? `${b.label}: ${format(b.value)}` : `${b.label}: no data`}>
               {b.active && b.value != null && !dense && (
                 <span className="mb-1 text-center text-[11px] font-bold text-ink tabular">{format(b.value)}</span>
               )}
-              <div
-                className={cx(
-                  'w-full rounded-[7px] transition-[height] duration-500',
-                  b.value == null ? 'bg-transparent' : toneCls[b.tone ?? 'good'],
-                  b.active && 'ring-2 ring-ink/80 ring-offset-2 ring-offset-surface',
-                )}
-                style={{ height: b.value == null ? 0 : `max(4px, ${(b.value / max) * 100}%)` }}
-              />
+              {b.value == null ? (
+                <div className="mb-1 h-1 w-1/3 max-w-3 rounded-full bg-line" />
+              ) : (
+                <div
+                  className={cx(
+                    'w-full max-w-7 rounded-t-[6px] rounded-b-[2px] transition-[height] duration-500',
+                    toneCls[b.tone ?? 'good'],
+                  )}
+                  style={{ height: `max(4px, ${(b.value / max) * 100}%)` }}
+                />
+              )}
             </div>
           ))}
         </div>

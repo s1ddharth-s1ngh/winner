@@ -40,6 +40,8 @@ export default function StatsScreen() {
   const oldest = addDays(today, -HISTORY_DAYS)
 
   const days = data?.history.filter((d) => d.date >= from && d.date <= to) ?? []
+  // History stops at today: pad the rest of the period so the chart always shows the full week/month.
+  if (data) for (let d = addDays(days.at(-1)?.date ?? addDays(from, -1), 1); d <= to; d = addDays(d, 1)) days.push(emptyDay(d))
   const workouts = data?.workouts.filter((w) => w.date >= from && w.date <= to) ?? []
 
   return (
@@ -132,6 +134,7 @@ function Kpis({ items }: { items: { label: string; value: ReactNode; tone?: Tone
 
 const dayLabel = (d: ISODate, span: Span) => (span === 'week' ? formatWeekdayShort(d).slice(0, 2) : String(Number(d.slice(8))))
 const past = (days: DayScore[], today: ISODate) => days.filter((d) => d.date <= today)
+const emptyDay = (date: ISODate): DayScore => ({ date, steps: null, stepsStars: 0, flights: null, flightsStars: 0, sleep: null, sleepStars: 0, workouts: 0, workoutMinutes: 0, workoutStars: 0, total: 0 })
 
 function Records({ items }: { items: { label: string; value: ReactNode; sub?: ReactNode }[] }) {
   return (
