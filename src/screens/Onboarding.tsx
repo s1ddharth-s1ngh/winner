@@ -1,6 +1,5 @@
-import { ArrowRight, Check, Hash, Users } from 'lucide-react'
+import { ArrowRight, Hash, Users } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
-import { AVATAR_COLORS } from '../config/app'
 import { repo } from '../data/repo'
 import { DEMO_GROUP_CODE } from '../data/demoSeed'
 import { useSession } from '../app/session'
@@ -13,7 +12,6 @@ export default function Onboarding() {
   const { profile, refresh } = useSession()
   const [step, setStep] = useState<'profile' | 'group'>('profile')
   const [username, setUsername] = useState(profile.username)
-  const [color, setColor] = useState(profile.avatar_color)
   const [timezone, setTimezone] = useState(profile.timezone)
   const [groupName, setGroupName] = useState('')
   const [code, setCode] = useState(pendingJoin() ?? '')
@@ -24,7 +22,7 @@ export default function Onboarding() {
     e.preventDefault()
     setBusy('profile')
     try {
-      await repo.saveProfile({ username: username.trim(), avatar_color: color, timezone })
+      await repo.saveProfile({ username: username.trim(), timezone })
       setStep('group')
     } catch (err) {
       setError((err as Error).message)
@@ -61,23 +59,10 @@ export default function Onboarding() {
           <p className="mt-1 text-[15px] text-muted">This is how your friends will see you in the rankings.</p>
 
           <div className="mt-8 flex justify-center">
-            <Avatar name={username || '?'} color={color} size={104} />
+            <Avatar name={username || '?'} color={profile.avatar_color} size={104} />
           </div>
 
-          <div className="mt-6 flex flex-wrap justify-center gap-2.5">
-            {AVATAR_COLORS.map((c) => (
-              <button
-                key={c}
-                type="button"
-                onClick={() => setColor(c)}
-                aria-label={`Color ${c}`}
-                className={cx('grid size-9 place-items-center rounded-full transition active:scale-90', color === c && 'ring-2 ring-offset-2 ring-offset-bg')}
-                style={{ background: c, ['--tw-ring-color' as string]: c }}
-              >
-                {color === c && <Check className="size-4 text-white" strokeWidth={3} />}
-              </button>
-            ))}
-          </div>
+          <p className="mt-3 text-center text-[13px] text-muted">Add a photo and pick your colors later in Settings.</p>
 
           <div className="mt-8 space-y-4">
             <Field label="Username" required maxLength={20} value={username} onChange={(e) => setUsername(e.target.value)} placeholder="e.g. Samar" />
