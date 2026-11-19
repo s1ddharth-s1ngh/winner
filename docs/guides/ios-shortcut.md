@@ -90,6 +90,17 @@ Perché più volte? iOS **non lascia leggere Salute mentre l'iPhone è bloccato*
 il telefono è bloccato, quell'esecuzione fallisce in silenzio. Con più orari almeno una va a buon fine.
 I reinvii non creano doppioni: il server sovrascrive la stessa giornata.
 
+### Trigger extra (dati più freschi)
+
+- **Sveglia** (*Alarm*) → **Viene fermata** (*Is Stopped*) → **Esegui immediatamente**: il sonno arriva appena ti svegli
+  (il telefono è sbloccato quando spegni la sveglia).
+- **Caricabatterie** (*Charger*) → **Viene scollegato** (*Is Disconnected*): un altro invio "gratis" durante il giorno.
+
+### Sincronizza adesso dalla PWA
+
+In **Settings → iPhone · Shortcuts** c'è il pulsante **Sync now**: apre Comandi ed esegue subito il comando.
+Funziona solo se il comando si chiama esattamente **Winner for Life sync**.
+
 ---
 
 ## Cosa succede lato server

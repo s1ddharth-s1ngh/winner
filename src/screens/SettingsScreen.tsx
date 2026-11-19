@@ -373,7 +373,7 @@ function ShortcutCard() {
       <div className="flex items-center gap-3">
         <div className="flex-1">
           <p className="text-[15px] font-semibold">iPhone · Shortcuts</p>
-          <p className="text-[13px] text-muted">An automation sends Apple Health steps and sleep with a personal token.</p>
+          <p className="text-[13px] text-muted">An automation sends Apple Health steps, flights and sleep with a personal token.</p>
         </div>
       </div>
 
@@ -428,6 +428,13 @@ function ShortcutCard() {
             </div>
           ))}
         </div>
+      )}
+
+      {tokens.data && tokens.data.length > 0 && (
+        // Opens the Shortcuts app and runs the shortcut by name (name must match docs/guides/ios-shortcut.md).
+        <Button icon={RefreshCw} onClick={() => (location.href = 'shortcuts://run-shortcut?name=Winner%20for%20Life%20sync')} className="mt-3 h-10 w-full text-sm">
+          Sync now
+        </Button>
       )}
 
       <Button variant="secondary" icon={KeyRound} onClick={create} loading={busy} className="mt-3 h-10 w-full text-sm">
