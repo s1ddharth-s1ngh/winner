@@ -19,7 +19,7 @@ Ported from Telebi's chat module (2026-11-19), cut down for a small group of fri
 
 ## Where
 
-- DB: `supabase/migrations/20261119150000_chat.sql`. Tables are read through RLS and written only by
+- DB: `supabase/migrations/20261119002331_chat.sql`. Tables are read through RLS and written only by
   the `chat_*` RPCs. Single visibility rule: `chat_can_see` = active member.
 - Tests: chat section of `supabase/tests/check-rls.mjs` (`npm run test:db`), tag parsing in
   `src/domain/chat.test.ts`.
@@ -34,4 +34,5 @@ Ported from Telebi's chat module (2026-11-19), cut down for a small group of fri
 
 ## Owner steps
 
-- Apply the migration to the Supabase project.
+- [x] Migration applied (2026-11-19).
+- Try it live with two accounts: realtime, toasts, "Seen".

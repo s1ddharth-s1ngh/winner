@@ -84,7 +84,7 @@ export function createLocalRepo(): Repo {
     return [...db.groups, demoGroup()].filter((g) => mine.has(g.id))
   }
 
-  // Chat: same rules as the chat_* RPCs in supabase/migrations/20261119150000_chat.sql.
+  // Chat: same rules as the chat_* RPCs in supabase/migrations/20261119002331_chat.sql.
   const groupMemberIds = (db: DB, groupId: string) => [
     ...db.members.filter((m) => m.group_id === groupId).map((m) => m.user_id),
     ...(groupId === DEMO_ID ? PERSONAS.map((p) => p.id) : []),
