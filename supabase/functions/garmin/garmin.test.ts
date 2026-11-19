@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { decrypt, encrypt } from './crypto'
 import { mapActivities, mapDailies, mapSleep, toInstant, workoutType } from './map'
 
-const KEY = btoa(String.fromCharCode(...new Uint8Array(32).fill(7)))
+const KEY = 'a-long-random-server-secret-for-tests-only'
 
 describe('crypto', () => {
   it('round-trips and is bound to the user', async () => {
@@ -12,7 +12,7 @@ describe('crypto', () => {
     await expect(decrypt(box, 'user-b', KEY)).rejects.toThrow()
   })
   it('rejects a short secret', async () => {
-    await expect(encrypt('x', 'u', btoa('short'))).rejects.toThrow(/32 bytes/)
+    await expect(encrypt('x', 'u', 'short')).rejects.toThrow(/32 characters/)
   })
 })
 

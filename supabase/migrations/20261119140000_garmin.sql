@@ -24,6 +24,19 @@ create policy "garmin: read own link" on public.garmin_links
 -- No other policies: links and secrets are written only by the edge function (service role).
 -- garmin_secrets has no policy at all, so clients never see even the ciphertext.
 
+-- Shared secret that pg_cron sends to the garmin function (x-cron-secret). It is generated inside Vault
+-- (see docs/guides/garmin.md) and read here by the function with the service role only.
+create function public.garmin_cron_secret()
+returns text
+language plpgsql stable security definer set search_path = ''
+as $$
+begin
+  return (select decrypted_secret from vault.decrypted_secrets where name = 'garmin_cron_secret');
+end;
+$$;
+revoke execute on function public.garmin_cron_secret() from public, anon, authenticated;
+grant execute on function public.garmin_cron_secret() to service_role;
+
 -- Garmin activities become workouts. external_id ("garmin:<activityId>") makes re-syncs idempotent.
 alter table public.workouts add column external_id text check (char_length(external_id) <= 60);
 alter table public.workouts add constraint workouts_user_external_key unique (user_id, external_id);

@@ -4,9 +4,9 @@
 //   "connect"    { api_key }  checks the key with Garmin, stores it encrypted, imports the last 30 days
 //   "sync"                    imports the last 7 days
 //   "disconnect"              deletes the stored key
-// From pg_cron (header x-cron-secret: <CRON_SECRET>): imports the last 3 days for every linked user.
+// From pg_cron (header x-cron-secret: Vault secret "garmin_cron_secret"): imports the last 3 days for every linked user.
 //
-// Secrets: GARMIN_ENC_KEY (32 bytes base64), CRON_SECRET. The plain API key never leaves this function.
+// Secret: GARMIN_ENC_KEY (random string, 32+ chars). The plain API key never leaves this function.
 // Manual entries are never overwritten, same rule as ingest-health.
 import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2'
 import { dateIn } from '../ingest-health/validate.ts'
@@ -133,10 +133,10 @@ Deno.serve(async (req) => {
   })
 
   // Scheduled run: every linked user, one after the other; one failure does not stop the others.
-  const cronSecret = Deno.env.get('CRON_SECRET') ?? ''
   const sentCron = req.headers.get('x-cron-secret')
   if (sentCron !== null) {
-    if (cronSecret.length < 16 || sentCron !== cronSecret) return json(401, { error: 'Bad cron secret.' })
+    const { data: cronSecret } = await sb.rpc('garmin_cron_secret')
+    if (typeof cronSecret !== 'string' || cronSecret.length < 16 || sentCron !== cronSecret) return json(401, { error: 'Bad cron secret.' })
     const { data: links } = await sb.from('garmin_links').select('user_id')
     let ok = 0
     for (const { user_id } of links ?? []) {

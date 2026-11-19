@@ -35,10 +35,12 @@ I dati inseriti **a mano** non vengono mai sovrascritti.
 
 ### 1. Segreti del server
 
+Serve un solo segreto: `GARMIN_ENC_KEY`, una stringa casuale di almeno 32 caratteri
+(es. `openssl rand -hex 32`, oppure un password manager).
+Impostalo in Supabase → **Edge Functions → Secrets**, oppure:
+
 ```bash
-openssl rand -base64 32   # → GARMIN_ENC_KEY
-openssl rand -hex 24      # → CRON_SECRET
-npx supabase secrets set GARMIN_ENC_KEY=<valore> CRON_SECRET=<valore>
+npx supabase secrets set GARMIN_ENC_KEY=<valore>
 ```
 
 ⚠️ Non cambiare più `GARMIN_ENC_KEY`: le chiavi salvate non si potrebbero più leggere e ognuno dovrebbe ricollegare Garmin.
@@ -52,14 +54,15 @@ npx supabase functions deploy garmin
 
 ### 3. Sincronizzazione automatica (ogni 3 ore)
 
-Nel pannello Supabase → **SQL Editor**, sostituisci `<project-ref>` e `<CRON_SECRET>` ed esegui:
+Nel pannello Supabase → **SQL Editor**, sostituisci `<project-ref>` ed esegui.
+Il segreto del cron lo genera il database dentro Vault: nessuno deve copiarlo.
 
 ```sql
 create extension if not exists pg_cron;
 create extension if not exists pg_net;
 
 select vault.create_secret('https://<project-ref>.supabase.co', 'project_url');
-select vault.create_secret('<CRON_SECRET>', 'garmin_cron_secret');
+select vault.create_secret(encode(extensions.gen_random_bytes(24), 'hex'), 'garmin_cron_secret');
 
 select cron.schedule('garmin-sync', '15 */3 * * *', $$
   select net.http_post(
