@@ -10,6 +10,12 @@ import { addDays, dateIn, todayIn, zonedTimeToInstant } from '../lib/dates'
 
 export const isAndroidApp = () => Capacitor.getPlatform() === 'android'
 
+/** iPhone/iPad web (iPadOS reports itself as a Mac with touch). */
+export const isIOS = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+
+/** Runs the Apple Health shortcut; the name must match docs/guides/ios-shortcut.md. */
+export const IOS_SHORTCUT_URL = 'shortcuts://run-shortcut?name=Winner%20for%20Life%20sync'
+
 const LAST_SYNC = 'wfl:health:lastSync'
 const READ = { read: ['steps', 'flightsClimbed', 'sleep'] as ('steps' | 'flightsClimbed' | 'sleep')[] }
 

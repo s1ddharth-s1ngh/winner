@@ -98,8 +98,15 @@ I reinvii non creano doppioni: il server sovrascrive la stessa giornata.
 
 ### Sincronizza adesso dalla PWA
 
-In **Settings → iPhone · Shortcuts** c'è il pulsante **Sync now**: apre Comandi ed esegue subito il comando.
+Nella schermata **Today**, in alto, c'è il pulsante con le due frecce (solo su iPhone/iPad).
+Lo stesso pulsante c'è anche in **Settings → iPhone · Shortcuts** (**Sync now**).
+
+1. Tocca il pulsante: si apre Comandi ed esegue subito il comando.
+2. Quando ha finito, tocca **◀ Winner** in alto a sinistra per tornare nell'app.
+3. L'app ricarica i dati e ti dice **Synced with Apple Health** (oppure **No new data** se non è arrivato nulla).
+
 Funziona solo se il comando si chiama esattamente **Winner for Life sync**.
+Se non hai ancora creato un token, il pulsante ti porta in Settings.
 
 ---
 

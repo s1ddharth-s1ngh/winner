@@ -1,13 +1,14 @@
-import { Activity, Bell, ChevronRight, Footprints, MessageCircle, MoonStar, Plus, Star, Sunrise, Trash2, TrendingUp, Trophy } from 'lucide-react'
-import { useState, type ReactNode } from 'react'
-import { Link } from 'react-router'
+import { Activity, Bell, ChevronRight, Footprints, MessageCircle, MoonStar, Plus, RefreshCw, Star, Sunrise, Trash2, TrendingUp, Trophy } from 'lucide-react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { Link, useNavigate } from 'react-router'
 import { useChat } from '../app/chat'
-import { useGroupData, useMyData, useToday } from '../app/hooks'
+import { useGroupData, useLive, useMyData, useToday } from '../app/hooks'
 import { useInbox } from '../app/inbox'
 import { useSession } from '../app/session'
 import { useSheets } from '../app/AppShell'
 import { Ring } from '../components/charts'
 import { AnimatedNumber, Avatar, Card, Chip, IconButton, PageHeader, RankBadge, SectionTitle, Skeleton, StarCount, Stars, cx, rise } from '../components/ui'
+import { useToast } from '../components/toast'
 import { FLIGHT_TIERS, GOALS, MAX_FLIGHT_STARS, MAX_SLEEP_STARS, MAX_STEP_STARS, STEP_TIERS, WORKOUT_BONUS } from '../config/scoring'
 import { repo } from '../data/repo'
 import { buildLeaderboard, periodRange } from '../domain/leaderboard'
@@ -15,6 +16,7 @@ import type { Workout } from '../domain/types'
 import { currentStreak, qualifiesSleep, qualifiesSteps, type DayScore } from '../domain/scoring'
 import { addDays, clock, formatWeekdayLetter, minutesOfDayIn, startOfWeek, timeAgo, type ISODate } from '../lib/dates'
 import { compact, duration, formatNumber, greeting } from '../lib/format'
+import { IOS_SHORTCUT_URL, isIOS } from '../native/health'
 
 const SOURCE = { health_connect: 'Health Connect', ios_shortcut: 'iPhone Shortcut', garmin: 'Garmin', manual: 'Manual' } as const
 
@@ -37,6 +39,7 @@ export default function TodayScreen() {
         title={`${greeting(Math.floor(minutesOfDayIn(new Date(), profile.timezone) / 60))} ${profile.username}`}
         actions={
           <>
+            {isIOS() && <IosSyncButton updatedAt={stat?.updated_at} />}
             <Link to="/chat">
               <IconButton icon={MessageCircle} label="Chats" badge={chatUnread > 0} />
             </Link>
@@ -102,6 +105,53 @@ export default function TodayScreen() {
 }
 
 /** Horizontally swipeable cards with dots. Each child is one full-width slide. */
+/**
+ * iPhone only: runs the Apple Health shortcut, which writes to the server.
+ * When the user comes back, the data reloads; we compare today's `updated_at` to tell them if anything arrived.
+ */
+function IosSyncButton({ updatedAt }: { updatedAt?: string }) {
+  const toast = useToast()
+  const navigate = useNavigate()
+  const tokens = useLive(() => repo.listTokens(), [])
+  const [syncing, setSyncing] = useState(false)
+  const latest = useRef(updatedAt)
+  useEffect(() => {
+    latest.current = updatedAt
+  })
+
+  const sync = () => {
+    if (tokens.data?.length === 0) {
+      toast('Set up the iPhone Shortcut first')
+      navigate('/settings')
+      return
+    }
+    const before = updatedAt
+    let left = false
+    setSyncing(true)
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') return void (left = true)
+      document.removeEventListener('visibilitychange', onVisibility)
+      // The reload on return (repo.subscribe) needs a moment before we judge.
+      setTimeout(() => {
+        setSyncing(false)
+        if (latest.current !== before) toast('Synced with Apple Health')
+        else toast('No new data. Open the Shortcut to check it.', 'error')
+      }, 2500)
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    location.href = IOS_SHORTCUT_URL
+    // Shortcuts never opened (app missing or link blocked): stop spinning.
+    setTimeout(() => {
+      if (left) return
+      document.removeEventListener('visibilitychange', onVisibility)
+      setSyncing(false)
+      toast('Could not open the Shortcuts app', 'error')
+    }, 4000)
+  }
+
+  return <IconButton icon={RefreshCw} label="Sync Apple Health" onClick={sync} disabled={syncing} className={cx(syncing && '[&>svg]:animate-spin')} />
+}
+
 function Slides({ labels, children }: { labels: string[]; children: ReactNode[] }) {
   const [active, setActive] = useState(0)
   return (

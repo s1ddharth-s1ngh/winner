@@ -21,7 +21,7 @@ import { TimezoneSelect } from '../components/TimezoneSelect'
 import { APP } from '../config/app'
 import { repo } from '../data/repo'
 import { timeAgo } from '../lib/dates'
-import { connectHealth, healthStatus, isAndroidApp, lastHealthSync, openHealthSettings, syncHealth } from '../native/health'
+import { IOS_SHORTCUT_URL, connectHealth, healthStatus, isAndroidApp, lastHealthSync, openHealthSettings, syncHealth } from '../native/health'
 import { CustomizeFields } from './ProfileScreen'
 import ScoringSheet from './sheets/ScoringSheet'
 
@@ -431,8 +431,7 @@ function ShortcutCard() {
       )}
 
       {tokens.data && tokens.data.length > 0 && (
-        // Opens the Shortcuts app and runs the shortcut by name (name must match docs/guides/ios-shortcut.md).
-        <Button icon={RefreshCw} onClick={() => (location.href = 'shortcuts://run-shortcut?name=Winner%20for%20Life%20sync')} className="mt-3 h-10 w-full text-sm">
+        <Button icon={RefreshCw} onClick={() => (location.href = IOS_SHORTCUT_URL)} className="mt-3 h-10 w-full text-sm">
           Sync now
         </Button>
       )}

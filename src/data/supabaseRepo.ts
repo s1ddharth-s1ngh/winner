@@ -194,7 +194,13 @@ export function createSupabaseRepo(url: string, key: string): Repo {
       for (const table of ['daily_stats', 'workouts', 'group_members', 'profiles'])
         channel.on('postgres_changes', { event: '*', schema: 'public', table }, cb)
       channel.subscribe()
-      return () => void sb.removeChannel(channel)
+      // Realtime misses writes while the app is in the background (e.g. the iOS Shortcut ran): reload on return.
+      const onVisible = () => document.visibilityState === 'visible' && cb()
+      document.addEventListener('visibilitychange', onVisible)
+      return () => {
+        document.removeEventListener('visibilitychange', onVisible)
+        void sb.removeChannel(channel)
+      }
     },
 
     // Chat tables are read directly (RLS) and written only through the chat_* RPCs.
