@@ -330,7 +330,7 @@ function SleepHero({ day, onAdd }: { day: DayScore; onAdd: () => void }) {
 
       <div className="mt-5 mb-4 flex items-center gap-3 px-1 text-sm">
         <span className="flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1.5 font-semibold tabular">
-          <MoonStar className="size-4 text-sleep" /> {s ? clock(s.bedtime) : '—'}
+          <MoonStar className="size-4 text-yellow-500" /> {s ? clock(s.bedtime) : '—'}
         </span>
         <span className="h-px flex-1 bg-line" />
         <span className="flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1.5 font-semibold tabular">
