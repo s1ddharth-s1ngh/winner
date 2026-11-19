@@ -210,7 +210,7 @@ function TimeInput({
   stars?: number | null
 }) {
   return (
-    <label className={cx('block rounded-[20px] bg-surface-2 p-3 ring-1 ring-line/60 transition focus-within:bg-surface focus-within:ring-2 focus-within:ring-sleep')}>
+    <label className={cx('block rounded-[20px] bg-surface-2 p-3 ring-1 ring-line/60 transition focus-within:bg-surface')}>
       <span className="flex items-center justify-between text-xs font-semibold text-muted">
         <span className="flex items-center gap-1.5">
           <Icon className="size-3.5" /> {label}

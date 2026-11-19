@@ -87,7 +87,7 @@ export default function WorkoutSheet({ open, onClose, onSaved }: { open: boolean
               {duration(m)}
             </button>
           ))}
-          <label className="flex h-10 items-center gap-1 rounded-full bg-surface px-3 text-sm ring-1 ring-line transition focus-within:ring-2 focus-within:ring-hobby">
+          <label className="flex h-10 items-center gap-1 rounded-full bg-surface px-3 text-sm ring-1 ring-line transition">
             <input
               inputMode="numeric"
               aria-label="Custom minutes"
@@ -108,7 +108,7 @@ export default function WorkoutSheet({ open, onClose, onSaved }: { open: boolean
             rows={2}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Legs day, 5k in the park…"
-            className="w-full resize-none rounded-[20px] bg-surface-2 px-4 py-3 text-[15px] text-ink ring-1 ring-line/60 outline-none placeholder:text-faint focus:bg-surface focus:ring-2 focus:ring-hobby"
+            className="w-full resize-none rounded-[20px] bg-surface-2 px-4 py-3 text-[15px] text-ink ring-1 ring-line/60 outline-none placeholder:text-faint focus:bg-surface"
           />
         </label>
 

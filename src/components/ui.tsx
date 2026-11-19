@@ -243,7 +243,7 @@ export function Field({
       <label htmlFor={id} className="mb-1.5 block px-1 text-[13px] font-semibold text-ink-2">
         {label}
       </label>
-      <span className="flex h-12 items-center gap-2.5 rounded-full bg-surface-2 px-4 ring-1 ring-line/60 transition focus-within:bg-surface focus-within:ring-2 focus-within:ring-brand">
+      <span className="flex h-12 items-center gap-2.5 rounded-full bg-surface-2 px-4 ring-1 ring-line/60 transition focus-within:bg-surface">
         {Icon && <Icon className="size-[18px] shrink-0 text-faint" />}
         <input id={id} {...input} className="h-full w-full min-w-0 bg-transparent text-[15px] text-ink outline-none placeholder:text-faint" />
         {trailing}

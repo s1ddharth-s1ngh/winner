@@ -1,4 +1,4 @@
-import { SendHorizontal, Sparkles } from 'lucide-react'
+import { SendHorizontal, Megaphone } from 'lucide-react'
 import { useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { Avatar, cx, rise } from '../../components/ui'
 import { useToast } from '../../components/toast'
@@ -106,7 +106,7 @@ export default function Composer({
   }
 
   return (
-    <div className="safe-bottom border-t border-line bg-bg/90 px-3 pt-2 backdrop-blur-xl">
+    <div className="safe-bottom bg-transparent px-3 pt-2">
       {banner}
       {matches.length > 0 && (
         <div className="mb-2 overflow-hidden rounded-[20px] bg-surface ring-1 ring-line" role="listbox" aria-label="Mention someone">
@@ -156,7 +156,7 @@ export default function Composer({
             quickOpen ? 'bg-brand text-white ring-brand' : 'bg-surface-2 text-muted ring-line',
           )}
         >
-          <Sparkles className={cx('size-5 transition-transform duration-300', quickOpen && 'rotate-[18deg] scale-110')} />
+          <Megaphone className={cx('size-5 transition-transform duration-300', quickOpen && '-rotate-12 scale-110')} />
         </button>
         <textarea
           ref={ref}
@@ -170,7 +170,7 @@ export default function Composer({
             setQuery(e.target.value.slice(0, e.target.selectionStart).match(MENTION_QUERY)?.[1] ?? null)
           }}
           onKeyDown={onKeyDown}
-          className="no-scrollbar min-h-11 flex-1 resize-none rounded-[22px] bg-surface-2 px-4 py-2.5 text-[15px] text-ink ring-1 ring-line outline-none placeholder:text-faint focus:ring-2 focus:ring-brand"
+          className="no-scrollbar min-h-11 flex-1 resize-none rounded-[22px] bg-surface-2 px-4 py-2.5 text-[15px] text-ink ring-1 ring-line outline-none placeholder:text-faint"
         />
         <button
           type="button"
