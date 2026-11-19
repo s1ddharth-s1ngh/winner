@@ -3,6 +3,7 @@ import AppShell from './app/AppShell'
 import { SessionProvider, useSessionState } from './app/session'
 import { ToastProvider } from './components/toast'
 import AuthScreen from './screens/AuthScreen'
+import CompareScreen from './screens/CompareScreen'
 import GroupScreen from './screens/GroupScreen'
 import InboxScreen from './screens/InboxScreen'
 import Onboarding from './screens/Onboarding'
@@ -32,6 +33,7 @@ function Gate() {
         <Route path="ranking" element={<RankingScreen />} />
         <Route path="stats" element={<StatsScreen />} />
         <Route path="profile" element={<ProfileScreen />} />
+        <Route path="compare/:userId" element={<CompareScreen />} />
         <Route path="groups" element={<GroupScreen />} />
         <Route path="settings" element={<SettingsScreen />} />
         <Route path="inbox" element={<InboxScreen />} />

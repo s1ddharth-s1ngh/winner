@@ -540,7 +540,12 @@ function MiniRanking({ today }: { today: ISODate }) {
         {!data
           ? Array.from({ length: 3 }, (_, i) => <Skeleton key={i} className="m-3 h-10" />)
           : shown.map((r, i) => (
-              <div key={r.profile.id} style={rise(i)} className={cx('flex animate-rise items-center gap-3 px-4 py-3', r.profile.id === user.id && 'bg-brand-soft/60')}>
+              <Link
+                key={r.profile.id}
+                to={r.profile.id === user.id ? '/stats' : `/compare/${r.profile.id}`}
+                style={rise(i)}
+                className={cx('flex animate-rise items-center gap-3 px-4 py-3 transition-colors hover:bg-surface-2', r.profile.id === user.id && 'bg-brand-soft/60')}
+              >
                 <RankBadge rank={r.rank} />
                 <Avatar name={r.profile.username} color={r.profile.avatar_color} src={r.profile.avatar_url} size={34} />
                 <span className="flex-1 truncate font-semibold">
@@ -548,7 +553,7 @@ function MiniRanking({ today }: { today: ISODate }) {
                   {r.profile.id === user.id && <span className="ml-1.5 text-xs font-semibold text-brand">You</span>}
                 </span>
                 {r.rank ? <span className="font-bold tabular">{compact(r.steps)}</span> : <span className="text-[13px] font-medium text-faint">No steps yet</span>}
-              </div>
+              </Link>
             ))}
       </Card>
     </>

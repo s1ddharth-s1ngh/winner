@@ -120,7 +120,11 @@ function subline(r: Row, board: Board, period: Period) {
 function RankRow({ row: r, board, period, me, index }: { row: Row; board: Board; period: Period; me: boolean; index: number }) {
   const sub = subline(r, board, period)
   return (
-    <div style={rise(index)} className={cx('relative flex animate-rise items-center gap-3 px-4 py-3', me && 'bg-brand-soft/60')}>
+    <Link
+      to={me ? '/stats' : `/compare/${r.profile.id}`}
+      style={rise(index)}
+      className={cx('relative flex animate-rise items-center gap-3 px-4 py-3 transition-colors hover:bg-surface-2', me && 'bg-brand-soft/60')}
+    >
       {me && <span className="absolute inset-y-2 left-0 w-1 rounded-r-full bg-brand" />}
       <RankBadge rank={r.rank} size={26} />
       <Avatar name={r.profile.username} color={r.profile.avatar_color} src={r.profile.avatar_url} size={40} />
@@ -142,7 +146,7 @@ function RankRow({ row: r, board, period, me, index }: { row: Row; board: Board;
         </div>
       </div>
       <span className="text-[17px] font-bold">{r.rank == null && board === 'steps' ? <span className="text-[13px] font-medium text-faint">No steps yet</span> : value(r, board)}</span>
-    </div>
+    </Link>
   )
 }
 
@@ -157,7 +161,7 @@ function Podium({ rows, board, me }: { rows: Row[]; board: Board; me: string }) 
         {order.map((r) => {
           const rank = r.rank ?? 3
           return (
-            <div key={r.profile.id} style={rise(delay[rank])} className="flex animate-rise flex-col items-center">
+            <Link key={r.profile.id} to={r.profile.id === me ? '/stats' : `/compare/${r.profile.id}`} style={rise(delay[rank])} className="flex animate-rise flex-col items-center">
               <div className="relative">
                 {rank === 1 && <Crown className="absolute -top-7 left-1/2 size-7 -translate-x-1/2 fill-[#f5b731] text-[#f5b731]" />}
                 <span className={cx('block rounded-full p-[3px]', rank === 1 ? 'bg-[#f5b731]' : 'bg-white/25')}>
@@ -177,7 +181,7 @@ function Podium({ rows, board, me }: { rows: Row[]; board: Board; me: string }) 
               >
                 <p className="pt-2 text-center text-2xl font-black text-white/40">{rank}</p>
               </div>
-            </div>
+            </Link>
           )
         })}
       </div>
