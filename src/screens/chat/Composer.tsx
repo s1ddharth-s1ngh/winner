@@ -1,7 +1,8 @@
-import { SendHorizontal } from 'lucide-react'
+import { SendHorizontal, Sparkles } from 'lucide-react'
 import { useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
-import { Avatar } from '../../components/ui'
+import { Avatar, cx, rise } from '../../components/ui'
 import { useToast } from '../../components/toast'
+import { QUICK_MESSAGES, type QuickCategory } from '../../config/quickMessages'
 import { toTagged } from '../../domain/chat'
 import type { Profile } from '../../domain/types'
 
@@ -30,6 +31,10 @@ export default function Composer({
   const ref = useRef<HTMLTextAreaElement>(null)
   // Where the caret goes after a mention is picked, applied right after the render.
   const caret = useRef<number | null>(null)
+  const [quickOpen, setQuickOpen] = useState(false)
+  // Per category, the shuffled lines not used yet: every line comes up once before any repeats.
+  const bags = useRef(new Map<string, string[]>())
+  const lastQuick = useRef<string | null>(null)
 
   // Grow with the text, up to about six lines.
   useLayoutEffect(() => {
@@ -53,6 +58,23 @@ export default function Composer({
     picked.current.set(p.username, p.id)
     caret.current = before.length
     setText(before + text.slice(el.selectionStart))
+    setQuery(null)
+  }
+
+  // Tapping again swaps the line just inserted; anything typed before it (e.g. "@name ") stays.
+  const insertQuick = (c: QuickCategory) => {
+    let bag = bags.current.get(c.id)
+    if (!bag?.length) {
+      bag = c.messages.filter((m) => m !== lastQuick.current).sort(() => Math.random() - 0.5)
+      bags.current.set(c.id, bag)
+    }
+    const line = bag.pop()!
+    const prev = lastQuick.current
+    const base = prev && text.endsWith(prev) ? text.slice(0, -prev.length) : text
+    const next = base && !/\s$/.test(base) ? `${base} ${line}` : base + line
+    lastQuick.current = line
+    caret.current = next.length
+    setText(next)
     setQuery(null)
   }
 
@@ -105,7 +127,37 @@ export default function Composer({
           ))}
         </div>
       )}
+      {quickOpen && (
+        <div className="no-scrollbar -mx-3 mb-2 flex gap-2 overflow-x-auto px-3" role="group" aria-label="Quick messages">
+          {QUICK_MESSAGES.map((c, i) => (
+            <button
+              key={c.id}
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => insertQuick(c)}
+              style={rise(i)}
+              className="flex shrink-0 animate-rise items-center gap-1.5 rounded-full bg-surface-2 px-3.5 py-2 text-sm font-semibold text-ink ring-1 ring-line transition-transform active:scale-95"
+            >
+              <c.icon className="size-4 text-brand" />
+              {c.label}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="flex items-end gap-2 pb-2">
+        <button
+          type="button"
+          aria-label="Quick messages"
+          aria-expanded={quickOpen}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => setQuickOpen((o) => !o)}
+          className={cx(
+            'grid size-11 shrink-0 place-items-center rounded-full ring-1 transition-[background-color,color,transform] active:scale-90',
+            quickOpen ? 'bg-brand text-white ring-brand' : 'bg-surface-2 text-muted ring-line',
+          )}
+        >
+          <Sparkles className={cx('size-5 transition-transform duration-300', quickOpen && 'rotate-[18deg] scale-110')} />
+        </button>
         <textarea
           ref={ref}
           rows={1}
