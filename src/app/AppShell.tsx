@@ -59,9 +59,16 @@ export default function AppShell() {
                   type="button"
                   aria-label="Add data"
                   onClick={() => setSheet({ kind: 'chooser' })}
-                  className="grid size-11 place-items-center rounded-full bg-brand text-white transition-[background-color,transform] duration-200 ease-out hover:bg-[color-mix(in_oklab,var(--brand)_88%,black)] active:scale-90"
+                  className="group grid size-11 place-items-center rounded-full bg-brand text-white transition-[background-color,transform] duration-200 ease-out hover:bg-[color-mix(in_oklab,var(--brand)_88%,black)] active:scale-90"
                 >
-                  <Plus className="size-6" strokeWidth={2.2} />
+                  {/* Same springy spin as the sheet's close X; turns into an × while a sheet is open. */}
+                  <Plus
+                    className={cx(
+                      'size-6 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]',
+                      sheet ? 'rotate-[135deg]' : 'group-hover:rotate-90 group-active:scale-75',
+                    )}
+                    strokeWidth={2.2}
+                  />
                 </button>
               </div>
             ),
