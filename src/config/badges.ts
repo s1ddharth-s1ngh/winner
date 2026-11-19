@@ -1,5 +1,5 @@
 // Badge catalogue. Add, remove or tweak freely: badges are computed from history, never stored.
-import { BedDouble, Crown, Dumbbell, Footprints, Moon, Mountain, Sparkles, Sunrise, Trophy, Zap, type LucideIcon } from 'lucide-react'
+import { Activity, BedDouble, Crown, Flag, Footprints, Moon, Mountain, Sunrise, Trophy, Zap, type LucideIcon } from 'lucide-react'
 import { firstRunDate, qualifiesSteps, type DayScore } from '../domain/scoring'
 import type { ISODate } from '../lib/dates'
 
@@ -39,7 +39,7 @@ export const BADGES: BadgeDef[] = [
     id: 'first-step',
     name: 'First Step',
     description: 'Log your first day of data.',
-    icon: Sparkles,
+    icon: Flag,
     tone: 'brand',
     earned: (h) => firstDay(h, (d) => d.steps != null || d.sleep != null),
   },
@@ -108,7 +108,7 @@ export const BADGES: BadgeDef[] = [
     id: 'hobbyist',
     name: 'Hobbyist',
     description: 'Log 10 workout or hobby sessions.',
-    icon: Dumbbell,
+    icon: Activity,
     tone: 'hobby',
     earned: (h) => {
       let n = 0

@@ -1,4 +1,4 @@
-import { BedDouble, ChartColumn, ChevronRight, Dumbbell, Footprints, House, Plus, Trophy, UserRound } from 'lucide-react'
+import { Activity, BedDouble, ChartColumn, ChevronRight, Footprints, House, Plus, Trophy, UserRound } from 'lucide-react'
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
 import { NavLink, Outlet } from 'react-router'
 import { Sheet, cx } from '../components/ui'
@@ -85,7 +85,7 @@ export default function AppShell() {
             onClick={() => setSheet({ kind: 'workout' })}
             title="Workout or hobby"
             text="Gym, run, padel… with how long it took"
-            icons={[<Dumbbell key="d" className="size-5" />]}
+            icons={[<Activity key="d" className="size-5" />]}
             tone="bg-hobby"
           />
         </div>
