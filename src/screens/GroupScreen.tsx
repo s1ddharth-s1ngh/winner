@@ -136,7 +136,7 @@ export default function GroupScreen() {
             Join group
           </Button>
         </div>
-        <Button variant="danger" icon={LogOut} onClick={leave} className="mt-3 w-full">
+        <Button variant="secondary" icon={LogOut} onClick={leave} className="mt-3 w-full">
           Leave {group.name}
         </Button>
       </div>

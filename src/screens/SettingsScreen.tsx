@@ -49,7 +49,7 @@ export default function SettingsScreen() {
           <Row title={APP.name} text={`Version ${__APP_VERSION__} · ${repo.kind === 'local' ? 'demo mode' : 'connected'}`} />
         </Card>
 
-        <Button variant="danger" icon={LogOut} onClick={() => void repo.signOut()} className="mt-6 w-full">
+        <Button variant="secondary" icon={LogOut} onClick={() => void repo.signOut()} className="mt-6 w-full">
           Sign out
         </Button>
       </div>

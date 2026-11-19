@@ -29,13 +29,12 @@ export function Card({ className, children, onClick, style }: { className?: stri
   )
 }
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
+type Variant = 'primary' | 'secondary' | 'ghost'
 const variants: Record<Variant, string> = {
   primary:
     'bg-brand text-white hover:bg-[color-mix(in_oklab,var(--brand)_88%,black)]',
   secondary: 'bg-surface-2 text-ink ring-1 ring-line hover:bg-surface-3',
   ghost: 'text-brand hover:bg-brand-soft',
-  danger: 'bg-danger text-white hover:bg-[color-mix(in_oklab,var(--danger)_88%,black)]',
 }
 
 /** Every button is a pill (same rule as Telebi's NexSuite). */
