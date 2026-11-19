@@ -311,17 +311,17 @@ function SleepHero({ day, onAdd }: { day: DayScore; onAdd: () => void }) {
   return (
     <Card className="relative flex h-full flex-col overflow-hidden p-5">
       <div className="flex items-center justify-between">
-        <Chip tone="sleep" className="py-1 text-xs">
+        <Chip tone="steps" className="py-1 text-xs">
           <MoonStar className="size-3.5" /> Last night
         </Chip>
         <Stars value={s?.stars ?? 0} max={MAX_SLEEP_STARS} size={17} />
       </div>
       <div className="mt-3 flex justify-center">
-        <Ring value={minutes / GOALS.sleepMinutes} size={212} stroke={20} from="var(--sleep)" to="var(--sleep)">
+        <Ring value={minutes / GOALS.sleepMinutes} size={212} stroke={20} from="var(--steps)" to="var(--steps)">
           <div>
             <div className="display text-[40px]">{s ? duration(minutes) : '0h'}</div>
             <div className="mt-2 text-[13px] font-medium text-muted">of {duration(GOALS.sleepMinutes)} goal</div>
-            <div className="mx-auto mt-2 w-fit rounded-full bg-sleep-soft px-2.5 py-0.5 text-xs font-bold text-sleep-strong tabular">
+            <div className="mx-auto mt-2 w-fit rounded-full bg-steps-soft px-2.5 py-0.5 text-xs font-bold text-steps-strong tabular">
               {Math.round((minutes / GOALS.sleepMinutes) * 100)}%
             </div>
           </div>
@@ -330,7 +330,7 @@ function SleepHero({ day, onAdd }: { day: DayScore; onAdd: () => void }) {
 
       <div className="mt-5 mb-4 flex items-center gap-3 px-1 text-sm">
         <span className="flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1.5 font-semibold tabular">
-          <MoonStar className="size-4 text-sleep" /> {s ? clock(s.bedtime) : '—'}
+          <MoonStar className="size-4 text-steps" /> {s ? clock(s.bedtime) : '—'}
         </span>
         <span className="h-px flex-1 bg-line" />
         <span className="flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1.5 font-semibold tabular">
@@ -342,7 +342,7 @@ function SleepHero({ day, onAdd }: { day: DayScore; onAdd: () => void }) {
         <p className="text-[13px] text-muted">
           {s ? (
             <>
-              Bedtime <b className="text-ink">+{s.bedtimeStars}★</b> · {s.durationBonus ? <b className="text-sleep-strong">7–9h bonus +1★</b> : 'no 7–9h bonus'}
+              Bedtime <b className="text-ink">+{s.bedtimeStars}★</b> · {s.durationBonus ? <b className="text-steps-strong">7–9h bonus +1★</b> : 'no 7–9h bonus'}
             </>
           ) : (
             'No sleep data. That means 0★ for the night.'
