@@ -45,62 +45,71 @@ export function DatePicker({ value, onChange, today }: { value: ISODate; onChang
         </button>
       </div>
 
-      {open && (
-        <div className="animate-rise mt-3 rounded-3xl bg-surface p-4 ring-1 ring-line">
-          <div className="mb-3 flex items-center justify-between">
-            <button
-              type="button"
-              aria-label="Previous month"
-              className="grid size-9 place-items-center rounded-full bg-surface-2 text-ink-2 transition active:scale-95"
-              onClick={() => setMonth(addMonths(month, -1))}
-            >
-              <ChevronLeft className="size-4" />
-            </button>
-            <div className="text-sm font-bold text-ink">{formatMonth(month)}</div>
-            <button
-              type="button"
-              aria-label="Next month"
-              disabled={!canNext}
-              className="grid size-9 place-items-center rounded-full bg-surface-2 text-ink-2 transition active:scale-95 disabled:opacity-30"
-              onClick={() => setMonth(addMonths(month, 1))}
-            >
-              <ChevronRight className="size-4" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-7 gap-1 text-center">
-            {WEEKDAYS.map((w, i) => (
-              <div key={i} className="pb-1 text-xs font-semibold text-faint">
-                {w}
-              </div>
-            ))}
-            {Array.from({ length: weekday(month) }, (_, i) => (
-              <div key={`pad${i}`} />
-            ))}
-            {days.map((d) => {
-              const future = d > today
-              const selected = d === value
-              return (
+      {/* Always mounted so open/close can animate height; grid-rows 0fr↔1fr is the CSS-only height transition. */}
+      <div
+        inert={!open}
+        className={cx(
+          'grid transition-[grid-template-rows,opacity,translate] duration-[420ms] ease-[cubic-bezier(0.32,0.72,0,1)]',
+          open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] -translate-y-1 opacity-0',
+        )}
+      >
+        <div className="min-h-0 overflow-hidden">
+            <div className="mt-3 rounded-3xl bg-surface p-4 ring-1 ring-line">
+              <div className="mb-3 flex items-center justify-between">
                 <button
-                  key={d}
                   type="button"
-                  disabled={future}
-                  aria-label={formatDayShort(d)}
-                  aria-pressed={selected}
-                  onClick={() => pickChip(d)}
-                  className={cx(
-                    'mx-auto grid size-10 place-items-center rounded-full text-sm font-semibold transition active:scale-90',
-                    selected ? 'bg-brand text-white' : future ? 'text-faint/50' : 'text-ink hover:bg-surface-2',
-                    d === today && !selected && 'ring-1 ring-brand text-brand',
-                  )}
+                  aria-label="Previous month"
+                  className="grid size-9 place-items-center rounded-full bg-surface-2 text-ink-2 transition active:scale-95"
+                  onClick={() => setMonth(addMonths(month, -1))}
                 >
-                  {Number(d.slice(8))}
+                  <ChevronLeft className="size-4" />
                 </button>
-              )
-            })}
-          </div>
+                <div className="text-sm font-bold text-ink">{formatMonth(month)}</div>
+                <button
+                  type="button"
+                  aria-label="Next month"
+                  disabled={!canNext}
+                  className="grid size-9 place-items-center rounded-full bg-surface-2 text-ink-2 transition active:scale-95 disabled:opacity-30"
+                  onClick={() => setMonth(addMonths(month, 1))}
+                >
+                  <ChevronRight className="size-4" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-7 gap-1 text-center">
+                {WEEKDAYS.map((w, i) => (
+                  <div key={i} className="pb-1 text-xs font-semibold text-faint">
+                    {w}
+                  </div>
+                ))}
+                {Array.from({ length: weekday(month) }, (_, i) => (
+                  <div key={`pad${i}`} />
+                ))}
+                {days.map((d) => {
+                  const future = d > today
+                  const selected = d === value
+                  return (
+                    <button
+                      key={d}
+                      type="button"
+                      disabled={future}
+                      aria-label={formatDayShort(d)}
+                      aria-pressed={selected}
+                      onClick={() => pickChip(d)}
+                      className={cx(
+                        'mx-auto grid size-10 place-items-center rounded-full text-sm font-semibold transition active:scale-90',
+                        selected ? 'bg-brand text-white' : future ? 'text-faint/50' : 'text-ink hover:bg-surface-2',
+                        d === today && !selected && 'ring-1 ring-brand text-brand',
+                      )}
+                    >
+                      {Number(d.slice(8))}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
         </div>
-      )}
+      </div>
     </div>
   )
 }
